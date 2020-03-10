@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
 			          << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC << " ms" << std::endl;
 			
 			std::string outFileContent;
-			std::ifstrea m
 			// readFile(tmpFileName, outFileContent);
 			// request->replyBinary("Simulation terminated");
 			request->replyBinary("OK");
