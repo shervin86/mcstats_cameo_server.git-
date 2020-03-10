@@ -22,8 +22,7 @@ target_link_libraries(mcstas_server PUBLIC m)
 target_link_libraries(mcstas_server PUBLIC cameo)
 target_link_libraries(mcstas_server PUBLIC zmq)
 target_link_libraries(mcstas_server PUBLIC protobuf)
-
-#target_include_directories(fakeNomad PUBLIC 
+target_include_directories(mcstas_server PUBLIC include/)
 
 
 #add_executable(mcstas_server.cpp)

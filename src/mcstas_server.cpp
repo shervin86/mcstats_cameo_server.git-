@@ -5,15 +5,24 @@
 #include <string>
 #include <stdio.h>
 #include <fstream>
+#include "sim_request.hh"
 
+/**
+ * \brief name of the responder created by the server that can be
+ * accessed by Nomad
+ */
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
-#define DEBUG
+
 
 /**********
  * \file mcstas_server.cpp
  * \brief server communicating with Nomad through CAMEO
+ * \author Shervin Nourbakhsh nourbakhsh@ill.fr
+ *
+ * The server should be started by CAMEO as a deamon.
+ * It answers to requests from NOMAD to run mcstas simulation for a given ILL instrument with
+ * parameters provided by NOMAD
  */
-
 int main(int argc, char *argv[])
 {
 	cameo::application::This::init(argc, argv);
@@ -43,7 +52,7 @@ int main(int argc, char *argv[])
 		// Loop on the requests.
 		while (true) {
 			// Receive the simple request.
-			/** Get the request content that is
+			/* Get the request content that is
 			 * ? json file ?
 			 * ? other     ?
 			 */

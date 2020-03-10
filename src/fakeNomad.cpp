@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 
-#define DEBUG
+//#define DEBUG
 #define SERVERNAME "mcstas_server"
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
 
