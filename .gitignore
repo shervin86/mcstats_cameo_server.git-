@@ -2,7 +2,10 @@
  
 [Bb]in/
 [Oo]bj/
-*.~
+[Bb]uild/
+
+# emacs temp files
+*~
 #*
 
 # Prerequisites
