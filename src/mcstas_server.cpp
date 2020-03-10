@@ -9,6 +9,11 @@
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
 #define DEBUG
 
+/**********
+ * \file mcstas_server.cpp
+ * \brief server communicating with Nomad through CAMEO
+ */
+
 int main(int argc, char *argv[])
 {
 	cameo::application::This::init(argc, argv);
