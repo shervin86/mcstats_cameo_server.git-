@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(cameo-mcstas VERSION 0.10)
+project(cameo-mcstas VERSION 0.10.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
