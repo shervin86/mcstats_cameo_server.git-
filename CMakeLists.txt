@@ -6,8 +6,8 @@ project(cameo-mcstas VERSION 0.10.0)
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+include_directories(include)
 
 
 # add the executable
@@ -22,7 +22,7 @@ target_link_libraries(mcstas_server PUBLIC m)
 target_link_libraries(mcstas_server PUBLIC cameo)
 target_link_libraries(mcstas_server PUBLIC zmq)
 target_link_libraries(mcstas_server PUBLIC protobuf)
-target_include_directories(mcstas_server PUBLIC include/)
+add_definitions(-DDEBUG)
 
 
 #add_executable(mcstas_server.cpp)
