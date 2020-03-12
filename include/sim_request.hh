@@ -3,19 +3,33 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
+
+
+
+
+
 /**
  * \class sim_request
  * \brief helper to code and decode simulation requests between Nomad and the mcstas_server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
  */
 
+
+/* checking the the request is valid, should happen in this class
+ * because it is used by both the client and the server and so it can make sure at compilation time that both can understand the request
+ */
+
 class sim_request
 {
       public:
+	typedef enum {
+		D22
+	} instrument_t;
+	
 	/** \brief constructor to be used on the client side
-	 *  \par instrument_   name of the ILL instrument
-	 *  \par n_            number of neutrons to simulate
-	 *  \par params_       list of named parameters of the simulation
+	 *  \param[in] instrument_ : name of the ILL instrument
+	 *  \param[in] n_          : number of neutrons to simulate
+	 *  \param[in] params_     : list of named parameters of the simulation
 	 */
 	sim_request(std::string instrument_, unsigned long long int n_,
 	            std::vector<std::string> params_)
@@ -24,6 +38,7 @@ class sim_request
 	}
 
 	/** \brief constructor that decodes the message from CAMEO (server side)
+	 * \param[in] message : request in string form received by the server
 	 */
 	sim_request(std::string message)
 	{

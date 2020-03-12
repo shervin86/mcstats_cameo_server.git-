@@ -7,6 +7,21 @@
 //#define DEBUG
 #define SERVERNAME "mcstas_server"
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
+/** 
+ * Writes a string to a file as binary  
+ * @param fileName : the name of the output file  
+ * @param fileContent : the string to write to  */
+void writeFile(const std::string &fileName, const std::string &fileContent)
+{
+	std::ofstream file(fileName,  std::ios::binary | std::ios::ate);
+	if (file.is_open()) {
+		file << fileContent;
+		file.flush();
+		file.close();
+	} else {
+		std::cerr << "File " << fileName << " cannot be written." << std::endl;
+	}
+}
 
 int main(int argc, char *argv[])
 {
@@ -52,7 +67,7 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
-		/**
+		/** creating the request
 		 */
 		std::vector<std::string> params;
 		params.push_back("lambda=4.5");
@@ -65,8 +80,7 @@ int main(int argc, char *argv[])
 
 		do {
 			requester->receiveBinary(response);
-			std::ofstream f("f.tgz", std::ofstream::binary);
-			f.write(response.c_str(), response.size());
+			if(response.size()>1000) writeFile("f.tgz",response);
 			
 #ifdef DEBUG
 //			std::cout << response << std::endl;

@@ -15,14 +15,40 @@
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
 
 #define MAX_BUFFER 1000000
+
+/**
+ * Reads the file to a string as binary
+ * @param fileName      : the name of the input file  
+ * @param fileContent   : the string to read the content in  
+*/
+void readFile(const std::string &fileName, std::string &fileContent)
+{
+	std::streampos size;
+	std::ifstream  file(fileName,  std::ios::binary | std::ios::ate);
+	if (file.is_open()) {
+		size = file.tellg(); // Reserve the string.
+		assert(size<MAX_BUFFER); // if this fails, smarter chuck reading and sending should be implemented
+		fileContent.resize(size);
+		//
+		// Get the allocated array.
+		char * array = (char*)fileContent.data();
+		file.seekg(0, std::ios::beg);
+		file.read(array, size);
+		file.close();
+	} else {
+		std::cerr << "File " << fileName << " cannot be read." << std::endl;
+	}
+}
+
+
 /**********
  * \file mcstas_server.cpp
  * \brief server communicating with Nomad through CAMEO
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
  *
  * The server should be started by CAMEO as a deamon.
- * It answers to requests from NOMAD to run mcstas simulation for a given ILL instrument with
- * parameters provided by NOMAD
+ * It answers to requests from NOMAD to run mcstas simulation for a given ILL
+ * instrument with parameters provided by NOMAD
  */
 int main(int argc, char *argv[])
 {
@@ -108,19 +134,11 @@ int main(int argc, char *argv[])
 
 			{
 				
-				
+				std::string fileContent;
 				system((std::string("tar -czf ")+tmpFileName+".tgz "+tmpFileName+"/").c_str());
-				std::ifstream f(tmpFileName+".tgz", std::ifstream::binary);
-				f.seekg (0, f.end);
-				int length = f.tellg();
-				f.seekg (0, f.beg);
-				char buffer[MAX_BUFFER];
-				int toread = std::min(length, MAX_BUFFER);
-				assert(length < MAX_BUFFER);
-				f.read(buffer,toread);
-				request->replyBinary(std::string(buffer, toread));
-				// readFile(tmpFileName, outFileContent);
-				// request->replyBinary("Simulation terminated");
+				readFile(tmpFileName+".tgz", fileContent);
+				request->replyBinary(fileContent);
+				 // request->replyBinary("Simulation terminated");
 				request->replyBinary("OK");
 				//			remove(tmpFileName.c_str());
 			}
