@@ -1,0 +1,35 @@
+#!/bin/bash
+
+PREFIX=/usr/local/src/
+LOCALDIR=$PREFIX/$USER/
+CAMEOTAR=cameo-package-jzmq-0.1.5b.tar.gz
+sudo mkdir $LOCALDIR
+sudo chwon $USER:$GROUP $LOCALDIR
+
+cd $LOCALDIR
+mkdir cameo
+
+
+sudo apt install libprotobuf-c1 python3-protobuf python3-zmq default-jdk libzmq-java libboost libprotobuf-dev libprotobuf-lite10 libprotobuf10 protobuf-compiler  libzmq-java   libzmq-jni libzmq3-dev libzmq5 python-zmq 
+
+wget https://code.ill.fr/cameo/cameo/-/wikis/resources/$CAMEOTAR
+tar -xzvf $CAMEOTAR
+cd $CAMEOTAR/
+sudo ./install.sh /usr/local/
+
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/jni/ 
+#set -x -U LD_LIBRARY_PATH $LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu/jni/
+
+cd ~/cameo/test.xml
+cameo-server test.xml
+
+cmo 
+cmo -e tcp://localhost:7123
+cmo -e tcp://localhost:7123 list
+which top
+cmo -e tcp://localhost:7123 exec ls
+madmanserver 
+cameo-server 
+cameo-server /usr/local/src/nourbakhsh/mantid-reduction-cameo/config.xml 
+bash
+cmo -e tcp://localhost:8000 connect madmanserver

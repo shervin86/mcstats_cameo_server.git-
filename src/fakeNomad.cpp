@@ -1,19 +1,19 @@
 #include "sim_request.hh"
 #include <cameo/cameo.h>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <fstream>
 
 //#define DEBUG
 #define SERVERNAME "mcstas_server"
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
-/** 
- * Writes a string to a file as binary  
- * @param fileName : the name of the output file  
+/**
+ * Writes a string to a file as binary
+ * @param fileName : the name of the output file
  * @param fileContent : the string to write to  */
 void writeFile(const std::string &fileName, const std::string &fileContent)
 {
-	std::ofstream file(fileName,  std::ios::binary | std::ios::ate);
+	std::ofstream file(fileName, std::ios::binary | std::ios::ate);
 	if (file.is_open()) {
 		file << fileContent;
 		file.flush();
@@ -69,19 +69,19 @@ int main(int argc, char *argv[])
 
 		/** creating the request
 		 */
-		std::vector<std::string> params;
-		params.push_back("lambda=4.5");
+		nlohmann::json j = {{"instrument", "D22"}, {"-n", 1000000}, {"lambda", 4.5}};
+		// sim_request request("D22", 1e6, params);
+		sim_request request(j);
 
-		sim_request request("D22", 1e6, params);
-		std::cout << request << std::endl;
 		requester->sendBinary(request.to_string());
 		// Wait for the response from the server.
 		std::string response;
 
 		do {
 			requester->receiveBinary(response);
-			if(response.size()>1000) writeFile("f.tgz",response);
-			
+			if (response.size() > 1000)
+				writeFile("f.tgz", response);
+
 #ifdef DEBUG
 //			std::cout << response << std::endl;
 #endif

@@ -7,7 +7,7 @@ project(cameo-mcstas VERSION 0.10.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-include_directories(include)
+include_directories(include include/nlohmann)
 
 
 # add the executable

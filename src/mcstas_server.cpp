@@ -1,12 +1,12 @@
 #include "sim_request.hh"
 #include <cameo/cameo.h>
+#include <cassert>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 #include <string>
-#include <cassert>
 
 /**
  * \brief name of the responder created by the server that can be
@@ -18,20 +18,21 @@
 
 /**
  * Reads the file to a string as binary
- * @param fileName      : the name of the input file  
- * @param fileContent   : the string to read the content in  
-*/
+ * @param fileName      : the name of the input file
+ * @param fileContent   : the string to read the content in
+ */
 void readFile(const std::string &fileName, std::string &fileContent)
 {
 	std::streampos size;
-	std::ifstream  file(fileName,  std::ios::binary | std::ios::ate);
+	std::ifstream  file(fileName, std::ios::binary | std::ios::ate);
 	if (file.is_open()) {
-		size = file.tellg(); // Reserve the string.
-		assert(size<MAX_BUFFER); // if this fails, smarter chuck reading and sending should be implemented
+		size = file.tellg();       // Reserve the string.
+		assert(size < MAX_BUFFER); // if this fails, smarter chuck reading and sending
+		                           // should be implemented
 		fileContent.resize(size);
 		//
 		// Get the allocated array.
-		char * array = (char*)fileContent.data();
+		char *array = (char *)fileContent.data();
 		file.seekg(0, std::ios::beg);
 		file.read(array, size);
 		file.close();
@@ -39,7 +40,6 @@ void readFile(const std::string &fileName, std::string &fileContent)
 		std::cerr << "File " << fileName << " cannot be read." << std::endl;
 	}
 }
-
 
 /**********
  * \file mcstas_server.cpp
@@ -79,22 +79,12 @@ int main(int argc, char *argv[])
 		// Loop on the requests.
 		while (true) {
 			// Receive the simple request.
-			/* Get the request content that is
-			 * ? json file ?
-			 * ? other     ?
-			 */
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 			sim_request sim_request_obj(request->getBinary());
 #ifdef DEBUG
-			if (sim_request_obj.good()) {
-				std::cout << "========== [REQ] ==========\n"
-				          << sim_request_obj
-				          << "\n===========================" << std::endl;
-			}
-			request->replyBinary("==>\n" + sim_request_obj.to_string() +
-			                     "\n <== RECEIVED");
-#else
-			request->replyBinary("RECEIVED");
+			std::cout << "========== [REQ] ==========\n"
+			          << sim_request_obj
+			          << "\n===========================" << std::endl;
 #endif
 
 			std::vector<std::string> args = sim_request_obj.args();
@@ -109,42 +99,41 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
 			for (auto singlearg : args) {
-				std::cout << singlearg << std::endl;
+				std::cout << "***" << singlearg << std::endl;
 			}
+			std::cout << "**#" << sim_request_obj.instrument_name() << std::endl;
 #endif
 
-			{
-				auto start = clock();
+			auto start = clock();
 
-				std::unique_ptr<cameo::application::Instance>
-				    simulationApplication =
-				        server.start(sim_request_obj.instrument(), args);
-				std::cout << "Started simulation application "
-				          << *simulationApplication << std::endl;
-				cameo::application::State state = simulationApplication->waitFor();
-				auto                      end   = clock();
+			std::unique_ptr<cameo::application::Instance> simulationApplication =
+			    server.start(sim_request_obj.instrument_name(), args);
+			std::cout << "Started simulation application " << *simulationApplication
+			          << std::endl;
+			cameo::application::State state = simulationApplication->waitFor();
+			auto                      end   = clock();
 
-				std::cout << "Finished the simulation application with state "
-				          << cameo::application::toString(state) << std::endl;
-				std::cout
-				    << std::fixed << std::setprecision(3)
-				    << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
-				    << " ms" << std::endl;
-			}
+			std::cout << "Finished the simulation application with state "
+			          << cameo::application::toString(state) << std::endl;
+			std::cout << std::fixed << std::setprecision(3)
+			          << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
+			          << " ms" << std::endl;
 
-			{
-				
+			if (state == cameo::application::SUCCESS) {
+
 				std::string fileContent;
-				system((std::string("tar -czf ")+tmpFileName+".tgz "+tmpFileName+"/").c_str());
-				readFile(tmpFileName+".tgz", fileContent);
+				system((std::string("tar -czf ") + tmpFileName + ".tgz " +
+				        tmpFileName + "/")
+				           .c_str());
+				readFile(tmpFileName + ".tgz", fileContent);
 				request->replyBinary(fileContent);
-				 // request->replyBinary("Simulation terminated");
+				// request->replyBinary("Simulation terminated");
 				request->replyBinary("OK");
 				//			remove(tmpFileName.c_str());
 			}
 		}
 		std::cout << "Finished the application" << std::endl;
-		
+
 	} // end of block to make sure zmq objects are closed properly
 	return 0;
 }
