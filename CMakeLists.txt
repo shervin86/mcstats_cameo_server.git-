@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(cameo-mcstas VERSION 0.10.0)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 include_directories(include include/nlohmann)
@@ -22,6 +22,9 @@ target_link_libraries(mcstas_server PUBLIC m)
 target_link_libraries(mcstas_server PUBLIC cameo)
 target_link_libraries(mcstas_server PUBLIC zmq)
 target_link_libraries(mcstas_server PUBLIC protobuf)
+#target_link_libraries(mcstas_server PUBLIC gcrypt)
+#target_link_libraries(mcstas_server PUBLIC gpg-error)
+target_link_libraries(mcstas_server PUBLIC stdc++fs)
 add_definitions(-DDEBUG)
 
 

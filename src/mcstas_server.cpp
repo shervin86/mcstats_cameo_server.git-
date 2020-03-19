@@ -5,9 +5,14 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
+//#include <stdio.h>
 #include <string>
+#include <functional>   // for std::hash
 
+#include "c++/7/experimental/filesystem"
+namespace fs = std::experimental::filesystem;
+
+/********************************/
 /**
  * \brief name of the responder created by the server that can be
  * accessed by Nomad
@@ -76,24 +81,30 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
+		std::hash<std::string> h_str;
+		
 		// Loop on the requests.
 		while (true) {
 			// Receive the simple request.
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 			sim_request sim_request_obj(request->getBinary());
+			//hash h(sim_request_obj.to_string());
 #ifdef DEBUG
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj
 			          << "\n===========================" << std::endl;
+			std::cout << "#" << std::hex << h_str(sim_request_obj.to_string()) << std::endl;
+			std::cout << "*" << h_str(sim_request_obj.to_string()) << std::endl;
 #endif
-
+			
 			std::vector<std::string> args = sim_request_obj.args();
 
 			// define a temp file in RAM
-			std::string tmpFileName = tmpnam(nullptr);
+			std::string tmpFileName = std::to_string(h_str(sim_request_obj.to_string()));
 			tmpFileName.replace(1, 3, "dev/shm/SIMD22/");
 			// tmpFileName += "/";
-			system("mkdir -p /dev/shm/SIMD22");
+			fs::create_directory("/dev/shm/SIMD22");
+			//system("mkdir -p /dev/shm/SIMD22");
 			args.push_back("--dir=" + tmpFileName);
 			// args.push_back("--no-output-dir");
 
@@ -103,7 +114,7 @@ int main(int argc, char *argv[])
 			}
 			std::cout << "**#" << sim_request_obj.instrument_name() << std::endl;
 #endif
-
+			
 			auto start = clock();
 
 			std::unique_ptr<cameo::application::Instance> simulationApplication =
