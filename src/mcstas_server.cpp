@@ -88,41 +88,56 @@ int main(int argc, char *argv[])
 			// Receive the simple request.
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 			sim_request sim_request_obj(request->getBinary());
-			//hash h(sim_request_obj.to_string());
 #ifdef DEBUG
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj
 			          << "\n===========================" << std::endl;
-			std::cout << "#" << std::hex << h_str(sim_request_obj.to_string()) << std::endl;
 			std::cout << "*" << h_str(sim_request_obj.to_string()) << std::endl;
 #endif
 			
-			std::vector<std::string> args = sim_request_obj.args();
 
-			// define a temp file in RAM
-			std::string tmpFileName = std::to_string(h_str(sim_request_obj.to_string()));
-			tmpFileName.replace(1, 3, "dev/shm/SIMD22/");
-			// tmpFileName += "/";
-			fs::create_directory("/dev/shm/SIMD22");
-			//system("mkdir -p /dev/shm/SIMD22");
-			args.push_back("--dir=" + tmpFileName);
+
+			// define a temp dir in RAM
+			std::string dirName="/dev/shm/SIMD22/";
+			fs::path p = dirName;
+			fs::create_directories(p);
+			std::string hash_string = std::to_string(h_str(sim_request_obj.to_string()));
+			p/=hash_string; 
+			p+=".tgz";
+			std::cout << p << std::endl;
+			std::cout << "PARENT="<< p.parent_path() << std::endl;
+			std::cout << "FILENAME="<<p.filename() << std::endl;
+			std::cout << "STEM=" << p.stem() << std::endl;
+			std::cout << "EXT="<<p.extension() << std::endl;
+			
+			cameo::application::State state = cameo::application::UNKNOWN;
+			if(!fs::exists(p)){ // in this case we need to re-run the simulation
+				// if there is a failure, something should be reported somehow
+				std::cout << "[TAR] does not exists" << std::endl;
+				if(fs::exists(p.parent_path()/p.stem())){
+					std::cerr << "[ERROR] Sim dir already exists but not TGZ, please clean up" << std::endl;
+					return 1;
+				}
+				std::vector<std::string> args = sim_request_obj.args();
+				args.push_back("--dir=" + (p.parent_path()/p.stem()).string());
 			// args.push_back("--no-output-dir");
 
 #ifdef DEBUG
-			for (auto singlearg : args) {
-				std::cout << "***" << singlearg << std::endl;
-			}
-			std::cout << "**#" << sim_request_obj.instrument_name() << std::endl;
+				for (auto singlearg : args) {
+					std::cout << "***" << singlearg << std::endl;
+				}
+				std::cout << "**#" << sim_request_obj.instrument_name() << std::endl;
 #endif
-			
-			auto start = clock();
+				
+				auto start = clock();
 
 			std::unique_ptr<cameo::application::Instance> simulationApplication =
 			    server.start(sim_request_obj.instrument_name(), args);
 			std::cout << "Started simulation application " << *simulationApplication
 			          << std::endl;
-			cameo::application::State state = simulationApplication->waitFor();
-			auto                      end   = clock();
+			 state = simulationApplication->waitFor();
+
+			auto end   = clock();
 
 			std::cout << "Finished the simulation application with state "
 			          << cameo::application::toString(state) << std::endl;
@@ -130,17 +145,23 @@ int main(int argc, char *argv[])
 			          << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
 			          << " ms" << std::endl;
 
+			}else{
+			 // in this case re-use the previous results
+				std::cout << "[DIR] exists" << std::endl;
+				state = cameo::application::SUCCESS; 
+			}
+
 			if (state == cameo::application::SUCCESS) {
 
 				std::string fileContent;
-				system((std::string("tar -czf ") + tmpFileName + ".tgz " +
-				        tmpFileName + "/")
-				           .c_str());
-				readFile(tmpFileName + ".tgz", fileContent);
+				system((std::string("tar -cz -C ") + p.parent_path().string() + " " + p.stem().string()+" > " + p.string()).c_str());
+				readFile(p, fileContent);
 				request->replyBinary(fileContent);
 				// request->replyBinary("Simulation terminated");
 				request->replyBinary("OK");
 				//			remove(tmpFileName.c_str());
+			}else{
+				request->replyBinary("ERROR");
 			}
 		}
 		std::cout << "Finished the application" << std::endl;

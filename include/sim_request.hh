@@ -79,7 +79,7 @@ class sim_request
 	{
 		// check mandatory parameters first
 		assert(_j.contains("instrument"));
-		assert(_j.contains("-n"));
+		assert(_j.contains("--ncount"));
 		assert(_j.contains("lambda"));
 	}
 };

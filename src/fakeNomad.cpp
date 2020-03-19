@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	{
 #ifdef DEBUG
 		for (size_t i = 0; i < argc; ++i) {
-			std::cerr << "==" << argv[i] << std::endl;
+			std::cout << "[ARGS]" << argv[i] << std::endl;
 		}
 #endif
 
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
 		/** creating the request
 		 */
-		nlohmann::json j = {{"instrument", "D22"}, {"-n", 1000000}, {"lambda", 4.5}};
+		nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000}, {"lambda", 4.5}};
 		// sim_request request("D22", 1e6, params);
 		sim_request request(j);
 
@@ -85,10 +85,11 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
 //			std::cout << response << std::endl;
 #endif
-		} while (response != "OK" and response != "DIE");
-
+		} while (response != "OK" and response != "DIE" and response != "ERROR");
+		
 		std::cout << "Finished the application" << std::endl;
 
 	} // end of block to make sure zmq objects are closed properly
+	
 	return 0;
 }
