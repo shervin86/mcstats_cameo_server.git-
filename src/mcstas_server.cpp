@@ -6,8 +6,8 @@
 #include <iostream>
 #include <sstream>
 //#include <stdio.h>
+//#include <functional> // for std::hash
 #include <string>
-#include <functional>   // for std::hash
 
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
@@ -81,87 +81,102 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
-		std::hash<std::string> h_str;
-		
-		// Loop on the requests.
+		// std::hash<std::string> h_str;  // this should return the hash of the request
+
+		// Loop on the requests
+		// accept only one request for now
+
 		while (true) {
+			// initialize
+			cameo::application::State state = cameo::application::UNKNOWN;
+
+			std::cout << "\n\n"
+			          << "READY: waiting for new requests" << std::endl;
 			// Receive the simple request.
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 			sim_request sim_request_obj(request->getBinary());
-#ifdef DEBUG
+			//#ifdef DEBUG
 			std::cout << "========== [REQ] ==========\n"
-			          << sim_request_obj
+			          << sim_request_obj << "\n"
+			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
-			std::cout << "*" << h_str(sim_request_obj.to_string()) << std::endl;
-#endif
-			
-
+			//#endif
 
 			// define a temp dir in RAM
-			std::string dirName="/dev/shm/SIMD22/";
+			std::string dirName =
+			    std::string("/dev/shm/") + sim_request_obj.instrument_name() + "/";
 			fs::path p = dirName;
 			fs::create_directories(p);
-			std::string hash_string = std::to_string(h_str(sim_request_obj.to_string()));
-			p/=hash_string; 
-			p+=".tgz";
-			std::cout << p << std::endl;
-			std::cout << "PARENT="<< p.parent_path() << std::endl;
-			std::cout << "FILENAME="<<p.filename() << std::endl;
-			std::cout << "STEM=" << p.stem() << std::endl;
-			std::cout << "EXT="<<p.extension() << std::endl;
-			
-			cameo::application::State state = cameo::application::UNKNOWN;
-			if(!fs::exists(p)){ // in this case we need to re-run the simulation
+			std::string hash_string = sim_request_obj.hash();
+			p /= hash_string;
+			p += ".tgz";
+
+			if (!fs::exists(p) && (fs::exists(p.parent_path() / p.stem()))) {
+				std::cerr << "[ERROR] Sim dir already exists but not TGZ, "
+				             "please clean up"
+				          << std::endl;
+				state = cameo::application::FAILURE;
+
+				request->replyBinary(cameo::application::toString(state));
+				continue; // get ready to process new request
+			}
+
+			if (!fs::exists(p)) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
 				std::cout << "[TAR] does not exists" << std::endl;
-				if(fs::exists(p.parent_path()/p.stem())){
-					std::cerr << "[ERROR] Sim dir already exists but not TGZ, please clean up" << std::endl;
-					return 1;
-				}
 				std::vector<std::string> args = sim_request_obj.args();
-				args.push_back("--dir=" + (p.parent_path()/p.stem()).string());
-			// args.push_back("--no-output-dir");
+				args.push_back("--dir=" + (p.parent_path() / p.stem()).string());
 
 #ifdef DEBUG
 				for (auto singlearg : args) {
 					std::cout << "***" << singlearg << std::endl;
 				}
-				std::cout << "**#" << sim_request_obj.instrument_name() << std::endl;
+				std::cout << "**#" << sim_request_obj.instrument_name()
+				          << std::endl;
 #endif
-				
+
 				auto start = clock();
 
-			std::unique_ptr<cameo::application::Instance> simulationApplication =
-			    server.start(sim_request_obj.instrument_name(), args);
-			std::cout << "Started simulation application " << *simulationApplication
-			          << std::endl;
-			 state = simulationApplication->waitFor();
+				std::unique_ptr<cameo::application::Instance>
+				    simulationApplication =
+				        server.start(sim_request_obj.instrument_name(), args);
+#ifdef DEBUG
+				std::cout << "Started simulation application "
+				          << *simulationApplication << std::endl;
+#endif
+				state = simulationApplication->waitFor();
 
-			auto end   = clock();
-
-			std::cout << "Finished the simulation application with state "
-			          << cameo::application::toString(state) << std::endl;
-			std::cout << std::fixed << std::setprecision(3)
-			          << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
-			          << " ms" << std::endl;
-
-			}else{
-			 // in this case re-use the previous results
-				std::cout << "[DIR] exists" << std::endl;
-				state = cameo::application::SUCCESS; 
+				auto end = clock();
+#ifdef DEBUG
+				std::cout << "Finished the simulation application with state "
+				          << cameo::application::toString(state) << std::endl;
+				std::cout
+				    << std::fixed << std::setprecision(3)
+				    << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
+				    << " ms" << std::endl;
+#endif
+			} else {
+				// in this case re-use the previous results
+				std::cout << "simulation exists, re-using the same results"
+				          << std::endl;
+				state = cameo::application::SUCCESS;
 			}
 
+			request->replyBinary(
+			    std::to_string(state)); // cameo::application::toString(state));
 			if (state == cameo::application::SUCCESS) {
 
+				std::ofstream request_dump_file(
+				    (p.parent_path() / p.stem()).string() + "/request.json");
+				request_dump_file << sim_request_obj << std::endl;
+
+				system((std::string("tar -cz -C ") + p.parent_path().string() +
+				        " " + p.stem().string() + " > " + p.string())
+				           .c_str());
+
 				std::string fileContent;
-				system((std::string("tar -cz -C ") + p.parent_path().string() + " " + p.stem().string()+" > " + p.string()).c_str());
 				readFile(p, fileContent);
 				request->replyBinary(fileContent);
-				// request->replyBinary("Simulation terminated");
-				request->replyBinary("OK");
-				//			remove(tmpFileName.c_str());
-			}else{
-				request->replyBinary("ERROR");
 			}
 		}
 		std::cout << "Finished the application" << std::endl;

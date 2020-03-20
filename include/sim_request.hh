@@ -2,6 +2,8 @@
 #define SIM_REQUEST_CLASS
 #include "nlohmann/json.hpp"
 #include <cassert>
+#include <fstream>
+#include <functional>
 #include <iomanip>
 #include <ostream>
 #include <sstream>
@@ -20,12 +22,19 @@
 
 class sim_request
 {
-      public:
+	public:
 	/** \brief constructor to be used on the client side
 	 *  \param[in] j : json with the simulation parameters and instrument name
 	 */
 	sim_request(nlohmann::json j) : _j(j)
 	{
+		check_json();
+		_instrument = _j["instrument"];
+	};
+
+	sim_request(std::ifstream &jsonfile)
+	{
+		_j = nlohmann::json::parse(jsonfile);
 		check_json();
 		_instrument = _j["instrument"];
 	};
@@ -38,8 +47,6 @@ class sim_request
 		_j = nlohmann::json::parse(message);
 		check_json();
 		_instrument = _j["instrument"];
-
-		return;
 	}
 
 	/// returing the string "SIM"+name of the instrument
@@ -52,6 +59,7 @@ class sim_request
 		for (const auto &i : _j.items()) {
 			if (i.key() == "instrument")
 				continue;
+
 			std::stringstream s;
 			s << i.key() << "=" << i.value();
 			args.push_back(s.str());
@@ -59,28 +67,49 @@ class sim_request
 		return args;
 	}
 
-
+	/// \brief pretty print of the request in json format
 	friend std::ostream &operator<<(std::ostream &os, const sim_request &s);
 
 	/** \brief transform the request into a string to be sent through CAMEO
-	 *
 	 * this method is kept if one wants to decouple the printing and the encoding into string
 	 */
 	inline std::string to_string(void) const { return _j.dump(); }
+	inline std::string string(void) const { return _j.dump(); }
 
-      private:
-	nlohmann::json _j;
-	std::string    _instrument;
+	/** \brief returns the hash of the entire request string */
+	inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
+
+	private:
+	nlohmann::json         _j;
+	std::string            _instrument;
+	std::hash<std::string> _hash; // this class calculates the hash from the string
 
 	/** \brief checks if the request is valid
-	 * \FIXME replace asserts with expections
+	 * \FIXME replace asserts with exceptions
+	 * \return TRUE if everything is OK and FALSE otherwise
 	 */
-	bool check_json(void)
+	bool check_json(void) const
 	{
+		bool ret = true; // true = OK
 		// check mandatory parameters first
+		check_json_common();
+		return ret;
+	}
+
+	/** \brief checks for mandatory elements of the json request, common to all instruments
+	 * \return TRUE if everything is OK and FALSE otherwise
+	 */
+	inline bool check_json_common(void) const
+	{
 		assert(_j.contains("instrument"));
 		assert(_j.contains("--ncount"));
+		return true;
+	}
+
+	inline bool check_json_source(void) const
+	{
 		assert(_j.contains("lambda"));
+		return true;
 	}
 };
 

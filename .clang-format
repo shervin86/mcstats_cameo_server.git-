@@ -8,3 +8,4 @@ ColumnLimit: 100
 
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
+AccessModifierOffset: 0

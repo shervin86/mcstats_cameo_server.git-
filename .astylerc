@@ -1,0 +1,8 @@
+--style=linux
+--indent=force-tab
+--keep-one-line-statements
+--keep-one-line-blocks
+--attach-return-type
+--align-reference=type
+--align-pointer=name
+--delete-empty-lines
