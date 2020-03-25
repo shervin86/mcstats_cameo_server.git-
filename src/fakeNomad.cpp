@@ -4,9 +4,9 @@
 #include <iomanip>
 #include <iostream>
 
-//#define DEBUG
 #define SERVERNAME "mcstas_server"
 #define REQUESTER_RESPONDER_NAME "mcstas_responder"
+
 /**
  * Writes a string to a file as binary
  * @param fileName : the name of the output file
@@ -23,11 +23,19 @@ void writeFile(const std::string &fileName, const std::string &fileContent)
 	}
 }
 
+enum exitCodes{
+	exitOK=0,
+	exitNOCLIENT,
+	exitNOSERVER,
+	exitREQUESTER,
+	exitFAILURE
+};
+
+
 int main(int argc, char *argv[])
 {
-	std::cout << "============================== Start of fakeNomad " << std::endl;
-
-	// get the request from json file
+	exitCodes ret=exitOK;
+	std::cout << "\n============================== Start of fakeNomad " << std::endl;
 
 	cameo::application::This::init(argc, argv);
 	cameo::application::State returnState = cameo::application::UNKNOWN;
@@ -37,11 +45,16 @@ int main(int argc, char *argv[])
 	{
 
 		cameo::application::This::setRunning();
-
+		if(! cameo::application::This::isAvailable()){
+			std::cout << "[ERROR] Application not available" << std::endl;
+			return exitNOCLIENT;
+		}
+		
 		// Get the local Cameo server.
 		cameo::Server &server = cameo::application::This::getServer();
-		if (cameo::application::This::isAvailable() && server.isAvailable()) {
-			std::cerr << "Connected server " << server << std::endl;
+  		if (! server.isAvailable()) {
+			std::cout << "[ERROR] CAMEO server not connected, abort" << server << std::endl;
+			return exitNOSERVER;
 		}
 
 		// Connect to the mcstas_server: put the name of the cameo process as
@@ -49,12 +62,10 @@ int main(int argc, char *argv[])
 		std::unique_ptr<cameo::application::Instance> responderServer =
 		    server.connect(SERVERNAME);
 
-#ifdef DEBUG
-		std::cout << "Application " << *responderServer << " has state "
-		          << cameo::application::toString(responderServer->now()) << std::endl;
-#endif
+		std::cout << "responder: " << *responderServer << "                    ["<<cameo::application::toString(responderServer->now()) << "]" << std::endl;
 
-		// check that the server is running, otherwise wait till a given timeOut
+
+        // check that the server is running, otherwise wait till a given timeOut
 
 		// Create a requester.
 		std::unique_ptr<cameo::application::Requester> requester =
@@ -62,17 +73,15 @@ int main(int argc, char *argv[])
 		        *responderServer,
 		        REQUESTER_RESPONDER_NAME); // the name here has to be the same as on the
 		                                   // server
-		std::cout << "Created requester " << *requester << std::endl;
+		std::cout << "Requester: " << *requester << " ["<< "CREATED" << "]" << std::endl;
 		if (requester.get() == 0) {
-			std::cout << "requester error" << std::endl;
-			return -1;
+			std::cerr << "[ERROR] requester error" << std::endl;
+			return exitREQUESTER;
 		}
 
-		/** creating the request
-		 */
+		// creating the request
 		std::ifstream jsonfile("request.json");
-		// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000},
-		// {"lambda", 4.5}};
+// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000}, {"lambda", 4.5}};
 		sim_request request(jsonfile);
 
 		requester->sendBinary(request.to_string());
@@ -81,24 +90,19 @@ int main(int argc, char *argv[])
 		requester->receiveBinary(response);
 		std::cout << "RESP=" << response << std::endl;
 		returnState = std::stoul(response);
-		//		std::cout << std::boolalpha <<
-		//(cameo::application::SUCCESS==returnState) << std::endl;
+
 		if (cameo::application::SUCCESS == returnState) {
 			requester->receiveBinary(response);
 			if (response.size() > 1000)
 				writeFile(request.hash() + ".tgz", response);
 		} else {
 			std::cerr << "ERROR" << std::endl;
+			ret=exitFAILURE;
 		}
-		// #ifdef DEBUG
-		// //			std::cout << response << std::endl;
-		// #endif
-		// 		} while (response != "OK" and response != "DIE" and response !=
-		// "ERROR");
 
 		std::cout << "Finished the application" << std::endl;
 
 	} // end of block to make sure zmq objects are closed properly
 
-	return 0;
+	return ret;
 }

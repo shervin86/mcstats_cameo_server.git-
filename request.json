@@ -1,0 +1,5 @@
+{
+	"instrument": "D22",
+	"--ncount": 10000000,
+	"lambda": 4.5
+}
