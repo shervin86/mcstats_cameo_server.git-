@@ -31,15 +31,29 @@ target_link_libraries(mcstas_server PUBLIC protobuf)
 target_link_libraries(mcstas_server PUBLIC stdc++fs)
 
 
-
 #add_executable(mcstas_server.cpp)
+
+############################# MCSTAS
+link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
+
+add_custom_command(OUTPUT ILL_H512_D22-preVselector.c
+  COMMENT "creation of .c"
+  COMMAND mcstas -t -o build/ILL_H512_D22-preVselector.c ILL_H512_D22-preVselector.instr
+  WORKING_DIRECTORY ../
+  )
+
+add_executable(ILL_H512_D22-preVselector.out ILL_H512_D22-preVselector.c)
+target_compile_options(ILL_H512_D22-preVselector.out PUBLIC -O3 -Wno-error -Wno-all -Wno-extra)
+target_include_directories(ILL_H512_D22-preVselector.out PUBLIC /usr/share/mcstas/2.6/libs/mcpl)
+target_link_libraries(ILL_H512_D22-preVselector.out PUBLIC m)
+target_link_libraries(ILL_H512_D22-preVselector.out PUBLIC mcpl)
 
 
 
 
 ################ Install
 set(CMAKE_INSTALL_PREFIX ../)
-install(TARGETS fakeNomad DESTINATION bin)
+install(TARGETS fakeNomad mcstas_server ILL_H512_D22-preVselector.out DESTINATION bin)
 
 
 

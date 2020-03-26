@@ -17,7 +17,9 @@ cmake --build .
 ```
 #!/usr/bin/fish
 set INSTRUMENT ILL_H512_D22
-
+cd build/
+mcstas -t  -o $INSTRUMENT.c  ../mcstas/$INSTRUMENT.instr 
+gcc -O3 -o $INSTRUMENT.out $INSTRUMENT.c -lm
 ```
 
 
