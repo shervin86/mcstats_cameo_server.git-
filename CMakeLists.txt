@@ -10,12 +10,16 @@ add_compile_options(-Wall -Wextra -pedantic -Werror)
 include_directories(include include/nlohmann)
 add_definitions(-DDEBUG)
 
+add_definitions(-DSERVERNAME="mcstas_server")
+add_definitions(-DREQUESTER_RESPONDER_NAME="mcstas_responder")
+
 # add the executable
 add_executable(fakeNomad src/fakeNomad.cpp)
 target_link_libraries(fakeNomad PUBLIC m)
 target_link_libraries(fakeNomad PUBLIC cameo)
 target_link_libraries(fakeNomad PUBLIC zmq)
 target_link_libraries(fakeNomad PUBLIC protobuf)
+target_link_libraries(fakeNomad PUBLIC stdc++fs)
 
 add_executable(mcstas_server src/mcstas_server.cpp)
 target_link_libraries(mcstas_server PUBLIC m)

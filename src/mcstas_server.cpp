@@ -12,12 +12,12 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
+static const std::string baseDir = "/dev/shm/";
 /********************************/
 /**
  * \brief name of the responder created by the server that can be
  * accessed by Nomad
  */
-#define REQUESTER_RESPONDER_NAME "mcstas_responder"
 
 #define MAX_BUFFER 1000000
 
@@ -103,9 +103,8 @@ int main(int argc, char *argv[])
 			//#endif
 
 			// define a temp dir in RAM
-			std::string dirName =
-			    std::string("/dev/shm/") + sim_request_obj.instrument_name() + "/";
-			fs::path p = dirName;
+			std::string dirName = baseDir + sim_request_obj.instrument_name() + "/";
+			fs::path    p       = dirName;
 			fs::create_directories(p);
 			std::string hash_string = sim_request_obj.hash();
 			p /= hash_string;
@@ -127,34 +126,32 @@ int main(int argc, char *argv[])
 				std::vector<std::string> args = sim_request_obj.args();
 				args.push_back("--dir=" + (p.parent_path() / p.stem()).string());
 
-#ifdef DEBUG
 				for (auto singlearg : args) {
 					std::cout << "***" << singlearg << std::endl;
 				}
 				std::cout << "**#" << sim_request_obj.instrument_name()
 				          << std::endl;
-#endif
 
 				auto start = clock();
 
 				std::unique_ptr<cameo::application::Instance>
 				    simulationApplication =
 				        server.start(sim_request_obj.instrument_name(), args);
-#ifdef DEBUG
+
 				std::cout << "Started simulation application "
 				          << *simulationApplication << std::endl;
-#endif
+
 				state = simulationApplication->waitFor();
 
 				auto end = clock();
-#ifdef DEBUG
+
 				std::cout << "Finished the simulation application with state "
 				          << cameo::application::toString(state) << std::endl;
 				std::cout
 				    << std::fixed << std::setprecision(3)
 				    << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
 				    << " ms" << std::endl;
-#endif
+
 			} else {
 				// in this case re-use the previous results
 				std::cout << "simulation exists, re-using the same results"

@@ -4,8 +4,13 @@
 #include <iomanip>
 #include <iostream>
 
-#define SERVERNAME "mcstas_server"
-#define REQUESTER_RESPONDER_NAME "mcstas_responder"
+#include "c++/7/experimental/filesystem"
+namespace fs = std::experimental::filesystem;
+
+static const std::string baseDir = "/dev/shm/NOMAD/";
+
+//#define SERVERNAME "mcstas_server"
+//#define REQUESTER_RESPONDER_NAME "mcstas_responder"
 
 /**
  * Writes a string to a file as binary
@@ -23,18 +28,11 @@ void writeFile(const std::string &fileName, const std::string &fileContent)
 	}
 }
 
-enum exitCodes{
-	exitOK=0,
-	exitNOCLIENT,
-	exitNOSERVER,
-	exitREQUESTER,
-	exitFAILURE
-};
-
+enum exitCodes { exitOK = 0, exitNOCLIENT, exitNOSERVER, exitREQUESTER, exitFAILURE };
 
 int main(int argc, char *argv[])
 {
-	exitCodes ret=exitOK;
+	exitCodes ret = exitOK;
 	std::cout << "\n============================== Start of fakeNomad " << std::endl;
 
 	cameo::application::This::init(argc, argv);
@@ -45,15 +43,16 @@ int main(int argc, char *argv[])
 	{
 
 		cameo::application::This::setRunning();
-		if(! cameo::application::This::isAvailable()){
+		if (!cameo::application::This::isAvailable()) {
 			std::cout << "[ERROR] Application not available" << std::endl;
 			return exitNOCLIENT;
 		}
-		
+
 		// Get the local Cameo server.
 		cameo::Server &server = cameo::application::This::getServer();
-  		if (! server.isAvailable()) {
-			std::cout << "[ERROR] CAMEO server not connected, abort" << server << std::endl;
+		if (!server.isAvailable()) {
+			std::cout << "[ERROR] CAMEO server not connected, abort" << server
+			          << std::endl;
 			return exitNOSERVER;
 		}
 
@@ -62,10 +61,11 @@ int main(int argc, char *argv[])
 		std::unique_ptr<cameo::application::Instance> responderServer =
 		    server.connect(SERVERNAME);
 
-		std::cout << "responder: " << *responderServer << "                    ["<<cameo::application::toString(responderServer->now()) << "]" << std::endl;
+		std::cout << "responder: " << *responderServer << "                    ["
+		          << cameo::application::toString(responderServer->now()) << "]"
+		          << std::endl;
 
-
-        // check that the server is running, otherwise wait till a given timeOut
+		// check that the server is running, otherwise wait till a given timeOut
 
 		// Create a requester.
 		std::unique_ptr<cameo::application::Requester> requester =
@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 		        *responderServer,
 		        REQUESTER_RESPONDER_NAME); // the name here has to be the same as on the
 		                                   // server
-		std::cout << "Requester: " << *requester << " ["<< "CREATED" << "]" << std::endl;
+		std::cout << "Requester: " << *requester << " ["
+		          << "CREATED"
+		          << "]" << std::endl;
 		if (requester.get() == 0) {
 			std::cerr << "[ERROR] requester error" << std::endl;
 			return exitREQUESTER;
@@ -81,25 +83,35 @@ int main(int argc, char *argv[])
 
 		// creating the request
 		std::ifstream jsonfile("request.json");
-// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000}, {"lambda", 4.5}};
+		// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000},
+		// {"lambda", 4.5}};
 		sim_request request(jsonfile);
+		std::string dirName = baseDir + request.instrument_name() + "/";
+		fs::path    p       = dirName;
+		fs::create_directories(p);
+		std::string hash_string = request.hash();
+		p /= hash_string;
+		p += ".tgz";
+		if (!fs::exists(p)) {
 
-		requester->sendBinary(request.to_string());
-		// Wait for the response from the server.
-		std::string response;
-		requester->receiveBinary(response);
-		std::cout << "RESP=" << response << std::endl;
-		returnState = std::stoul(response);
-
-		if (cameo::application::SUCCESS == returnState) {
+			requester->sendBinary(request.to_string());
+			// Wait for the response from the server.
+			std::string response;
 			requester->receiveBinary(response);
-			if (response.size() > 1000)
-				writeFile(request.hash() + ".tgz", response);
-		} else {
-			std::cerr << "ERROR" << std::endl;
-			ret=exitFAILURE;
-		}
+			std::cout << "RESP=" << response << std::endl;
+			returnState = std::stoul(response);
 
+			if (cameo::application::SUCCESS == returnState) {
+				requester->receiveBinary(response);
+				if (response.size() > 1000)
+					writeFile(p, response);
+			} else {
+				std::cerr << "ERROR" << std::endl;
+				ret = exitFAILURE;
+			}
+		} else {
+			std::cout << "[INFO] Result already present in " << p << std::endl;
+		}
 		std::cout << "Finished the application" << std::endl;
 
 	} // end of block to make sure zmq objects are closed properly
