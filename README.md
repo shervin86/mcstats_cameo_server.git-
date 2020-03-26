@@ -1,3 +1,8 @@
+### Clone
+```
+git config --local core.hooksPath .githooks/
+```
+
 ### Compilation
 
 ```
@@ -6,6 +11,13 @@ cd build/
 cmake ../
 
 cmake --build .
+```
+
+### McStas instrument
+```
+#!/usr/bin/fish
+set INSTRUMENT ILL_H512_D22
+
 ```
 
 
@@ -31,3 +43,4 @@ sleep 2s
 xterm -e cmo -e tcp://localhost:7123 exec fakeNomad &
 
 ```
+

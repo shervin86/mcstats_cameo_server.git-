@@ -1,0 +1,5 @@
+#!/bin/sh
+
+clang-format -style=file -i ./src/*.cpp ./include/*.hh ./include/*.h #./src/*.cc
+git add -u ./src/*.cpp ./include/*.hh ./include/*.h #./src/*.cc
+
