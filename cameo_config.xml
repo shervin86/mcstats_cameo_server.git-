@@ -19,6 +19,9 @@
 		  <start executable="/home/cs/nourbakhsh/cameo/bin/fakeNomad" args=""/>
 		</application>
 
+		<application name="MCPLD22" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22-preVselector.out" args="--ncount=1e5 lambda=4.5 --dir=preVselector" />
+		</application>
 		
 	</applications>
 

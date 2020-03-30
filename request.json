@@ -1,5 +1,11 @@
 {
-	"instrument": "D22",
 	"--ncount": 1000000,
-	"lambda": 4.51
+	"instrument": {
+		"name": "D22"
+	},
+	"source" : {
+		"lambda": 4.49
+	},
+	"sample" :{
+	}
 }

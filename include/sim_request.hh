@@ -18,6 +18,17 @@
 /* checking the the request is valid, should happen in this class
  * because it is used by both the client and the server and so it can make sure at compilation time
  * that both can understand the request
+ *
+ * JSON format:
+ *
+{
+    "instrument": "D22",
+        "--ncount": 1000000,
+        "source": {
+            "lambda": 4.51
+    }
+}
+*
  */
 
 class sim_request
@@ -28,15 +39,15 @@ class sim_request
 	 */
 	sim_request(nlohmann::json j) : _j(j)
 	{
-		check_json();
+		assert(check_json()); /// \todo use exception
 		_instrument = _j["instrument"];
 	};
 
 	sim_request(std::ifstream &jsonfile)
 	{
 		_j = nlohmann::json::parse(jsonfile);
-		check_json();
-		_instrument = _j["instrument"];
+		assert(check_json()); ///\todo use exception
+		_instrument = _j["instrument"]["name"];
 	};
 
 	/** \brief constructor that decodes the message from CAMEO (server side)
@@ -46,7 +57,7 @@ class sim_request
 	{
 		_j = nlohmann::json::parse(message);
 		check_json();
-		_instrument = _j["instrument"];
+		_instrument = _j["instrument"]["name"];
 	}
 
 	/// returing the string "SIM"+name of the instrument
@@ -56,10 +67,17 @@ class sim_request
 	inline std::vector<std::string> args(void) const
 	{
 		std::vector<std::string> args;
+
 		for (const auto &i : _j.items()) {
-			if (i.key() == "instrument")
+			if (i.key() == "instrument" or i.key() == "source" or i.key() == "sample")
 				continue;
 
+			std::stringstream s;
+			s << i.key() << "=" << i.value();
+			args.push_back(s.str());
+		}
+
+		for (const auto &i : _j["source"].items()) {
 			std::stringstream s;
 			s << i.key() << "=" << i.value();
 			args.push_back(s.str());
@@ -79,20 +97,22 @@ class sim_request
 	/** \brief returns the hash of the entire request string */
 	inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
 
+	// inline std::string hash(param_t k) const{
+
 	private:
 	nlohmann::json         _j;
 	std::string            _instrument;
 	std::hash<std::string> _hash; // this class calculates the hash from the string
 
 	/** \brief checks if the request is valid
-	 * \FIXME replace asserts with exceptions
+	 * \todo replace asserts with exceptions
 	 * \return TRUE if everything is OK and FALSE otherwise
 	 */
 	bool check_json(void) const
 	{
 		bool ret = true; // true = OK
 		// check mandatory parameters first
-		check_json_common();
+		ret = ret && check_json_common();
 		return ret;
 	}
 
@@ -101,16 +121,21 @@ class sim_request
 	 */
 	inline bool check_json_common(void) const
 	{
-		assert(_j.contains("instrument"));
+		bool ret = true;
+		// \todo use exceptions here
 		assert(_j.contains("--ncount"));
-		return true;
+		assert(_j.contains("instrument"));
+		assert(_j.contains("source"));
+		assert(_j.contains("sample"));
+		ret = ret && check_json_source();
+		ret = ret && check_json_sample();
+		ret = ret && check_json_instrument();
+		return ret;
 	}
 
-	inline bool check_json_source(void) const
-	{
-		assert(_j.contains("lambda"));
-		return true;
-	}
+	inline bool check_json_source(void) const { return _j["source"].contains("lambda"); }
+	inline bool check_json_sample(void) const { return true; }
+	inline bool check_json_instrument(void) const { return _j["instrument"].contains("name"); }
 };
 
 std::ostream &operator<<(std::ostream &os, const sim_request &s)
