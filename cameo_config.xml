@@ -7,7 +7,7 @@
 	
 
 		<!-- The Java application with name subpubjava -->
-		<application name="SIMD22" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		<application name="SIMD22-sFULL" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
 		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22.out" args="-n 1e4" />
 		</application>
 
@@ -22,7 +22,11 @@
 		<application name="MCPLD22" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
 		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22-preVselector.out" args="--ncount=1e5 lambda=4.5 --dir=preVselector" />
 		</application>
-		
+
+		<application name="SIMD22-sSAMPLE" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22-sSAMPLE.out" args="--ncount=1e5 lambda=4.5" />
+		</application>
+
 	</applications>
 
 </config>

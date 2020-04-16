@@ -88,19 +88,20 @@ int main(int argc, char *argv[])
 
 		while (true) {
 			// initialize
-			cameo::application::State state = cameo::application::UNKNOWN;
+			cameo::application::State state  = cameo::application::UNKNOWN;
+			size_t                    istage = 0;
+			std::string               stage_hash;
 
 			std::cout << "\n\n"
 			          << "READY: waiting for new requests" << std::endl;
 			// Receive the simple request.
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 			sim_request sim_request_obj(request->getBinary());
-			//#ifdef DEBUG
+
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
 			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
-			//#endif
 
 			// define a temp dir in RAM
 			std::string dirName = baseDir + sim_request_obj.instrument_name() + "/";
@@ -116,27 +117,69 @@ int main(int argc, char *argv[])
 				          << std::endl;
 				state = cameo::application::FAILURE;
 
-				request->replyBinary(cameo::application::toString(state));
+				request->replyBinary(std::to_string(state));
 				continue; // get ready to process new request
 			}
 
 			if (!fs::exists(p)) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
 				std::cout << "[TAR] does not exists" << std::endl;
+
+				// here I could check what has changed and decide if/when/how to
+				// re-use MCPL files
+				/*
+				  - sample
+				  - detector
+				  - source as well as instrument are bound.... so if any change,
+				  re-run the entire simulation...
+				 */
+
+				std::string mcpl_filename;
+				// check here if any MCPL exists for one of the stages
+				// stages are ordered from the detector to the source
+				for (istage = 0;
+				     istage < stages.size() and mcpl_filename.empty();) {
+					stage_hash = sim_request_obj.hash(istage);
+					fs::path stage_path(p.parent_path() / "MCPL" /
+					                    stages[istage] / stage_hash);
+					stage_path += ".json";
+					std::cout << "[INFO] check if MCPL file for stage "
+					          << istage
+					          << " exists\n       check existence of file"
+					          << stage_path << std::endl;
+					if (fs::exists(stage_path)) {
+						mcpl_filename =
+						    stage_path.parent_path() / stage_path.stem();
+						mcpl_filename += ".mcpl.gz";
+						std::cout << "    -> file found" << std::endl;
+					} else
+						++istage;
+				}
+
+				if (mcpl_filename.empty())
+					istage = stages.size() - 1;
+				// std::cout << istage << "\t" << stages[istage] << std::endl;
+				//------------------------------ build list of arguments for the
+				// simulation program
 				std::vector<std::string> args = sim_request_obj.args();
 				args.push_back("--dir=" + (p.parent_path() / p.stem()).string());
 
-				for (auto singlearg : args) {
-					std::cout << "***" << singlearg << std::endl;
-				}
-				std::cout << "**#" << sim_request_obj.instrument_name()
-				          << std::endl;
+				if (!mcpl_filename.empty())
+					args.push_back("Vin_filename=" + mcpl_filename);
+				std::string app_name =
+				    sim_request_obj.instrument_name() + "-" + stages[istage];
+#ifdef DEBUG
 
+				std::cout << "[DEBUG] APP: #" << app_name << "#" << std::endl;
+				for (auto singlearg : args)
+					std::cout << "[DEBUG] arg: #" << singlearg << "#"
+					          << std::endl;
+#endif
+
+				// start the sim application
 				auto start = clock();
-
 				std::unique_ptr<cameo::application::Instance>
-				    simulationApplication =
-				        server.start(sim_request_obj.instrument_name(), args);
+				    simulationApplication = server.start(app_name, args);
 
 				std::cout << "Started simulation application "
 				          << *simulationApplication << std::endl;
@@ -159,14 +202,34 @@ int main(int argc, char *argv[])
 				state = cameo::application::SUCCESS;
 			}
 
-			request->replyBinary(
-			    std::to_string(state)); // cameo::application::toString(state));
+			// send back the exit status to the client
+			request->replyBinary(std::to_string(state));
+
 			if (state == cameo::application::SUCCESS) {
 
+				// print the request json in the directory
 				std::ofstream request_dump_file(
 				    (p.parent_path() / p.stem()).string() + "/request.json");
 				request_dump_file << sim_request_obj << std::endl;
 
+				if (istage == FULL_STAGE) {
+					size_t is = 1;
+					// create a directory for the request at stage 1
+					fs::path mcpl_path = p.parent_path() / "MCPL" / stages[is] /
+					                     sim_request_obj.hash(is);
+					fs::create_directories(mcpl_path.parent_path());
+
+					// copy the request json
+					mcpl_path += ".json";
+					fs::copy(p.parent_path() / p.stem() / "request.json",
+					         mcpl_path);
+
+					// move the mcpl file and rename it
+					mcpl_path.replace_extension(".mcpl.gz");
+					fs::rename(p.parent_path() / p.stem() /
+					               (std::string(stages[is]) + ".mcpl.gz"),
+					           mcpl_path);
+				}
 				system((std::string("tar -cz -C ") + p.parent_path().string() +
 				        " " + p.stem().string() + " > " + p.string())
 				           .c_str());

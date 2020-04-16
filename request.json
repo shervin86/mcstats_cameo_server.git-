@@ -1,11 +1,14 @@
 {
-	"--ncount": 1000000,
+	"--ncount": 100000000,
 	"instrument": {
 		"name": "D22"
 	},
 	"source" : {
-		"lambda": 4.49
+		"lambda": 4.51
 	},
-	"sample" :{
-	}
+	"sample" :{ },
+	"detector":{
+		"D22_collimation": 2.00
+	},
+	"mcpl" : { }
 }

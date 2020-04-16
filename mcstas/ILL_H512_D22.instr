@@ -297,6 +297,9 @@ AT (0,0,0.01)                      RELATIVE PREVIOUS
 COMPONENT COPY(HCS_Al) = COPY(HCS_Al)(xwidth=0.04)
 AT (0,0,3+0.01) RELATIVE PREVIOUS
 
+COMPONENT Vout = MCPL_output( filename = "sSAMPLE")
+AT (0, 0, 0.01) RELATIVE PREVIOUS
+
 COMPONENT D22_PreV = Monitor_nD(xwidth=0.04, yheight=0.05,
   options="x y", bins=50, restore_neutron=1)
 AT (0,0,0.01) RELATIVE PREVIOUS

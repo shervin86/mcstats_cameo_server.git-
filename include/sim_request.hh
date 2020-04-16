@@ -9,6 +9,9 @@
 #include <sstream>
 #include <vector>
 
+// this enum has to be continous since there is a loop over the stages
+#define FULL_STAGE 2
+static const std::vector<std::string> stages = {"sDETECTOR", "sSAMPLE", "sFULL"};
 /**
  * \class sim_request
  * \brief helper to code and decode simulation requests between Nomad and the mcstas_server
@@ -34,6 +37,13 @@
 class sim_request
 {
 	public:
+	/** \brief different stages of the simulation
+	 *
+	 * At each stage, a MCPL file is saved with the neutrons at that stage
+	 * a previously produced MCPL file (or simulation result) is used if the hash for that stage
+	 * matches but not the previous
+	 */
+
 	/** \brief constructor to be used on the client side
 	 *  \param[in] j : json with the simulation parameters and instrument name
 	 */
@@ -69,7 +79,7 @@ class sim_request
 		std::vector<std::string> args;
 
 		for (const auto &i : _j.items()) {
-			if (i.key() == "instrument" or i.key() == "source" or i.key() == "sample")
+			if (i.value().type() == nlohmann::json::value_t::object)
 				continue;
 
 			std::stringstream s;
@@ -82,6 +92,19 @@ class sim_request
 			s << i.key() << "=" << i.value();
 			args.push_back(s.str());
 		}
+
+		for (const auto &i : _j["sample"].items()) {
+			std::stringstream s;
+			s << i.key() << "=" << i.value();
+			args.push_back(s.str());
+		}
+
+		for (const auto &i : _j["detector"].items()) {
+			std::stringstream s;
+			s << i.key() << "=" << i.value();
+			args.push_back(s.str());
+		}
+
 		return args;
 	}
 
@@ -97,7 +120,22 @@ class sim_request
 	/** \brief returns the hash of the entire request string */
 	inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
 
-	// inline std::string hash(param_t k) const{
+	inline std::string hash(size_t s) const
+	{
+		nlohmann::json j(_j);
+		switch (s) {
+		case FULL_STAGE:
+			break;
+		case 0:
+			j.erase("detector");
+			break;
+		case 1:
+			j.erase("detector");
+			j.erase("sample");
+			break;
+		}
+		return std::to_string(_hash(j.dump()));
+	}
 
 	private:
 	nlohmann::json         _j;
