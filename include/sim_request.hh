@@ -74,15 +74,13 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	}
 
-	
 	/** \brief empty constructor: the parameters should be added with the add_parameter method
 	 */
 	sim_request(void){};
 
-	inline void set_num_neutrons(unsigned long int n){
-		_j["--ncount"] = n;
-	}
-	inline void add_parameter(size_t stage, std::string name, float value){
+	inline void set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
+	inline void add_parameter(size_t stage, std::string name, float value)
+	{
 		switch (stage) {
 		case sFULL:
 			_j["source"]["name"] = value;
@@ -96,8 +94,7 @@ class sim_request
 		}
 		return;
 	}
-		
-	
+
 	/// returing the string "SIM"+name of the instrument
 	inline std::string instrument_name(void) const { return "SIM" + _instrument; };
 
