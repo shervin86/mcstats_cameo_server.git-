@@ -10,7 +10,7 @@
 #include <vector>
 
 // this enum has to be continous since there is a loop over the stages
-#define FULL_STAGE 2
+
 static const std::vector<std::string> stages = {"sDETECTOR", "sSAMPLE", "sFULL"};
 /**
  * \class sim_request
@@ -37,6 +37,11 @@ static const std::vector<std::string> stages = {"sDETECTOR", "sSAMPLE", "sFULL"}
 class sim_request
 {
 	public:
+static const size_t sFULL = 2;
+static const size_t sSAMPLE = 1;
+static const size_t sDETECTOR =0;
+
+
 	/** \brief different stages of the simulation
 	 *
 	 * At each stage, a MCPL file is saved with the neutrons at that stage
@@ -124,12 +129,12 @@ class sim_request
 	{
 		nlohmann::json j(_j);
 		switch (s) {
-		case FULL_STAGE:
+		case sFULL:
 			break;
-		case 0:
+		case sDETECTOR:
 			j.erase("detector");
 			break;
-		case 1:
+		case sSAMPLE:
 			j.erase("detector");
 			j.erase("sample");
 			break;

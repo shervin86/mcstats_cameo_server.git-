@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 				    (p.parent_path() / p.stem()).string() + "/request.json");
 				request_dump_file << sim_request_obj << std::endl;
 
-				if (istage == FULL_STAGE) {
+				if (istage == sim_request::sFULL) {
 					size_t is = 1;
 					// create a directory for the request at stage 1
 					fs::path mcpl_path = p.parent_path() / "MCPL" / stages[is] /
