@@ -1,4 +1,5 @@
 ### Clone
+After cloning the repository, setup the githooks:
 ```
 git config --local core.hooksPath .githooks/
 ```
@@ -14,6 +15,8 @@ cmake --build .
 ```
 
 ### McStas instrument
+In order to run the server, you need to have McStas installed.
+Then compile the instrument file with McStas:
 ```
 #!/usr/bin/fish
 set INSTRUMENT ILL_H512_D22
