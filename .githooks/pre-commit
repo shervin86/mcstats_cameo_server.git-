@@ -1,5 +1,6 @@
 #!/bin/sh
+files="./src/*.cpp ./include/*.hh"
+files=`clang-format -style=file -i --verbose $files 2>&1 | cut -d ' ' -f 2`
 
-clang-format -style=file -i ./src/*.cpp ./include/*.hh ./include/*.h #./src/*.cc
-git add -u ./src/*.cpp ./include/*.hh ./include/*.h #./src/*.cc
+#git add -u $files
 
