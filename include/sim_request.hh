@@ -41,6 +41,11 @@ class sim_request
 	static const size_t sSAMPLE   = 1;
 	static const size_t sDETECTOR = 0;
 
+	/** \brief implemented instruments
+	 * \ingroup clientAPI
+	 */
+	enum instrument_t { D22 };
+
 	/** \brief different stages of the simulation
 	 *
 	 * At each stage, a MCPL file is saved with the neutrons at that stage
@@ -54,7 +59,7 @@ class sim_request
 	sim_request(nlohmann::json j) : _j(j)
 	{
 		assert(check_json()); /// \todo use exception
-		_instrument = _j["instrument"];
+		_instrument = _j["instrument"]["name"];
 	};
 
 	sim_request(std::ifstream &jsonfile)
@@ -74,11 +79,46 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	}
 
-	/** \brief empty constructor: the parameters should be added with the add_parameter method
+	/** \brief empty constructor:  parameters should be added one by one with dedicated methods
+	 *
+	 \ingroup clientAPI
+	 *   methods to be used:
+	 *   - set_num_neutrons()
+	 *   - set_instrument()
+	 *   - add_parameter()
 	 */
 	sim_request(void){};
 
+	/**
+	 * \brief set the number of neutrons to simulate
+	 * \ingroup clientAPI
+	 */
 	inline void set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
+
+	/** \brief sets the instrument
+	 *  \ingroup clientAPI
+	 * \details Implemented instruments:
+	 * #instrument_t
+	 */
+	void set_instrument(instrument_t instr = D22)
+	{
+		switch (instr) {
+		case D22:
+			_instrument              = "D22";
+			_j["instrument"]["name"] = _instrument;
+			break;
+		}
+	}
+	/** \brief add simulation parameter
+	 * \ingroup clientAPI
+	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
+	 * can be:
+	 *    - sim_request::#sFULL
+	 *    - sim_request::#sSAMPLE
+	 *    - sim_request::#sDETECTOR
+	 * \param[in] name : name of the parameter, it should match the name in McStas
+	 * \param[in] value : the value of the parameter, only float is implemented
+	 */
 	inline void add_parameter(size_t stage, std::string name, float value)
 	{
 		switch (stage) {
@@ -137,7 +177,14 @@ class sim_request
 	friend std::ostream &operator<<(std::ostream &os, const sim_request &s);
 
 	/** \brief transform the request into a string to be sent through CAMEO
-	 * this method is kept if one wants to decouple the printing and the encoding into string
+	    \ingroup clientAPI
+	    * \details
+	    * this method is kept if one wants to decouple the printing and the encoding into string
+	    * Example use with cameo:
+	    * \code{.cpp}
+	    * sim_request request();
+	    * requester->sendBinary(request.to_string());
+	    * \endcode
 	 */
 	inline std::string to_string(void) const { return _j.dump(); }
 	inline std::string string(void) const { return _j.dump(); }
