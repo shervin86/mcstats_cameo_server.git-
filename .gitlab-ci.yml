@@ -1,7 +1,29 @@
+stages:
+ - build
+ - doc
+ 
 before_script:
- - echo "before_script"
-
-doc:
- script:
-  - echo "doc script"
+ - pwd
+ - git status
+ - mkdir build/
   
+  
+b:
+ stage: build
+ script:
+   - cd build/
+   - cmake ..
+   - cmake --build .
+
+
+pages:
+ stage: doc
+ script:
+  - cd build/
+  - echo "doc script"
+  - cmake ..
+  - make doc
+  - mv doc/html/ ../public/
+ artifacts:
+    paths:
+    - public
