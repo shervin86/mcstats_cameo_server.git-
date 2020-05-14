@@ -24,14 +24,7 @@ static const std::vector<std::string> stages = {"sDETECTOR", "sSAMPLE", "sFULL"}
  *
  * JSON format:
  *
-{
-    "instrument": "D22",
-        "--ncount": 1000000,
-        "source": {
-            "lambda": 4.51
-    }
-}
-*
+ *
  */
 
 class sim_request
@@ -46,14 +39,14 @@ class sim_request
 	 */
 	enum instrument_t { D22 };
 
-	/** \brief different stages of the simulation
+	/* \brief different stages of the simulation
 	 *
 	 * At each stage, a MCPL file is saved with the neutrons at that stage
 	 * a previously produced MCPL file (or simulation result) is used if the hash for that stage
 	 * matches but not the previous
 	 */
 
-	/** \brief constructor to be used on the client side
+	/** \brief constructor to be used for development
 	 *  \param[in] j : json with the simulation parameters and instrument name
 	 */
 	sim_request(nlohmann::json j) : _j(j)
@@ -62,6 +55,13 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	};
 
+	/** \brief constructor to be used for development
+	 *  \param[in] jsonfile : input stream with the simulation parameters
+	 *                        and instrument name in json format
+	 *
+	 *  json example
+	 * \include request.json
+	 */
 	sim_request(std::ifstream &jsonfile)
 	{
 		_j = nlohmann::json::parse(jsonfile);
@@ -79,9 +79,9 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	}
 
-	/** \brief empty constructor:  parameters should be added one by one with dedicated methods
-	 *
-	 \ingroup clientAPI
+	/** \brief empty constructor: parameters should be added one by one
+	 *                            with dedicated methods
+	 * \ingroup clientAPI
 	 *   methods to be used:
 	 *   - set_num_neutrons()
 	 *   - set_instrument()
@@ -176,18 +176,22 @@ class sim_request
 	/// \brief pretty print of the request in json format
 	friend std::ostream &operator<<(std::ostream &os, const sim_request &s);
 
-	/** \brief transform the request into a string to be sent through CAMEO
-	    \ingroup clientAPI
-	    * \details
-	    * this method is kept if one wants to decouple the printing and the encoding into string
-	    * Example use with cameo:
-	    * \code{.cpp}
-	    * sim_request request();
-	    * requester->sendBinary(request.to_string());
-	    * \endcode
-	 */
 	inline std::string to_string(void) const { return _j.dump(); }
 	inline std::string string(void) const { return _j.dump(); }
+
+	/** \brief transform the request into a string to be sent through CAMEO
+	 * \ingroup clientAPI
+	 * \details
+	 * this method is kept if one wants to decouple the printing and the encoding into string
+	 *
+	 * Example use with cameo:
+	 * \code{.cpp}
+	 * sim_request request();
+	 * requester->sendBinary(request.to_cameo());
+	 * \endcode
+	 * \todo replace plain json with MessagePack or CBOR or something else
+	 */
+	inline std::string to_cameo(void) const { return _j.dump(); }
 
 	/** \brief returns the hash of the entire request string */
 	inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
