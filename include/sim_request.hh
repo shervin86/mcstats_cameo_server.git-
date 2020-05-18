@@ -10,8 +10,7 @@
 #include <vector>
 
 // this enum has to be continous since there is a loop over the stages
-
-static const std::vector<std::string> stages = {"sDETECTOR", "sSAMPLE", "sFULL"};
+#include "stages.hh"
 /**
  * \class sim_request
  * \brief helper to code and decode simulation requests between Nomad and the mcstas_server
@@ -169,13 +168,20 @@ class sim_request
 	}
 
 	/** \brief what is required to be returned */
-	inline returnType get_return_data(void){
-		if((! _j.contains("return")) or _j["return"]=="NONE") return rNONE;
-		if(_j["return"] == "COUNTS") return rCOUNTS;
-		if(_j["return"] == "ERRORS") return rERRORS;
-		if(_j["return"] == "NEUTRONS") return rNEUTRONS;
-		if(_j["return"] == "FULL") return rFULL;
-		else assert(false);
+	inline returnType get_return_data(void)
+	{
+		if ((!_j.contains("return")) or _j["return"] == "NONE")
+			return rNONE;
+		if (_j["return"] == "COUNTS")
+			return rCOUNTS;
+		if (_j["return"] == "ERRORS")
+			return rERRORS;
+		if (_j["return"] == "NEUTRONS")
+			return rNEUTRONS;
+		if (_j["return"] == "FULL")
+			return rFULL;
+		else
+			assert(false);
 	}
 	/// returing the string "SIM"+name of the instrument
 	inline std::string instrument_name(void) const { return "SIM" + _instrument; };

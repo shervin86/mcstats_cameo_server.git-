@@ -71,18 +71,13 @@ xterm -e cmo -e tcp://localhost:7123 exec fakeNomad &
 	  #. check if simulation already done
 	  #. if not check if partial simulation already done (any stage to be re-used)
 	  #. start the job via CAMEO with the right parameters
-	  #. return the exit status of the job to the client
-	  #. wait for further requests
-   - result request:
-      #. receive the json request
-	  #. determine if asking for 
-	     - counts
-		 - errors
+   	  #. determine if asking for 
+	     - no results -> return exit status
+	     - counts     -> return exit status and counts (openPMD format (JSON or HDF5))
+		 - errors     -> return exit status and errors
 		 - MC neutrons
-		 - entire folder
-	  #. check if simulation already done
-	     - if not return ERROR
-	  #. return the counts in openPMD format (JSON or HDF5)
+		 - entire folder -> return exit status and tgz of the simulation folder
+	  
       
   calculation request:
     1. destroy previously stored images.   -> won't implement now, I don't think it is useful

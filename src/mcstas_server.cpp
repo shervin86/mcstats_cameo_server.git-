@@ -1,5 +1,7 @@
 #include "sim_request.hh"
 #include "sim_result_detector.hh"
+#include "local_cache.hh"
+
 #include <cameo/cameo.h>
 #include <cassert>
 #include <fstream>
@@ -18,7 +20,7 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
-static const std::string baseDir = "/dev/shm/";
+//static const std::string baseDir = "/dev/shm/";
 /********************************/
 /**
  * \brief name of the responder created by the server that can be
@@ -109,25 +111,17 @@ int main(int argc, char *argv[])
 			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
 
+			local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
 			// define a temp dir in RAM
-			std::string dirName = baseDir + sim_request_obj.instrument_name() + "/";
-			fs::path    p       = dirName;
-			fs::create_directories(p);
-			std::string hash_string = sim_request_obj.hash();
-			p /= hash_string;
-			p += ".tgz";
+			fs::path p = lc.path();
 
-			if (!fs::exists(p) && (fs::exists(p.parent_path() / p.stem()))) {
-				std::cerr << "[ERROR] Sim dir already exists but not TGZ, "
-				             "please clean up"
-				          << std::endl;
+			if(! lc.isOK()){
 				state = cameo::application::FAILURE;
-
 				request->replyBinary(std::to_string(state));
 				continue; // get ready to process new request
 			}
 
-			if (!fs::exists(p)) { // in this case we need to re-run the simulation
+			if(!lc.is_done()){ // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
 				std::cout << "[TAR] does not exists" << std::endl;
 
@@ -208,39 +202,21 @@ int main(int argc, char *argv[])
 				state = cameo::application::SUCCESS;
 			}
 
+			sim_result_detector result;
+			result.set_status(std::to_string(state));
+			
 			// send back the exit status to the client
 			request->replyBinary(std::to_string(state));
 
 			if (state == cameo::application::SUCCESS) {
 
-				// print the request json in the directory
-				std::ofstream request_dump_file(
-				    (p.parent_path() / p.stem()).string() + "/request.json");
-				request_dump_file << sim_request_obj << std::endl;
-
+				lc.save_request(sim_request_obj.to_string());
 				if (istage == sim_request::sFULL) {
-					size_t is = 1;
-					// create a directory for the request at stage 1
-					fs::path mcpl_path = p.parent_path() / "MCPL" / stages[is] /
-					                     sim_request_obj.hash(is);
-					fs::create_directories(mcpl_path.parent_path());
-
-					// copy the request json
-					mcpl_path += ".json";
-					fs::copy(p.parent_path() / p.stem() / "request.json",
-					         mcpl_path);
-
-					// move the mcpl file and rename it
-					mcpl_path.replace_extension(".mcpl.gz");
-					fs::rename(p.parent_path() / p.stem() /
-					               (std::string(stages[is]) + ".mcpl.gz"),
-					           mcpl_path);
+					lc.save_stage(1, sim_request_obj.hash(1));
 				}
-				system((std::string("tar -cz -C ") + p.parent_path().string() +
-				        " " + p.stem().string() + " > " + p.string())
-				           .c_str());
+				lc.save_tgz();
 				for (auto &p_itr :
-				     fs::directory_iterator(p.parent_path() / p.stem())) {
+						 fs::directory_iterator(p.parent_path() / p.stem())) {
 					std::cout << "--> " << p_itr.path().stem() << std::endl;
 					std::string s   = p_itr.path().stem();
 					auto        pos = s.rfind('_');
@@ -250,8 +226,9 @@ int main(int argc, char *argv[])
 						p = p_itr.path();
 					std::cout << "##> " << s << "\t" << p << std::endl;
 				}
-				std::ifstream       fi(p);
-				sim_result_detector sim_result(fi);
+				std::ifstream fi(p);
+				sim_result_detector sim_result;
+				sim_result.read_file(fi);
 				std::cout << sim_result.to_cameo() << std::endl;
 				// p.parent_path()/
 				std::string fileContent;

@@ -22,7 +22,10 @@ class sim_result_detector
 	/** \brief constructor reading the mcstas detector file (server-side)
 	 *
 	 */
-	sim_result_detector(std::ifstream &f)
+
+	sim_result_detector(void){};
+	
+	void read_file(std::ifstream &f)
 	{
 		std::string type;
 		// std::shared_ptr< std::vector<float> > z(counts);
@@ -89,13 +92,15 @@ class sim_result_detector
 
 	inline size_t dim_x(void) { return _dim_x; };
 	inline size_t dim_y(void) { return _dim_y; };
-
+	inline void set_status(std::string s){ status=s;};
+	
 	private:
 	static const size_t DIM_X = 128;
 	static const size_t DIM_Y = 128;
 	float               _dim_x;
 	float               _dim_y;
 	std::vector<float>  counts, errors, n;
+	std::string status;
 };
 
 #endif
