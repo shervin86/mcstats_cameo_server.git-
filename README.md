@@ -49,3 +49,49 @@ xterm -e cmo -e tcp://localhost:7123 exec fakeNomad &
 
 ```
 
+
+
+# Workflow
+
+## Client
+
+ #. build the request in json format using the API
+ #. send the request via CAMEO to the server
+ #. wait for the answer (exit status of the simulation)
+ #. if SUCCESS, request for the result attributes
+ #. request for the result data
+    -> data should be in openPMD format (JSON or HD5)  \todo check openPMD API for C++
+
+
+## Server
+
+ #. wait for requests
+   - calculation/simulation request:
+	  #. receive the json request
+	  #. check if simulation already done
+	  #. if not check if partial simulation already done (any stage to be re-used)
+	  #. start the job via CAMEO with the right parameters
+	  #. return the exit status of the job to the client
+	  #. wait for further requests
+   - result request:
+      #. receive the json request
+	  #. determine if asking for 
+	     - counts
+		 - errors
+		 - MC neutrons
+		 - entire folder
+	  #. check if simulation already done
+	     - if not return ERROR
+	  #. return the counts in openPMD format (JSON or HDF5)
+      
+  calculation request:
+    1. destroy previously stored images.   -> won't implement now, I don't think it is useful
+    2. calculate and store the images.
+    3. return related information (sizes, etc.).
+  counts request:
+    return the binary array of the counts image if it exists.
+  errors request;
+    return the binary array of the errors image if it exists.
+  MC neutrons:
+    return the binary array of the true neutrons image if it exists.
+

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-
+#define TEST_CLIENT_API
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
@@ -86,6 +86,15 @@ int main(int argc, char *argv[])
 		// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000},
 		// {"lambda", 4.5}};
 		sim_request request(jsonfile);
+#ifdef TEST_CLIENT_API
+		sim_request request_empty;
+		request_empty.set_instrument(sim_request::D22);
+		request_empty.set_num_neutrons(100000);
+		request_empty.add_parameter(sim_request::sFULL, "lambda", 4.51);
+		request_empty.add_parameter(sim_request::sDETECTOR, "D22_collimation", 2.00);
+		std::cout << request << std::endl;
+		std::cout << request_empty << std::endl;
+#endif
 		std::string dirName = baseDir + request.instrument_name() + "/";
 		fs::path    p       = dirName;
 		fs::create_directories(p);

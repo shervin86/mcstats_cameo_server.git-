@@ -1,4 +1,5 @@
 #include "sim_request.hh"
+#include "sim_result_detector.hh"
 #include <cameo/cameo.h>
 #include <cassert>
 #include <fstream>
@@ -8,6 +9,11 @@
 //#include <stdio.h>
 //#include <functional> // for std::hash
 #include <string>
+// class sim_result_detector{
+// public:
+// 	sim_result_detector(std::ifstream& fi){std::cout << fi<< std::endl;};
+// 	std::string to_cameo(){std::string a; return a;};
+// };
 
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
@@ -233,10 +239,25 @@ int main(int argc, char *argv[])
 				system((std::string("tar -cz -C ") + p.parent_path().string() +
 				        " " + p.stem().string() + " > " + p.string())
 				           .c_str());
-
+				for (auto &p_itr :
+				     fs::directory_iterator(p.parent_path() / p.stem())) {
+					std::cout << "--> " << p_itr.path().stem() << std::endl;
+					std::string s   = p_itr.path().stem();
+					auto        pos = s.rfind('_');
+					if (pos != std::string::npos)
+						s.erase(pos);
+					if (s == "D22_Detector")
+						p = p_itr.path();
+					std::cout << "##> " << s << "\t" << p << std::endl;
+				}
+				std::ifstream       fi(p);
+				sim_result_detector sim_result(fi);
+				std::cout << sim_result.to_cameo() << std::endl;
+				// p.parent_path()/
 				std::string fileContent;
 				readFile(p, fileContent);
-				request->replyBinary(fileContent);
+				// request->replyBinary(fileContent);
+				request->replyBinary(sim_result.to_cameo());
 			}
 		}
 		std::cout << "Finished the application" << std::endl;

@@ -10,5 +10,6 @@
 	"detector":{
 		"D22_collimation": 2.00
 	},
+	"return": "NONE",
 	"mcpl" : { }
 }

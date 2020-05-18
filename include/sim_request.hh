@@ -34,6 +34,7 @@ class sim_request
 	static const size_t sSAMPLE   = 1;
 	static const size_t sDETECTOR = 0;
 
+	enum returnType { rNONE = 0, rCOUNTS, rERRORS, rNEUTRONS, rFULL };
 	/** \brief implemented instruments
 	 * \ingroup clientAPI
 	 */
@@ -100,15 +101,18 @@ class sim_request
 	 * \details Implemented instruments:
 	 * #instrument_t
 	 */
-	void set_instrument(instrument_t instr = D22)
+	inline void set_instrument(instrument_t instr = D22)
 	{
 		switch (instr) {
 		case D22:
 			_instrument              = "D22";
 			_j["instrument"]["name"] = _instrument;
+			_j["source"];
+			_j["detector"];
+			_j["sample"];
 			break;
 		}
-	}
+	};
 	/** \brief add simulation parameter
 	 * \ingroup clientAPI
 	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
@@ -123,7 +127,7 @@ class sim_request
 	{
 		switch (stage) {
 		case sFULL:
-			_j["source"]["name"] = value;
+			_j["source"][name] = value;
 			break;
 		case sDETECTOR:
 			_j["detector"][name] = value;
@@ -135,6 +139,44 @@ class sim_request
 		return;
 	}
 
+	/** \brief request results
+	 *  \ingroup clientAPI
+	 *  \param[in] iret : what to return. It can be:
+	 *     - sim_request::#rNONE
+	 *     - sim_request::#rCOUNTS
+	 *     - sim_request::#rERRORS
+	 *     - sim_request::#rNEUTRONS
+	 */
+	inline void set_return_data(returnType iret = rNONE)
+	{
+		switch (iret) {
+		case rNONE:
+			_j["return"] = "NONE";
+			break;
+		case rCOUNTS:
+			_j["return"] = "COUNTS";
+			break;
+		case rERRORS:
+			_j["return"] = "ERRORS";
+			break;
+		case rNEUTRONS:
+			_j["return"] = "NEUTRONS";
+			break;
+		case rFULL:
+			_j["return"] = "FULL";
+			break;
+		}
+	}
+
+	/** \brief what is required to be returned */
+	inline returnType get_return_data(void){
+		if((! _j.contains("return")) or _j["return"]=="NONE") return rNONE;
+		if(_j["return"] == "COUNTS") return rCOUNTS;
+		if(_j["return"] == "ERRORS") return rERRORS;
+		if(_j["return"] == "NEUTRONS") return rNEUTRONS;
+		if(_j["return"] == "FULL") return rFULL;
+		else assert(false);
+	}
 	/// returing the string "SIM"+name of the instrument
 	inline std::string instrument_name(void) const { return "SIM" + _instrument; };
 
@@ -145,6 +187,8 @@ class sim_request
 
 		for (const auto &i : _j.items()) {
 			if (i.value().type() == nlohmann::json::value_t::object)
+				continue;
+			if (i.key() == "return")
 				continue;
 
 			std::stringstream s;
