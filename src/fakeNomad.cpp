@@ -87,17 +87,20 @@ int main(int argc, char *argv[])
 			return exitREQUESTER;
 		}
 
-		// creating the request
+		//! [request]
 		sim_request   request;
+		//! [request]
 		std::ifstream jsonfile("request.json");
 		if (useJSON)
 			request.read_json(jsonfile);
 		else {
+		  /// [request2]
 			request.set_instrument(sim_request::D22);
 			request.set_num_neutrons(1000000);
 			request.add_parameter(sim_request::sFULL, "lambda", 4.51);
 			request.add_parameter(sim_request::sDETECTOR, "D22_collimation", 2.00);
 			request.set_return_data(sim_request::rNONE);
+			/// [request2]
 		}
 		jsonfile.close();
 		std::cout << request << std::endl;
@@ -109,20 +112,25 @@ int main(int argc, char *argv[])
 		p /= hash_string;
 		p += ".tgz";
 		if (true or !fs::exists(p)) {
-
+			/// [send request]
 			requester->sendBinary(request.to_cameo());
+			/// [send request]
 			// Wait for the response from the server.
+			/// [receive result]
 			std::string response;
 			requester->receiveBinary(response);
 			sim_result_detector result(response);
-
+			/// [receive result]
+			/// [return state]
 			returnState = result.get_status();
-			// std::cout << "return status = " << response << "\t" <<
-			// result.get_status() << std::endl;
 			if (cameo::application::SUCCESS == returnState) {
+			  ///[return state]
 				// if (response.size() > 1000)
 				//	writeFile(p, response);
+			  ///[get data]
 				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
+				std::vector<float>& data = result.data();
+							  ///[get data]
 			} else {
 				std::cerr << "ERROR" << std::endl;
 				ret = exitFAILURE;

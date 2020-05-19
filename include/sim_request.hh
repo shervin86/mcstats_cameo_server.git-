@@ -8,12 +8,11 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
-
-// this enum has to be continous since there is a loop over the stages
+// definition of stages and their string representation
 #include "stages.hh"
 /**
  * \class sim_request
- * \brief helper to code and decode simulation requests between Nomad and the mcstas_server
+ * \brief code and decode simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
  */
 
@@ -29,15 +28,33 @@
 class sim_request
 {
 	public:
-	static const size_t sFULL     = 2;
-	static const size_t sSAMPLE   = 1;
-	static const size_t sDETECTOR = 0;
+	/** \brief empty constructor: parameters should be added one by one
+	 *                            with dedicated methods
+	 *
+	 * \ingroup clientAPI
+	 *   methods to be used:
+	 *   - set_num_neutrons()
+	 *   - set_instrument()
+	 *   - add_parameter()
+	 *   - set_return_data()
+	 */
+	sim_request(void){};
 
-	enum returnType { rNONE = 0, rCOUNTS, rERRORS, rNEUTRONS, rFULL };
+	/** \brief Specify what you want the server to return in the result 
+	 * \ingroup clientAPI 
+	 */
+	enum returnType {
+		rNONE = 0, ///< return only the exit status and no data
+		rCOUNTS,   ///< return the weighted counts on the detector
+		rERRORS,   ///< return the per pixel errors
+		rNEUTRONS, ///< return the number of MC neutrons on the detector
+		rALL,      ///< return the three pixel maps counts, errors, true MC neutrons
+		rFULL      ///< return the entire output directory in TGZ format
+	};
 	/** \brief implemented instruments
 	 * \ingroup clientAPI
 	 */
-	enum instrument_t { D22 };
+	enum instrument_t { D22 /** D22 Detector */ };
 
 	/* \brief different stages of the simulation
 	 *
@@ -86,15 +103,6 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	}
 
-	/** \brief empty constructor: parameters should be added one by one
-	 *                            with dedicated methods
-	 * \ingroup clientAPI
-	 *   methods to be used:
-	 *   - set_num_neutrons()
-	 *   - set_instrument()
-	 *   - add_parameter()
-	 */
-	sim_request(void){};
 
 	/**
 	 * \brief set the number of neutrons to simulate
@@ -148,11 +156,7 @@ class sim_request
 
 	/** \brief request results
 	 *  \ingroup clientAPI
-	 *  \param[in] iret : what to return. It can be:
-	 *     - sim_request::#rNONE
-	 *     - sim_request::#rCOUNTS
-	 *     - sim_request::#rERRORS
-	 *     - sim_request::#rNEUTRONS
+	 *  \param[in] iret : what to return as defined by #returnType. 
 	 */
 	inline void set_return_data(returnType iret = rNONE)
 	{

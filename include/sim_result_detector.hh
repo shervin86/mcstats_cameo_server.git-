@@ -27,7 +27,7 @@ class sim_result_detector
 	void read_file(std::ifstream &f)
 	{
 		std::string type;
-		// std::shared_ptr< std::vector<float> > z(counts);
+		// std::shared_ptr< std::vector<float> > z(_counts);
 		std::vector<float> *z = nullptr;
 		while (f.good()) {
 			std::string line;
@@ -40,7 +40,7 @@ class sim_result_detector
 					_dim_y = 128;
 				} else if (line.find("Data") != std::string::npos) {
 					if (line.find("I:"))
-						z = &counts;
+						z = &_counts;
 					else if (line.find("N:"))
 						z = &n;
 				}
@@ -70,7 +70,7 @@ class sim_result_detector
 	inline std::string to_cameo(void) const
 	{
 		nlohmann::json j;
-		j["data"]   = counts;
+		j["data"]   = _counts;
 		j["dim_x"]  = _dim_x;
 		j["dim_y"]  = _dim_y;
 		j["status"] = _status;
@@ -81,6 +81,7 @@ class sim_result_detector
 	/** \brief constructor that decodes the message from CAMEO (client side)
 	 * \ingroup clientAPI
 	 *  \param[in] message : request in string form received by the server
+	 * \todo use the empty constructor and make it a parse(message) method to delete the message string
 	 */
 	sim_result_detector(std::string message)
 	{
@@ -88,13 +89,21 @@ class sim_result_detector
 		_dim_x           = j["dim_x"];
 		_dim_y           = j["dim_y"];
 		_status          = j["status"];
+		_counts = j["data"];
 	}
 
 	inline int get_status(void) { return _status; };
-	/** \brief
-	 */
-	inline size_t dim_x(void) { return _dim_x; };
-	inline size_t dim_y(void) { return _dim_y; };
+  /** \addtogroup clientAPI
+   * @{
+   */
+  /// dimension x of the detector pixel array 
+  inline size_t dim_x(void) const{ return _dim_x; };
+   /// dimension y of the detector pixel array 
+  inline size_t dim_y(void) const{ return _dim_y; };
+  /// return the linearized vector of values 
+  inline const std::vector<float>& data() const { return _counts;}; 
+  /** @} */
+  
 	inline void   set_status(int s) { _status = s; };
 
 	private:
@@ -102,7 +111,7 @@ class sim_result_detector
 	static const size_t DIM_Y = 128;
 	float               _dim_x;
 	float               _dim_y;
-	std::vector<float>  counts, errors, n;
+	std::vector<float>  _counts, errors, n;
 	int                 _status;
 };
 
