@@ -69,6 +69,13 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	};
 
+	void read_json(std::ifstream &jsonfile)
+	{
+		_j = nlohmann::json::parse(jsonfile);
+		assert(check_json()); ///\todo use exception
+		_instrument = _j["instrument"]["name"];
+	};
+
 	/** \brief constructor that decodes the message from CAMEO (server side)
 	 *  \param[in] message : request in string form received by the server
 	 */
@@ -106,9 +113,10 @@ class sim_request
 		case D22:
 			_instrument              = "D22";
 			_j["instrument"]["name"] = _instrument;
-			_j["source"];
-			_j["detector"];
-			_j["sample"];
+			_j["source"]             = nlohmann::json::object();
+			_j["detector"]           = nlohmann::json::object();
+			_j["sample"]             = nlohmann::json::object();
+			_j["mcpl"]               = nlohmann::json::object();
 			break;
 		}
 	};
@@ -122,7 +130,7 @@ class sim_request
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] value : the value of the parameter, only float is implemented
 	 */
-	inline void add_parameter(size_t stage, std::string name, float value)
+	inline void add_parameter(size_t stage, std::string name, double value)
 	{
 		switch (stage) {
 		case sFULL:
@@ -244,7 +252,8 @@ class sim_request
 	inline std::string to_cameo(void) const { return _j.dump(); }
 
 	/** \brief returns the hash of the entire request string */
-	inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
+	// inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
+	inline std::string hash(void) const { return std::to_string(_hash(_j)); }
 
 	inline std::string hash(size_t s) const
 	{
@@ -260,13 +269,23 @@ class sim_request
 			j.erase("sample");
 			break;
 		}
-		return std::to_string(_hash(j.dump()));
+		return std::to_string(_hash(j));
+	}
+
+	inline std::vector<std::string> stage_hashes(void) const
+	{
+		std::vector<std::string> hashes;
+		for (size_t istage = 0; istage < stages.size(); ++istage) {
+			hashes.push_back(hash(istage));
+		}
+		return hashes;
 	}
 
 	private:
-	nlohmann::json         _j;
-	std::string            _instrument;
-	std::hash<std::string> _hash; // this class calculates the hash from the string
+	nlohmann::json _j;
+	std::string    _instrument;
+	// std::hash<std::string> _hash; // this class calculates the hash from the string
+	std::hash<nlohmann::json> _hash;
 
 	/** \brief checks if the request is valid
 	 * \todo replace asserts with exceptions

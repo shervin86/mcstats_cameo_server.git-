@@ -1,9 +1,10 @@
 #include "sim_request.hh"
+#include "sim_result_detector.hh"
 #include <cameo/cameo.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#define TEST_CLIENT_API
+
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
@@ -32,9 +33,14 @@ enum exitCodes { exitOK = 0, exitNOCLIENT, exitNOSERVER, exitREQUESTER, exitFAIL
 
 int main(int argc, char *argv[])
 {
-	exitCodes ret = exitOK;
+	exitCodes ret     = exitOK;
+	bool      useJSON = false;
 	std::cout << "\n============================== Start of fakeNomad " << std::endl;
-
+	for (int i = 0; i < argc; ++i) {
+		if (strcmp(argv[i], "useJSON") == 0 or strcmp(argv[i], "-J") == 0)
+			useJSON = true;
+		std::cout << "#" << argv[i] << "#\t" << useJSON << std::endl;
+	}
 	cameo::application::This::init(argc, argv);
 	cameo::application::State returnState = cameo::application::UNKNOWN;
 
@@ -82,38 +88,41 @@ int main(int argc, char *argv[])
 		}
 
 		// creating the request
+		sim_request   request;
 		std::ifstream jsonfile("request.json");
-		// nlohmann::json j = {{"instrument", "D22"}, {"--ncount", 1000000},
-		// {"lambda", 4.5}};
-		sim_request request(jsonfile);
-#ifdef TEST_CLIENT_API
-		sim_request request_empty;
-		request_empty.set_instrument(sim_request::D22);
-		request_empty.set_num_neutrons(100000);
-		request_empty.add_parameter(sim_request::sFULL, "lambda", 4.51);
-		request_empty.add_parameter(sim_request::sDETECTOR, "D22_collimation", 2.00);
+		if (useJSON)
+			request.read_json(jsonfile);
+		else {
+			request.set_instrument(sim_request::D22);
+			request.set_num_neutrons(1000000);
+			request.add_parameter(sim_request::sFULL, "lambda", 4.51);
+			request.add_parameter(sim_request::sDETECTOR, "D22_collimation", 2.00);
+			request.set_return_data(sim_request::rNONE);
+		}
+		jsonfile.close();
 		std::cout << request << std::endl;
-		std::cout << request_empty << std::endl;
-#endif
+
 		std::string dirName = baseDir + request.instrument_name() + "/";
 		fs::path    p       = dirName;
 		fs::create_directories(p);
 		std::string hash_string = request.hash();
 		p /= hash_string;
 		p += ".tgz";
-		if (!fs::exists(p)) {
+		if (true or !fs::exists(p)) {
 
-			requester->sendBinary(request.to_string());
+			requester->sendBinary(request.to_cameo());
 			// Wait for the response from the server.
 			std::string response;
 			requester->receiveBinary(response);
-			std::cout << "RESP=" << response << std::endl;
-			returnState = std::stoul(response);
+			sim_result_detector result(response);
 
+			returnState = result.get_status();
+			// std::cout << "return status = " << response << "\t" <<
+			// result.get_status() << std::endl;
 			if (cameo::application::SUCCESS == returnState) {
-				requester->receiveBinary(response);
-				if (response.size() > 1000)
-					writeFile(p, response);
+				// if (response.size() > 1000)
+				//	writeFile(p, response);
+				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
 			} else {
 				std::cerr << "ERROR" << std::endl;
 				ret = exitFAILURE;

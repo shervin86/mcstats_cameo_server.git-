@@ -3,10 +3,9 @@
 #include "nlohmann/json.hpp"
 #include <cassert>
 #include <fstream>
-#include <functional>
-#include <iomanip>
+//#include <functional>
+//#include <iomanip>
 #include <iostream>
-#include <ostream>
 #include <sstream>
 #include <vector>
 /**
@@ -24,7 +23,7 @@ class sim_result_detector
 	 */
 
 	sim_result_detector(void){};
-	
+
 	void read_file(std::ifstream &f)
 	{
 		std::string type;
@@ -71,10 +70,10 @@ class sim_result_detector
 	inline std::string to_cameo(void) const
 	{
 		nlohmann::json j;
-		j["data"]  = counts;
-		j["dim_x"] = _dim_x;
-		j["dim_y"] = _dim_y;
-
+		j["data"]   = counts;
+		j["dim_x"]  = _dim_x;
+		j["dim_y"]  = _dim_y;
+		j["status"] = _status;
 		// std::cout << j << std::endl;
 		return j.dump();
 	}
@@ -88,19 +87,23 @@ class sim_result_detector
 		nlohmann::json j = nlohmann::json::parse(message);
 		_dim_x           = j["dim_x"];
 		_dim_y           = j["dim_y"];
+		_status          = j["status"];
 	}
 
+	inline int get_status(void) { return _status; };
+	/** \brief
+	 */
 	inline size_t dim_x(void) { return _dim_x; };
 	inline size_t dim_y(void) { return _dim_y; };
-	inline void set_status(std::string s){ status=s;};
-	
+	inline void   set_status(int s) { _status = s; };
+
 	private:
 	static const size_t DIM_X = 128;
 	static const size_t DIM_Y = 128;
 	float               _dim_x;
 	float               _dim_y;
 	std::vector<float>  counts, errors, n;
-	std::string status;
+	int                 _status;
 };
 
 #endif

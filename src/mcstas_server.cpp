@@ -1,6 +1,6 @@
+#include "local_cache.hh"
 #include "sim_request.hh"
 #include "sim_result_detector.hh"
-#include "local_cache.hh"
 
 #include <cameo/cameo.h>
 #include <cassert>
@@ -20,7 +20,7 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
-//static const std::string baseDir = "/dev/shm/";
+// static const std::string baseDir = "/dev/shm/";
 /********************************/
 /**
  * \brief name of the responder created by the server that can be
@@ -96,34 +96,36 @@ int main(int argc, char *argv[])
 
 		while (true) {
 			// initialize
-			cameo::application::State state  = cameo::application::UNKNOWN;
-			size_t                    istage = 0;
-			std::string               stage_hash;
+			cameo::application::State state = cameo::application::UNKNOWN;
 
 			std::cout << "\n\n"
 			          << "READY: waiting for new requests" << std::endl;
 			// Receive the simple request.
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
-			sim_request sim_request_obj(request->getBinary());
+
+			// declare the APIs
+			sim_request         sim_request_obj(request->getBinary());
+			sim_result_detector sim_result;
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
 			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
 
-			local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
 			// define a temp dir in RAM
-			fs::path p = lc.path();
+			local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
+			fs::path p = lc.output_dir(); // path of the entire mcstas ouput directory
 
-			if(! lc.isOK()){
+			if (!lc.isOK()) { // check if the simulation has already run and tgz
+				          // available
 				state = cameo::application::FAILURE;
-				request->replyBinary(std::to_string(state));
+				sim_result.set_status(state);
+				request->replyBinary(sim_result.to_cameo());
 				continue; // get ready to process new request
 			}
 
-			if(!lc.is_done()){ // in this case we need to re-run the simulation
+			if (!lc.is_done()) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
-				std::cout << "[TAR] does not exists" << std::endl;
 
 				// here I could check what has changed and decide if/when/how to
 				// re-use MCPL files
@@ -133,36 +135,18 @@ int main(int argc, char *argv[])
 				  - source as well as instrument are bound.... so if any change,
 				  re-run the entire simulation...
 				 */
-
-				std::string mcpl_filename;
+				std::vector<std::string> hashes = sim_request_obj.stage_hashes();
+				auto                     stage  = lc.get_stage(hashes);
+				auto &                   istage = stage.first;
+				auto &                   mcpl_filename = stage.second;
 				// check here if any MCPL exists for one of the stages
 				// stages are ordered from the detector to the source
-				for (istage = 0;
-				     istage < stages.size() and mcpl_filename.empty();) {
-					stage_hash = sim_request_obj.hash(istage);
-					fs::path stage_path(p.parent_path() / "MCPL" /
-					                    stages[istage] / stage_hash);
-					stage_path += ".json";
-					std::cout << "[INFO] check if MCPL file for stage "
-					          << istage
-					          << " exists\n       check existence of file"
-					          << stage_path << std::endl;
-					if (fs::exists(stage_path)) {
-						mcpl_filename =
-						    stage_path.parent_path() / stage_path.stem();
-						mcpl_filename += ".mcpl.gz";
-						std::cout << "    -> file found" << std::endl;
-					} else
-						++istage;
-				}
 
-				if (mcpl_filename.empty())
-					istage = stages.size() - 1;
 				// std::cout << istage << "\t" << stages[istage] << std::endl;
 				//------------------------------ build list of arguments for the
 				// simulation program
 				std::vector<std::string> args = sim_request_obj.args();
-				args.push_back("--dir=" + (p.parent_path() / p.stem()).string());
+				args.push_back("--dir=" + (lc.output_dir()).string());
 
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
@@ -195,6 +179,15 @@ int main(int argc, char *argv[])
 				    << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
 				    << " ms" << std::endl;
 
+				if (state == cameo::application::SUCCESS) {
+
+					lc.save_request(sim_request_obj.to_string());
+					if (istage == sim_request::sFULL) {
+						lc.save_stage(1, sim_request_obj.hash(1));
+					}
+					lc.save_tgz();
+				}
+
 			} else {
 				// in this case re-use the previous results
 				std::cout << "simulation exists, re-using the same results"
@@ -202,21 +195,14 @@ int main(int argc, char *argv[])
 				state = cameo::application::SUCCESS;
 			}
 
-			sim_result_detector result;
-			result.set_status(std::to_string(state));
-			
 			// send back the exit status to the client
-			request->replyBinary(std::to_string(state));
+			// request->replyBinary(std::to_string(state));
 
 			if (state == cameo::application::SUCCESS) {
 
-				lc.save_request(sim_request_obj.to_string());
-				if (istage == sim_request::sFULL) {
-					lc.save_stage(1, sim_request_obj.hash(1));
-				}
-				lc.save_tgz();
+				// find the file with the counts on the detector
 				for (auto &p_itr :
-						 fs::directory_iterator(p.parent_path() / p.stem())) {
+				     fs::directory_iterator(p.parent_path() / p.stem())) {
 					std::cout << "--> " << p_itr.path().stem() << std::endl;
 					std::string s   = p_itr.path().stem();
 					auto        pos = s.rfind('_');
@@ -227,15 +213,17 @@ int main(int argc, char *argv[])
 					std::cout << "##> " << s << "\t" << p << std::endl;
 				}
 				std::ifstream fi(p);
-				sim_result_detector sim_result;
+
 				sim_result.read_file(fi);
-				std::cout << sim_result.to_cameo() << std::endl;
+				// std::cout << sim_result.to_cameo() << std::endl;
 				// p.parent_path()/
 				std::string fileContent;
 				readFile(p, fileContent);
 				// request->replyBinary(fileContent);
-				request->replyBinary(sim_result.to_cameo());
 			}
+
+			sim_result.set_status(state);
+			request->replyBinary(sim_result.to_cameo());
 		}
 		std::cout << "Finished the application" << std::endl;
 
