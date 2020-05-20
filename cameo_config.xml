@@ -8,7 +8,7 @@
 
 		<!-- The Java application with name subpubjava -->
 		<application name="SIMD22-sFULL" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
-		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22.out" args="-n 1e4" />
+		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22.out" args="-n 1e4 -s 65453" />
 		</application>
 
 		<application name="mcstas_server" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
@@ -24,7 +24,7 @@
 		</application>
 
 		<application name="SIMD22-sSAMPLE" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
-		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22-sSAMPLE.out" args="--ncount=1e5 lambda=4.5" />
+		  <start executable="/home/cs/nourbakhsh/cameo/bin/ILL_H512_D22-sSAMPLE.out" args="--ncount=1e5 -s 65453 lambda=4.5" />
 		</application>
 
 	</applications>

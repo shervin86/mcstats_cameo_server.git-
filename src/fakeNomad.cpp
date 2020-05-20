@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < argc; ++i) {
 		if (strcmp(argv[i], "useJSON") == 0 or strcmp(argv[i], "-J") == 0)
 			useJSON = true;
-		std::cout << "#" << argv[i] << "#\t" << useJSON << std::endl;
+		//		std::cout << "#" << argv[i] << "#\t" << useJSON << std::endl;
 	}
 	cameo::application::This::init(argc, argv);
 	cameo::application::State returnState = cameo::application::UNKNOWN;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 		else {
 			/// [request2]
 			request.set_instrument(panosc_sim_server::sim_request::D22);
-			request.set_num_neutrons(1000000);
+			request.set_num_neutrons(10000000);
 			request.add_parameter(panosc_sim_server::sFULL, "lambda", 4.51);
 			request.add_parameter(panosc_sim_server::sDETECTOR, "D22_collimation", 2.00);
 			request.set_return_data(panosc_sim_server::sim_request::rNONE);
@@ -128,7 +128,9 @@ int main(int argc, char *argv[])
 				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
 				const std::vector<float> &data = result.data();
 				///[get data]
-				std::cout << data[0] << std::endl;
+				for (auto d = data.begin(); d != data.end() && (d - data.begin()) < 10; d++) {
+					std::cout << "Data: " << *d << std::endl;
+				}
 			} else {
 				std::cerr << "ERROR" << std::endl;
 				ret = exitFAILURE;

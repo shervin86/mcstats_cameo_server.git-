@@ -14,9 +14,9 @@ rm /dev/shm/SIMD22/* -Rf
 time cmo -e tcp://localhost:7100 exec fakeNomad
 time cmo -e tcp://localhost:7100 exec fakeNomad
 
-#cmo -e tcp://localhost:7100 stop mcstas_server
+cmo -e tcp://localhost:7100 stop mcstas_server
 
-#kill $cameo_PID
+kill $cameo_PID
 
 
 

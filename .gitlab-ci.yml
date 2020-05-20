@@ -1,5 +1,6 @@
 stages:
  - build
+ - test
  - doc
  
 before_script:
@@ -8,14 +9,18 @@ before_script:
  - mkdir build/
   
   
-b:
+compile:
  stage: build
  script:
    - cd build/
    - cmake ..
    - cmake --build .
 
-
+test0:
+ stage: test
+ script:
+	- ./test/test1.sh
+	
 pages:
  stage: doc
  script:
