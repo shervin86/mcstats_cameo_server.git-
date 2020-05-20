@@ -9,3 +9,4 @@ ColumnLimit: 110
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AccessModifierOffset: 0
+NamespaceIndentation: Inner

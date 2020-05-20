@@ -1,7 +1,9 @@
 #ifndef STAGES_HEADER
 #define STAGES_HEADER
 #include<string>
-/** global definitions */
+/** \ingroup clientAPI 
+ * global definitions 
+ */
 namespace panosc_sim_server{
 
 

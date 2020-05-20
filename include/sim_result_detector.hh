@@ -3,25 +3,24 @@
 #include "nlohmann/json.hpp"
 #include <cassert>
 #include <fstream>
-//#include <functional>
-//#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+namespace panosc_sim_server
+{
 /**
  * \class sim_result_detector
- * \brief helper to code and decode simulation results (only detector image) between Nomad and the
- * mcstas_server
+ * \brief code and decode simulation results (only detector image) between client and server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
+ * \ingroup clientAPI
  */
-
 class sim_result_detector
 {
 	public:
+  
 	/** \brief constructor reading the mcstas detector file (server-side)
-	 *
 	 */
-
 	sim_result_detector(void){};
 
 	void read_file(std::ifstream &f)
@@ -89,22 +88,22 @@ class sim_result_detector
 		_dim_x           = j["dim_x"];
 		_dim_y           = j["dim_y"];
 		_status          = j["status"];
-		_counts = j["data"];
+		_counts          = j["data"];
 	}
 
 	inline int get_status(void) { return _status; };
-  /** \addtogroup clientAPI
-   * @{
-   */
-  /// dimension x of the detector pixel array 
-  inline size_t dim_x(void) const{ return _dim_x; };
-   /// dimension y of the detector pixel array 
-  inline size_t dim_y(void) const{ return _dim_y; };
-  /// return the linearized vector of values 
-  inline const std::vector<float>& data() const { return _counts;}; 
-  /** @} */
-  
-	inline void   set_status(int s) { _status = s; };
+	/** \addtogroup clientAPI
+	 * @{
+	 */
+	/// dimension x of the detector pixel array
+	inline size_t dim_x(void) const { return _dim_x; };
+	/// dimension y of the detector pixel array
+	inline size_t dim_y(void) const { return _dim_y; };
+	/// return the linearized vector of values
+	inline const std::vector<float> &data() const { return _counts; };
+	/** @} */
+
+	inline void set_status(int s) { _status = s; };
 
 	private:
 	static const size_t DIM_X = 128;
@@ -114,5 +113,5 @@ class sim_result_detector
 	std::vector<float>  _counts, errors, n;
 	int                 _status;
 };
-
+} // namespace panosc_sim_server
 #endif

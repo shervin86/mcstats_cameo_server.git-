@@ -5,8 +5,11 @@ namespace fs = std::experimental::filesystem;
 
 #include <fstream>
 #include <iostream>
-static const std::string baseDir = "/dev/shm/";
 #include "stages.hh"
+
+namespace panosc_sim_server{
+  static const std::string baseDir = "/dev/shm/";
+
 class local_cache
 {
 
@@ -112,5 +115,5 @@ class local_cache
 		return sp;
 	}
 };
-
+} // namespace panosc_sim_server
 #endif

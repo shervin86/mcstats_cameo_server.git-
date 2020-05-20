@@ -10,10 +10,14 @@
 #include <vector>
 // definition of stages and their string representation
 #include "stages.hh"
+
+namespace panosc_sim_server
+{
 /**
  * \class sim_request
  * \brief code and decode simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
+ * \ingroup clientAPI
  */
 
 /* checking the the request is valid, should happen in this class
@@ -40,8 +44,8 @@ class sim_request
 	 */
 	sim_request(void){};
 
-	/** \brief Specify what you want the server to return in the result 
-	 * \ingroup clientAPI 
+	/** \brief Specify what you want the server to return in the result
+	 * \ingroup clientAPI
 	 */
 	enum returnType {
 		rNONE = 0, ///< return only the exit status and no data
@@ -103,7 +107,6 @@ class sim_request
 		_instrument = _j["instrument"]["name"];
 	}
 
-
 	/**
 	 * \brief set the number of neutrons to simulate
 	 * \ingroup clientAPI
@@ -156,7 +159,7 @@ class sim_request
 
 	/** \brief request results
 	 *  \ingroup clientAPI
-	 *  \param[in] iret : what to return as defined by #returnType. 
+	 *  \param[in] iret : what to return as defined by #returnType.
 	 */
 	inline void set_return_data(returnType iret = rNONE)
 	{
@@ -324,10 +327,12 @@ class sim_request
 	inline bool check_json_sample(void) const { return true; }
 	inline bool check_json_instrument(void) const { return _j["instrument"].contains("name"); }
 };
+} // namespace panosc_sim_server
 
 std::ostream &operator<<(std::ostream &os, const sim_request &s)
 {
 	os << std::setw(4) << s._j;
 	return os;
 }
+
 #endif

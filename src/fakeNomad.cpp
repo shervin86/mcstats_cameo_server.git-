@@ -57,19 +57,16 @@ int main(int argc, char *argv[])
 		// Get the local Cameo server.
 		cameo::Server &server = cameo::application::This::getServer();
 		if (!server.isAvailable()) {
-			std::cout << "[ERROR] CAMEO server not connected, abort" << server
-			          << std::endl;
+			std::cout << "[ERROR] CAMEO server not connected, abort" << server << std::endl;
 			return exitNOSERVER;
 		}
 
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
-		std::unique_ptr<cameo::application::Instance> responderServer =
-		    server.connect(SERVERNAME);
+		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(SERVERNAME);
 
 		std::cout << "responder: " << *responderServer << "                    ["
-		          << cameo::application::toString(responderServer->now()) << "]"
-		          << std::endl;
+		          << cameo::application::toString(responderServer->now()) << "]" << std::endl;
 
 		// check that the server is running, otherwise wait till a given timeOut
 
@@ -88,29 +85,30 @@ int main(int argc, char *argv[])
 		}
 
 		//! [request]
-		sim_request   request;
+		panosc_sim_server::sim_request request;
 		//! [request]
 		std::ifstream jsonfile("request.json");
 		if (useJSON)
 			request.read_json(jsonfile);
 		else {
-		  /// [request2]
-			request.set_instrument(sim_request::D22);
+			/// [request2]
+			request.set_instrument(panosc_sim_server::sim_request::D22);
 			request.set_num_neutrons(1000000);
-			request.add_parameter(sim_request::sFULL, "lambda", 4.51);
-			request.add_parameter(sim_request::sDETECTOR, "D22_collimation", 2.00);
-			request.set_return_data(sim_request::rNONE);
+			request.add_parameter(panosc_sim_server::sim_request::sFULL, "lambda", 4.51);
+			request.add_parameter(panosc_sim_server::sim_request::sDETECTOR, "D22_collimation",
+			                      2.00);
+			request.set_return_data(panosc_sim_server::sim_request::rNONE);
 			/// [request2]
 		}
 		jsonfile.close();
 		std::cout << request << std::endl;
 
-		std::string dirName = baseDir + request.instrument_name() + "/";
-		fs::path    p       = dirName;
-		fs::create_directories(p);
-		std::string hash_string = request.hash();
-		p /= hash_string;
-		p += ".tgz";
+		// std::string dirName = baseDir + request.instrument_name() + "/";
+		// fs::path    p       = dirName;
+		// fs::create_directories(p);
+		// std::string hash_string = request.hash();
+		// p /= hash_string;
+		// p += ".tgz";
 		if (true or !fs::exists(p)) {
 			/// [send request]
 			requester->sendBinary(request.to_cameo());
@@ -119,18 +117,18 @@ int main(int argc, char *argv[])
 			/// [receive result]
 			std::string response;
 			requester->receiveBinary(response);
-			sim_result_detector result(response);
+			panosc_sim_server::sim_result_detector result(response);
 			/// [receive result]
 			/// [return state]
 			returnState = result.get_status();
 			if (cameo::application::SUCCESS == returnState) {
-			  ///[return state]
+				///[return state]
 				// if (response.size() > 1000)
 				//	writeFile(p, response);
-			  ///[get data]
+				///[get data]
 				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
-				std::vector<float>& data = result.data();
-							  ///[get data]
+				std::vector<float> &data = result.data();
+				///[get data]
 			} else {
 				std::cerr << "ERROR" << std::endl;
 				ret = exitFAILURE;
