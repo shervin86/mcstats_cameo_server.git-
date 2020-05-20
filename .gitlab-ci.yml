@@ -19,7 +19,7 @@ compile:
 test0:
  stage: test
  script:
-	- ./test/test1.sh
+  - ./test/test1.sh
 	
 pages:
  stage: doc
