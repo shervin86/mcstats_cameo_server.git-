@@ -3,12 +3,13 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
+#include "stages.hh"
 #include <fstream>
 #include <iostream>
-#include "stages.hh"
 
-namespace panosc_sim_server{
-  static const std::string baseDir = "/dev/shm/";
+namespace panosc_sim_server
+{
+static const std::string baseDir = "/dev/shm/";
 
 class local_cache
 {
@@ -21,10 +22,12 @@ class local_cache
 		std::string dirName = baseDir + instrument_name + "/";
 		_p                  = dirName;
 		fs::create_directories(_p);
-		std::string hash_string = hash;
-		_p /= hash_string;
+		_p /= hash;
 		//	_p += ".tgz";
 	};
+
+	// in the form of baseDir/instrument_name/hash/
+	inline fs::path output_dir(void) const { return _p; };
 
 	inline bool isOK(void) const
 	{
@@ -39,7 +42,6 @@ class local_cache
 
 	inline bool is_done(void) const { return fs::exists(path_tgz()); }
 
-	inline fs::path output_dir(void) const { return _p; };
 	inline fs::path path_tgz(void) const
 	{
 		auto p = _p;
@@ -56,32 +58,34 @@ class local_cache
 
 	inline void save_tgz(void)
 	{
-		system((std::string("tar -cz -C ") + _p.parent_path().string() + " " +
-		        _p.stem().string() + " > " + path_tgz().string())
+		system((std::string("tar -cz -C ") + _p.parent_path().string() + " " + _p.stem().string() +
+		        " > " + path_tgz().string())
 		           .c_str());
 	}
 
-	inline void save_stage(size_t is, std::string hash)
+	inline void save_stage(stage_t is, std::string hash) const
 	{
-		// create a directory for the request at stage 1
-		fs::path mcpl_path = _p.parent_path() / "MCPL" / stages[is] / hash;
+		auto stage_name = stages.at(is);
+		// strip the hash, add MCPL, add stage_name, add the hash
+		fs::path mcpl_path = _p.parent_path() / "MCPL" / stage_name / hash;
 		fs::create_directories(mcpl_path.parent_path());
 
 		// copy the request json
 		mcpl_path += ".json";
-		fs::copy(_p.parent_path() / _p.stem() / "request.json", mcpl_path);
+		fs::copy(output_dir() / "request.json", mcpl_path);
 
 		// move the mcpl file and rename it
 		mcpl_path.replace_extension(".mcpl.gz");
-		fs::rename(_p.parent_path() / _p.stem() / (std::string(stages[is]) + ".mcpl.gz"),
-		           mcpl_path);
+		auto l = output_dir() / stage_name;
+		l += ".mcpl.gz";
+		fs::rename(l, mcpl_path);
 		//}
 	}
 
 	inline std::pair<size_t, std::string> get_stage(std::vector<std::string> hashes) const
 	{
 		std::string mcpl_filename;
-		size_t      istage = 0;
+		stage_t     istage = sSOURCE;
 		// check here if any MCPL exists for one of the stages
 		// stages are ordered from the detector to the source
 		for (istage = 0; istage < stages.size() and mcpl_filename.empty();) {
@@ -108,9 +112,11 @@ class local_cache
 	private:
 	fs::path _p;
 
-	inline fs::path stage_path(size_t istage, std::string stage_hash) const
+	inline fs::path stage_path(stage_t istage, std::string stage_hash) const
 	{
-		fs::path sp(_p.parent_path() / "MCPL" / stages[istage] / stage_hash);
+		// const auto stage_name = stages[istage];
+
+		fs::path sp(_p.parent_path() / "MCPL" / stages.at(istage) / stage_hash);
 		sp += ".json";
 		return sp;
 	}

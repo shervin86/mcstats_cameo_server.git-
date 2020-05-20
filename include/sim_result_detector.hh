@@ -18,7 +18,6 @@ namespace panosc_sim_server
 class sim_result_detector
 {
 	public:
-  
 	/** \brief constructor reading the mcstas detector file (server-side)
 	 */
 	sim_result_detector(void){};
@@ -88,7 +87,8 @@ class sim_result_detector
 		_dim_x           = j["dim_x"];
 		_dim_y           = j["dim_y"];
 		_status          = j["status"];
-		_counts          = j["data"];
+		//_counts          =
+		(j["data"]).get_to(_counts);
 	}
 
 	inline int get_status(void) { return _status; };

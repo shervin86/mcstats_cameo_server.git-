@@ -8,14 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-//#include <stdio.h>
-//#include <functional> // for std::hash
 #include <string>
-// class sim_result_detector{
-// public:
-// 	sim_result_detector(std::ifstream& fi){std::cout << fi<< std::endl;};
-// 	std::string to_cameo(){std::string a; return a;};
-// };
 
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
@@ -104,8 +97,8 @@ int main(int argc, char *argv[])
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 
 			// declare the APIs
-			sim_request         sim_request_obj(request->getBinary());
-			sim_result_detector sim_result;
+			panosc_sim_server::sim_request         sim_request_obj(request->getBinary());
+			panosc_sim_server::sim_result_detector sim_result;
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
@@ -113,7 +106,8 @@ int main(int argc, char *argv[])
 			          << "\n===========================" << std::endl;
 
 			// define a temp dir in RAM
-			local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
+			panosc_sim_server::local_cache lc(sim_request_obj.instrument_name(),
+			                                  sim_request_obj.hash());
 			fs::path p = lc.output_dir(); // path of the entire mcstas ouput directory
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
@@ -135,9 +129,9 @@ int main(int argc, char *argv[])
 				  - source as well as instrument are bound.... so if any change,
 				  re-run the entire simulation...
 				 */
-				std::vector<std::string> hashes = sim_request_obj.stage_hashes();
-				auto                     stage  = lc.get_stage(hashes);
-				auto &                   istage = stage.first;
+				std::vector<std::string> hashes        = sim_request_obj.stage_hashes();
+				auto                     stage         = lc.get_stage(hashes);
+				auto &                   istage        = stage.first;
 				auto &                   mcpl_filename = stage.second;
 				// check here if any MCPL exists for one of the stages
 				// stages are ordered from the detector to the source
@@ -150,23 +144,22 @@ int main(int argc, char *argv[])
 
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
-				std::string app_name =
-				    sim_request_obj.instrument_name() + "-" + stages[istage];
+				std::string app_name = sim_request_obj.instrument_name() + "-" +
+				                       panosc_sim_server::stages.at(istage);
 #ifdef DEBUG
 
 				std::cout << "[DEBUG] APP: #" << app_name << "#" << std::endl;
 				for (auto singlearg : args)
-					std::cout << "[DEBUG] arg: #" << singlearg << "#"
-					          << std::endl;
+					std::cout << "[DEBUG] arg: #" << singlearg << "#" << std::endl;
 #endif
 
 				// start the sim application
-				auto start = clock();
-				std::unique_ptr<cameo::application::Instance>
-				    simulationApplication = server.start(app_name, args);
+				auto                                          start = clock();
+				std::unique_ptr<cameo::application::Instance> simulationApplication =
+				    server.start(app_name, args);
 
-				std::cout << "Started simulation application "
-				          << *simulationApplication << std::endl;
+				std::cout << "Started simulation application " << *simulationApplication
+				          << std::endl;
 
 				state = simulationApplication->waitFor();
 
@@ -174,15 +167,14 @@ int main(int argc, char *argv[])
 
 				std::cout << "Finished the simulation application with state "
 				          << cameo::application::toString(state) << std::endl;
-				std::cout
-				    << std::fixed << std::setprecision(3)
-				    << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
-				    << " ms" << std::endl;
+				std::cout << std::fixed << std::setprecision(3)
+				          << "CPU time used: " << 1000.0 * (end - start) / CLOCKS_PER_SEC
+				          << " ms" << std::endl;
 
 				if (state == cameo::application::SUCCESS) {
 
 					lc.save_request(sim_request_obj.to_string());
-					if (istage == sim_request::sFULL) {
+					if (istage == panosc_sim_server::sFULL) {
 						lc.save_stage(1, sim_request_obj.hash(1));
 					}
 					lc.save_tgz();
@@ -190,8 +182,7 @@ int main(int argc, char *argv[])
 
 			} else {
 				// in this case re-use the previous results
-				std::cout << "simulation exists, re-using the same results"
-				          << std::endl;
+				std::cout << "simulation exists, re-using the same results" << std::endl;
 				state = cameo::application::SUCCESS;
 			}
 
@@ -201,8 +192,7 @@ int main(int argc, char *argv[])
 			if (state == cameo::application::SUCCESS) {
 
 				// find the file with the counts on the detector
-				for (auto &p_itr :
-				     fs::directory_iterator(p.parent_path() / p.stem())) {
+				for (auto &p_itr : fs::directory_iterator(p.parent_path() / p.stem())) {
 					std::cout << "--> " << p_itr.path().stem() << std::endl;
 					std::string s   = p_itr.path().stem();
 					auto        pos = s.rfind('_');

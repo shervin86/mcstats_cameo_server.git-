@@ -176,6 +176,9 @@ class sim_request
 		case rNEUTRONS:
 			_j["return"] = "NEUTRONS";
 			break;
+		case rALL:
+			_j["return"] = "ALL";
+			break;
 		case rFULL:
 			_j["return"] = "FULL";
 			break;
@@ -288,6 +291,8 @@ class sim_request
 		return hashes;
 	}
 
+	friend std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s);
+
 	private:
 	nlohmann::json _j;
 	std::string    _instrument;
@@ -327,12 +332,11 @@ class sim_request
 	inline bool check_json_sample(void) const { return true; }
 	inline bool check_json_instrument(void) const { return _j["instrument"].contains("name"); }
 };
-} // namespace panosc_sim_server
 
-std::ostream &operator<<(std::ostream &os, const sim_request &s)
+std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s)
 {
 	os << std::setw(4) << s._j;
 	return os;
 }
-
+} // namespace panosc_sim_server
 #endif

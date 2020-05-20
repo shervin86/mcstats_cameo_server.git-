@@ -94,9 +94,8 @@ int main(int argc, char *argv[])
 			/// [request2]
 			request.set_instrument(panosc_sim_server::sim_request::D22);
 			request.set_num_neutrons(1000000);
-			request.add_parameter(panosc_sim_server::sim_request::sFULL, "lambda", 4.51);
-			request.add_parameter(panosc_sim_server::sim_request::sDETECTOR, "D22_collimation",
-			                      2.00);
+			request.add_parameter(panosc_sim_server::sFULL, "lambda", 4.51);
+			request.add_parameter(panosc_sim_server::sDETECTOR, "D22_collimation", 2.00);
 			request.set_return_data(panosc_sim_server::sim_request::rNONE);
 			/// [request2]
 		}
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
 		// std::string hash_string = request.hash();
 		// p /= hash_string;
 		// p += ".tgz";
-		if (true or !fs::exists(p)) {
+		if (true) {
 			/// [send request]
 			requester->sendBinary(request.to_cameo());
 			/// [send request]
@@ -127,14 +126,16 @@ int main(int argc, char *argv[])
 				//	writeFile(p, response);
 				///[get data]
 				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
-				std::vector<float> &data = result.data();
+				const std::vector<float> &data = result.data();
 				///[get data]
+				std::cout << data[0] << std::endl;
 			} else {
 				std::cerr << "ERROR" << std::endl;
 				ret = exitFAILURE;
 			}
 		} else {
-			std::cout << "[INFO] Result already present in " << p << std::endl;
+			// std::cout << "[INFO] Result already present in " << p << std::endl;
+			std::cout << "[INFO] Result already present in " << std::endl;
 		}
 		std::cout << "Finished the application" << std::endl;
 
