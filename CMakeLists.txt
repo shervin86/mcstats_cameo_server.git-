@@ -13,6 +13,12 @@ add_definitions(-DDEBUG)
 add_definitions(-DSERVERNAME="mcstas_server")
 add_definitions(-DREQUESTER_RESPONDER_NAME="mcstas_responder")
 
+
+
+# add library
+#add_library(sim_request src/sim_request.cc)
+add_library(sim_request_so SHARED src/sim_request.cc)
+
 # add the executable
 add_executable(fakeNomad src/fakeNomad.cpp)
 target_link_libraries(fakeNomad PUBLIC m)
@@ -20,6 +26,7 @@ target_link_libraries(fakeNomad PUBLIC cameo)
 target_link_libraries(fakeNomad PUBLIC zmq)
 target_link_libraries(fakeNomad PUBLIC protobuf)
 target_link_libraries(fakeNomad PUBLIC stdc++fs)
+target_link_libraries(fakeNomad PUBLIC sim_request_so)
 
 add_executable(mcstas_server src/mcstas_server.cpp)
 target_link_libraries(mcstas_server PUBLIC m)
@@ -29,6 +36,7 @@ target_link_libraries(mcstas_server PUBLIC protobuf)
 #target_link_libraries(mcstas_server PUBLIC gcrypt)
 #target_link_libraries(mcstas_server PUBLIC gpg-error)
 target_link_libraries(mcstas_server PUBLIC stdc++fs)
+target_link_libraries(mcstas_server PUBLIC sim_request)
 
 
 #add_executable(mcstas_server.cpp)
