@@ -36,7 +36,7 @@ target_link_libraries(mcstas_server PUBLIC protobuf)
 #target_link_libraries(mcstas_server PUBLIC gcrypt)
 #target_link_libraries(mcstas_server PUBLIC gpg-error)
 target_link_libraries(mcstas_server PUBLIC stdc++fs)
-target_link_libraries(mcstas_server PUBLIC sim_request)
+target_link_libraries(mcstas_server PUBLIC sim_request_so)
 
 
 #add_executable(mcstas_server.cpp)
