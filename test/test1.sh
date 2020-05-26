@@ -1,7 +1,7 @@
 #!/bin/bash
 #create a test config
 sed 's|7123|7100|;s|logs|test/logs|' cameo_config.xml  > test/cameo_config_test.xml
-
+exit 0
 # start another cameo server
 /usr/local/bin/cameo-server test/cameo_config_test.xml &> test/cameo.log &
 cameo_PID=$!

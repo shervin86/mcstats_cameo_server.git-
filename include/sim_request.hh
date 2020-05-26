@@ -108,7 +108,6 @@ class sim_request
 
 	/*------------------------------ server side */
 
-
 	/// \brief pretty print of the request in json format
 	friend std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s);
 
@@ -118,13 +117,12 @@ class sim_request
 
 	public:
 	inline std::string to_string(void) const { return _j.dump(); }
-	void read_json(std::ifstream &jsonfile)
+	void               read_json(std::ifstream &jsonfile)
 	{
 		_j = nlohmann::json::parse(jsonfile);
-		//assert(check_json()); ///\todo use exception
+		// assert(check_json()); ///\todo use exception
 		_instrument = _j["instrument"]["name"];
 	};
-
 };
 
 } // namespace panosc_sim_server

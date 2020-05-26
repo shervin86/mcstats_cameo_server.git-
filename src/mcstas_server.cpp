@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 
 			// declare the APIs
-			panosc_sim_server::sim_request_server         sim_request_obj(request->getBinary());
+			panosc_sim_server::sim_request_server  sim_request_obj(request->getBinary());
 			panosc_sim_server::sim_result_detector sim_result;
 
 			std::cout << "========== [REQ] ==========\n"
