@@ -108,125 +108,23 @@ class sim_request
 
 	/*------------------------------ server side */
 
-	/** \brief constructor that decodes the message from CAMEO (server side)
-	 *  \param[in] message : request in string form received by the server
-	 */
-	sim_request(std::string message);
-
-	/// returing the string "SIM"+name of the instrument
-	std::string instrument_name(void) const { return "SIM" + _instrument; };
-
-	/// returns the arguments to be passed to the mcstas execution
-	std::vector<std::string> args(void) const;
-
-	/** \brief what is required to be returned */
-	returnType get_return_data(void) const;
 
 	/// \brief pretty print of the request in json format
 	friend std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s);
 
-	// inline std::string string(void) const { return _j.dump(); }
-
-	/** \brief returns the hash of the entire request string */
-	// inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
-	inline std::string hash(void) const { return std::to_string(_hash(_j)); }
-
-	inline std::string hash(size_t s) const
-	{
-		nlohmann::json j(_j);
-		switch (s) {
-		case sFULL:
-			break;
-		case sDETECTOR:
-			j.erase("detector");
-			break;
-		case sSAMPLE:
-			j.erase("detector");
-			j.erase("sample");
-			break;
-		}
-		return std::to_string(_hash(j));
-	}
-
-	inline std::vector<std::string> stage_hashes(void) const
-	{
-		std::vector<std::string> hashes;
-		for (size_t istage = 0; istage < stages.size(); ++istage) {
-			hashes.push_back(hash(istage));
-		}
-		return hashes;
-	}
-
-	private:
+	protected:
 	nlohmann::json _j;
 	std::string    _instrument;
-	// std::hash<std::string> _hash; // this class calculates the hash from the string
-	std::hash<nlohmann::json> _hash;
-
-	/** \brief checks if the request is valid
-	 * \todo replace asserts with exceptions
-	 * \return TRUE if everything is OK and FALSE otherwise
-	 */
-	bool check_json(void) const
-	{
-		bool ret = true; // true = OK
-		// check mandatory parameters first
-		ret = ret && check_json_common();
-		return ret;
-	}
-
-	/** \brief checks for mandatory elements of the json request, common to all instruments
-	 * \return TRUE if everything is OK and FALSE otherwise
-	 */
-	inline bool check_json_common(void) const
-	{
-		bool ret = true;
-		// \todo use exceptions here
-		assert(_j.contains("--ncount"));
-		assert(_j.contains("instrument"));
-		assert(_j.contains("source"));
-		assert(_j.contains("sample"));
-		ret = ret && check_json_source();
-		ret = ret && check_json_sample();
-		ret = ret && check_json_instrument();
-		return ret;
-	}
-
-	inline bool check_json_source(void) const { return _j["source"].contains("lambda"); }
-	inline bool check_json_sample(void) const { return true; }
-	inline bool check_json_instrument(void) const { return _j["instrument"].contains("name"); }
-
-	/** \brief constructor to be used for development
-	 *  \param[in] j : json with the simulation parameters and instrument name
-	 */
-	sim_request(nlohmann::json j) : _j(j)
-	{
-		assert(check_json()); /// \todo use exception
-		_instrument = _j["instrument"]["name"];
-	};
-
-	/** \brief constructor to be used for development
-	 *  \param[in] jsonfile : input stream with the simulation parameters
-	 *                        and instrument name in json format
-	 *
-	 *  json example
-	 * \include request.json
-	 */
-	sim_request(std::ifstream &jsonfile)
-	{
-		_j = nlohmann::json::parse(jsonfile);
-		assert(check_json()); ///\todo use exception
-		_instrument = _j["instrument"]["name"];
-	};
 
 	public:
 	inline std::string to_string(void) const { return _j.dump(); }
-	void               read_json(std::ifstream &jsonfile)
+	void read_json(std::ifstream &jsonfile)
 	{
 		_j = nlohmann::json::parse(jsonfile);
-		assert(check_json()); ///\todo use exception
+		//assert(check_json()); ///\todo use exception
 		_instrument = _j["instrument"]["name"];
 	};
+
 };
 
 } // namespace panosc_sim_server
