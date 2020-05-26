@@ -1,42 +1,53 @@
 cmake_minimum_required(VERSION 3.10)
 
-# set the project name
+# Project name and version
 project(cameo-mcstas VERSION 0.10.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_compile_options(-Wall -Wextra -pedantic -Werror)
-include_directories(include include/nlohmann)
-add_definitions(-DDEBUG)
 
+# Want to compile dynamic or static libraries
+set(BUILD_SHARED_LIBS False)
+
+
+add_compile_options(-Wall -Wextra -pedantic -Werror)
+# where to find the header files
+include_directories(include include/nlohmann)
+#add_definitions(-DDEBUG)
+
+# definitions for the client and server 
 add_definitions(-DSERVERNAME="mcstas_server")
 add_definitions(-DREQUESTER_RESPONDER_NAME="mcstas_responder")
 
+#------------------------------------------------------------
+# Libraries
+#------------------------------------------------------------
+add_library(sim_request         src/sim_request.cc)         # client
+add_library(sim_request_server  src/sim_request_server.cc)  # server
+target_link_libraries(sim_request_server sim_request)
 
+add_library(sim_result src/sim_result.cc)               # client
+add_library(sim_result_server src/sim_result_server.cc) # server
+target_link_libraries(sim_result_server sim_result)
 
-# add library
-#add_library(sim_request src/sim_request.cc)
-add_library(sim_request_so SHARED src/sim_request.cc)
-add_library(sim_request_server  src/sim_request_server.cc)
-
-# add the executable
+#------------------------------------------------------------
+# Executables
+#------------------------------------------------------------
+# Client
 add_executable(fakeNomad src/fakeNomad.cpp)
-target_link_libraries(fakeNomad PUBLIC m)
-target_link_libraries(fakeNomad PUBLIC cameo)
-target_link_libraries(fakeNomad PUBLIC zmq)
-target_link_libraries(fakeNomad PUBLIC protobuf)
-target_link_libraries(fakeNomad PUBLIC stdc++fs)
-target_link_libraries(fakeNomad PUBLIC sim_request_so)
+target_link_libraries(fakeNomad PRIVATE cameo)
+target_link_libraries(fakeNomad PRIVATE stdc++fs)
+target_link_libraries(fakeNomad PRIVATE m zmq protobuf)
+target_link_libraries(fakeNomad PRIVATE sim_request sim_result)
 
+
+# Server
 add_executable(mcstas_server src/mcstas_server.cpp)
-target_link_libraries(mcstas_server PUBLIC m)
-target_link_libraries(mcstas_server PUBLIC cameo)
-target_link_libraries(mcstas_server PUBLIC zmq)
-target_link_libraries(mcstas_server PUBLIC protobuf)
-target_link_libraries(mcstas_server PUBLIC stdc++fs)
-target_link_libraries(mcstas_server PUBLIC sim_request_so)
-target_link_libraries(mcstas_server PUBLIC sim_request_server)
+target_link_libraries(mcstas_server PRIVATE cameo)
+target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
+target_link_libraries(mcstas_server PRIVATE stdc++fs)
+target_link_libraries(mcstas_server PRIVATE sim_request_server sim_result_server)
 
 
 #add_executable(mcstas_server.cpp)
@@ -73,10 +84,14 @@ target_link_libraries(ILL_H512_D22.out PUBLIC mcpl)
 
 
 ################ Install
-set(CMAKE_INSTALL_PREFIX ../)
+set(CMAKE_INSTALL_PREFIX /tmp/devel/)
 install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
-
-
+if (BUILD_SHARED_LIBS)
+  install(TARGETS sim_request sim_request_server sim_result LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
+endif(BUILD_SHARED_LIBS)
+  
+enable_testing()
+add_test(NAME d22 COMMAND ILL_H512_D22.out -n 10000 lambda=4.5)
 
 ################ Doc
 find_package(Doxygen)
@@ -90,7 +105,7 @@ if (DOXYGEN_FOUND)
   message("Doxygen build started")
   
   # note the option ALL which allows to build the docs together with the application
-  add_custom_target( doc ALL
+  add_custom_target( doc 
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen"

@@ -1,5 +1,5 @@
 #include "sim_request.hh"
-#include "sim_result_detector.hh"
+#include "sim_result.hh"
 #include <cameo/cameo.h>
 #include <fstream>
 #include <iomanip>
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 			/// [receive result]
 			std::string response;
 			requester->receiveBinary(response);
-			panosc_sim_server::sim_result_detector result(response);
+			panosc_sim_server::sim_result result(response);
 			/// [receive result]
 			/// [return state]
 			returnState = result.get_status();

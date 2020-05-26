@@ -2,8 +2,19 @@
 #define SIM_REQUEST_SERVER_HH
 
 #include "sim_request.hh"
+#include <cassert>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ostream>
+#include <sstream>
+#include <vector>
+
 namespace panosc_sim_server
 {
+/** \brief decode simulation requests from client to server
+ * \author Shervin Nourbakhsh nourbakhsh@ill.fr
+ */
 class sim_request_server : public sim_request
 {
 	public:
@@ -11,10 +22,9 @@ class sim_request_server : public sim_request
 	 *  \param[in] message : request in string form received by the server
 	 */
 	sim_request_server(std::string message)
-	// sim_request::sim_request(std::string message)
 	{
 		_j = nlohmann::json::parse(message);
-		check_json();
+		// check_json();
 		_instrument = _j["instrument"]["name"];
 	}
 
@@ -59,68 +69,10 @@ class sim_request_server : public sim_request
 		return hashes;
 	}
 
+	std::string to_string(void) const { return _j.dump(); }
+
 	private:
-	// std::hash<std::string> _hash; // this class calculates the hash from the string
 	std::hash<nlohmann::json> _hash;
-
-	/** \brief checks if the request is valid
-	 * \todo replace asserts with exceptions
-	 * \return TRUE if everything is OK and FALSE otherwise
-	 */
-	bool check_json(void) const
-	{
-		bool ret = true; // true = OK
-		// check mandatory parameters first
-		ret = ret && check_json_common();
-		return ret;
-	}
-
-	/** \brief checks for mandatory elements of the json request, common to all instruments
-	 * \return TRUE if everything is OK and FALSE otherwise
-	 */
-	inline bool check_json_common(void) const
-	{
-		bool ret = true;
-		// \todo use exceptions here
-		assert(_j.contains("--ncount"));
-		assert(_j.contains("instrument"));
-		assert(_j.contains("source"));
-		assert(_j.contains("sample"));
-		ret = ret && check_json_source();
-		ret = ret && check_json_sample();
-		ret = ret && check_json_instrument();
-		return ret;
-	}
-
-	inline bool check_json_source(void) const { return _j["source"].contains("lambda"); }
-	inline bool check_json_sample(void) const { return true; }
-	inline bool check_json_instrument(void) const { return _j["instrument"].contains("name"); }
-
-	/** \brief constructor to be used for development
-	 *  \param[in] j : json with the simulation parameters and instrument name
-	 */
-	/*
-	        sim_request_server(nlohmann::json j) : _j(j)
-	        {
-	                assert(check_json()); /// \todo use exception
-	                _instrument = _j["instrument"]["name"];
-	        };
-	*/
-	/** \brief constructor to be used for development
-	 *  \param[in] jsonfile : input stream with the simulation parameters
-	 *                        and instrument name in json format
-	 *
-	 *  json example
-	 * \include request.json
-	 */
-	/*
-	        sim_request_server(std::ifstream &jsonfile):
-	        {
-	                _j = nlohmann::json::parse(jsonfile);
-	                assert(check_json()); ///\todo use exception
-	                _instrument = _j["instrument"]["name"];
-	        };
-	*/
 };
 } // namespace panosc_sim_server
 

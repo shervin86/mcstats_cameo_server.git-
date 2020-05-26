@@ -1,5 +1,8 @@
 #include "sim_request.hh"
 
+//#include <cassert>
+#include <iomanip>
+
 namespace panosc_sim_server
 {
 
@@ -61,6 +64,12 @@ void sim_request::set_return_data(returnType iret)
 	}
 }
 
+void sim_request::read_json(std::ifstream &jsonfile)
+{
+	_j = nlohmann::json::parse(jsonfile);
+	// assert(check_json()); ///\todo use exception
+	_instrument = _j["instrument"]["name"];
+}
 
 std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s)
 {
