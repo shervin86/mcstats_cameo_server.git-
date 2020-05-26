@@ -1,36 +1,36 @@
 stages:
- - build
- - test
- - doc
+  - build
+  - test
+  - doc
  
 before_script:
- - pwd
- - git status
- - mkdir build/
+  - pwd
+  - git status
+  - mkdir build/
   
   
 compile:
- stage: build
- script:
-   - cd build/
-   - cmake ..
-   - cmake --build .
+  stage: build
+  script:
+    - cd build/
+    - cmake ..
+    - cmake --build .
 
 test0:
- stage: test
- script:
-  - test/test1.sh
+  stage: test
+  script:
+    - ./test/test1.sh
 
 pages:
- stage: doc
- script:
-  - cd build/
-  - echo "doc script"
-  - cmake ..
-  - make doc
-  - mv doc/html/ ../public/
- artifacts:
+  stage: doc
+  script:
+    - cd build/
+    - echo "doc script"
+    - cmake ..
+    - make doc
+    - mv doc/html/ ../public/
+  artifacts:
     paths:
-    - public
- only:
-  - master
+      - public
+  only:
+    - master
