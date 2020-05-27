@@ -38,7 +38,7 @@ class sim_result
 	/** @} */
 
 	protected:
-	sim_result(void);
+	sim_result(void){};
 	static const size_t DIM_X = 128;
 	static const size_t DIM_Y = 128;
 	float               _dim_x;

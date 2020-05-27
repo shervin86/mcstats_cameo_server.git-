@@ -1,6 +1,6 @@
 #include "local_cache.hh"
 #include "sim_request_server.hh"
-#include "sim_result_detector.hh"
+#include "sim_result_server.hh"
 
 #include <cameo/cameo.h>
 #include <cassert>
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 
 			// declare the APIs
-			panosc_sim_server::sim_request_server  sim_request_obj(request->getBinary());
-			panosc_sim_server::sim_result_detector sim_result;
+			panosc_sim_server::sim_request_server sim_request_obj(request->getBinary());
+			panosc_sim_server::sim_result_server  sim_result;
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"

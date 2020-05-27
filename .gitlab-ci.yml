@@ -9,13 +9,20 @@ before_script:
   - mkdir build/
   
   
-compile:
+compile_client_api:
   stage: build
   script:
     - cd build/
     - cmake ..
     - cmake --build .
 
+compile_server:
+  stage: build
+  script:
+    - cd build/
+    - cmake -DSERVER=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
+    - cmake --build .
+  
 test0:
   stage: test
   script:

@@ -1,4 +1,4 @@
-project(client_api VERSION 0.10.0 LANGUAGES CXX)
+project(sim_client_api VERSION 0.10.0 LANGUAGES CXX)
 
 add_library(sim_client src/sim_request.cc src/sim_result.cc)
 
@@ -13,7 +13,7 @@ target_include_directories(sim_client PUBLIC
 
 
 # 'make install' to the correct locations (provided by GNUInstallDirs).
-install(TARGETS sim_client EXPORT sim_client
+install(TARGETS sim_client EXPORT ${PROJECT_NAME}
   ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
   LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
   RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
@@ -22,10 +22,10 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAM
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT sim_client DESTINATION share/sim_client/cmake)
+install(EXPORT ${PROJECT_NAME} DESTINATION share/${PROJECT_NAME}/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS sim_client FILE sim_client.cmake)
+export(TARGETS sim_client FILE ${PROJECT_NAME}.cmake)
 
 # Every library has unit tests, of course
 #add_executable(testlib

@@ -48,7 +48,6 @@ target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
 target_link_libraries(mcstas_server PRIVATE stdc++fs)
 target_link_libraries(mcstas_server PRIVATE sim_server)
 
-
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
 endif(DO_INSTRUMENTS)
@@ -58,7 +57,7 @@ endif(SERVER)
 #set(CMAKE_INSTALL_PREFIX /tmp/devel/)
 #install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
 if(SERVER)
-  install(TARGETS fakeNomad mcstas_server  DESTINATION bin)
+  install(TARGETS fakeNomad mcstas_server RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
 
   if (BUILD_SHARED_LIBS)
 	install(TARGETS  sim_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
