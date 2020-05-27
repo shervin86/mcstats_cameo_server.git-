@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Want to compile dynamic or static libraries
-set(BUILD_SHARED_LIBS True)
+set(BUILD_SHARED_LIBS False)
 
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")

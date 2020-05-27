@@ -54,4 +54,4 @@ std::vector<std::string> sim_request_server::args(void) const
 
 	return args;
 }
-}
+} // namespace panosc_sim_server

@@ -40,6 +40,21 @@ void sim_request::add_parameter(size_t stage, std::string name, double value)
 	return;
 }
 
+void sim_request::add_parameter_array(stage_t stage, std::string name, std::vector<double> &vec)
+{
+	switch (stage) {
+	case sFULL:
+		_j["source"][name] = vec;
+		break;
+	case sDETECTOR:
+		_j["detector"][name] = vec;
+		break;
+	case sSAMPLE:
+		_j["sample"][name] = vec;
+		break;
+	}
+}
+
 void sim_request::set_return_data(returnType iret)
 {
 	switch (iret) {

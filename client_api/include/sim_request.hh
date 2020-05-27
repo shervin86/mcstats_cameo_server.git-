@@ -65,6 +65,17 @@ class sim_request
 	 */
 	void add_parameter(stage_t stage, std::string name, double value);
 
+	/** \brief add simulation parameter
+	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
+	 * can be:
+	 *    - sim_request::#sFULL
+	 *    - sim_request::#sSAMPLE
+	 *    - sim_request::#sDETECTOR
+	 * \param[in] name : name of the parameter, it should match the name in McStas
+	 * \param[in] vec : parameter is a vector of floats
+	 */
+	void add_parameter_array(stage_t stage, std::string name, std::vector<double> &vec);
+
 	/** \brief request results
 	 *  \param[in] iret : what to return as defined by #returnType.
 	 */
