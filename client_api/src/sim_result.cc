@@ -1,4 +1,5 @@
 #include "sim_result.hh"
+
 namespace panosc_sim_server
 {
 	sim_result::sim_result(std::string message)

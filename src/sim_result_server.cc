@@ -1,4 +1,6 @@
 #include "sim_result_server.hh"
+#include <sstream>
+#include <iostream>
 
 namespace panosc_sim_server
 {

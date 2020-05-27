@@ -8,7 +8,7 @@ add_library(sim_client src/sim_request.cc src/sim_result.cc)
 # paths.
 target_include_directories(sim_client PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:sim_client/include>
+  $<INSTALL_INTERFACE:${PROJECT_NAME}/include>
   PRIVATE src)
 
 

@@ -63,7 +63,7 @@ class sim_request
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] value : the value of the parameter, only float is implemented
 	 */
-	void add_parameter(size_t stage, std::string name, double value);
+	void add_parameter(stage_t stage, std::string name, double value);
 
 	/** \brief request results
 	 *  \param[in] iret : what to return as defined by #returnType.
@@ -85,7 +85,7 @@ class sim_request
 
 	/// @} here ends the client API documentation
 
-	/*------------------------------ server side */
+	/*------------------------------ for fakeNomad */
 
 	/// \brief pretty print of the request in json format, for debug purposes
 	friend std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s);
