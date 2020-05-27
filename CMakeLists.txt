@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name and version
-project(cameo-mcstas VERSION 0.10.0)
+project(cameo-mcstas VERSION 0.10.0 LANGUAGES CXX)
+
+include(GNUInstallDirs)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Want to compile dynamic or static libraries
-set(BUILD_SHARED_LIBS False)
+set(BUILD_SHARED_LIBS True)
 
+#add_compile_options(-Wall -Wextra -pedantic -Werror)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
 
-add_compile_options(-Wall -Wextra -pedantic -Werror)
 # where to find the header files
 include_directories(include include/nlohmann)
 #add_definitions(-DDEBUG)
@@ -20,77 +23,50 @@ include_directories(include include/nlohmann)
 add_definitions(-DSERVERNAME="mcstas_server")
 add_definitions(-DREQUESTER_RESPONDER_NAME="mcstas_responder")
 
+add_subdirectory(client_api)
 #------------------------------------------------------------
 # Libraries
 #------------------------------------------------------------
-add_library(sim_request         src/sim_request.cc)         # client
-add_library(sim_request_server  src/sim_request_server.cc)  # server
-target_link_libraries(sim_request_server sim_request)
-
-add_library(sim_result src/sim_result.cc)               # client
-add_library(sim_result_server src/sim_result_server.cc) # server
-target_link_libraries(sim_result_server sim_result)
+add_library(sim_server  src/sim_request_server.cc src/sim_result_server.cc)  # server
+target_link_libraries(sim_server sim_client)
 
 #------------------------------------------------------------
 # Executables
 #------------------------------------------------------------
+if(SERVER)
 # Client
 add_executable(fakeNomad src/fakeNomad.cpp)
 target_link_libraries(fakeNomad PRIVATE cameo)
 target_link_libraries(fakeNomad PRIVATE stdc++fs)
 target_link_libraries(fakeNomad PRIVATE m zmq protobuf)
-target_link_libraries(fakeNomad PRIVATE sim_request sim_result)
-
+target_link_libraries(fakeNomad PRIVATE sim_client)
 
 # Server
 add_executable(mcstas_server src/mcstas_server.cpp)
 target_link_libraries(mcstas_server PRIVATE cameo)
 target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
 target_link_libraries(mcstas_server PRIVATE stdc++fs)
-target_link_libraries(mcstas_server PRIVATE sim_request_server sim_result_server)
+target_link_libraries(mcstas_server PRIVATE sim_server)
 
 
-#add_executable(mcstas_server.cpp)
-
-############################# MCSTAS
-link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
-
-add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
-  COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o build/ILL_H512_D22-sSAMPLE.c mcstas/ILL_H512_D22-sSAMPLE.instr
-  WORKING_DIRECTORY ../
-  )
-
-add_custom_command(OUTPUT ILL_H512_D22.c
-  COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o build/ILL_H512_D22.c mcstas/ILL_H512_D22.instr
-  WORKING_DIRECTORY ../
-  )
-
-
-add_executable(ILL_H512_D22-sSAMPLE.out ILL_H512_D22-sSAMPLE.c)
-add_executable(ILL_H512_D22.out ILL_H512_D22.c)
-target_compile_options(ILL_H512_D22-sSAMPLE.out PUBLIC -O3 -Wno-error -Wno-all -Wno-extra)
-target_include_directories(ILL_H512_D22-sSAMPLE.out PUBLIC /usr/share/mcstas/2.6/libs/mcpl)
-target_link_libraries(ILL_H512_D22-sSAMPLE.out PUBLIC m)
-target_link_libraries(ILL_H512_D22-sSAMPLE.out PUBLIC mcpl)
-
-target_compile_options(ILL_H512_D22.out PUBLIC -O3 -Wno-error -Wno-all -Wno-extra)
-target_include_directories(ILL_H512_D22.out PUBLIC /usr/share/mcstas/2.6/libs/mcpl)
-target_link_libraries(ILL_H512_D22.out PUBLIC m)
-target_link_libraries(ILL_H512_D22.out PUBLIC mcpl)
-
-
-
+if(DO_INSTRUMENTS)
+  add_subdirectory(mcstas)
+endif(DO_INSTRUMENTS)
+endif(SERVER)
 
 ################ Install
-set(CMAKE_INSTALL_PREFIX /tmp/devel/)
-install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
-if (BUILD_SHARED_LIBS)
-  install(TARGETS sim_request sim_request_server sim_result LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
-endif(BUILD_SHARED_LIBS)
+#set(CMAKE_INSTALL_PREFIX /tmp/devel/)
+#install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
+if(SERVER)
+  install(TARGETS fakeNomad mcstas_server  DESTINATION bin)
+
+  if (BUILD_SHARED_LIBS)
+	install(TARGETS  sim_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
+  endif(BUILD_SHARED_LIBS)
+
+endif(SERVER)
   
-enable_testing()
+#enable_testing()
 add_test(NAME d22 COMMAND ILL_H512_D22.out -n 10000 lambda=4.5)
 
 ################ Doc

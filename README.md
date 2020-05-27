@@ -4,7 +4,7 @@ After cloning the repository, setup the githooks:
 git config --local core.hooksPath .githooks/
 ```
 
-### Compilation
+### Install (client API only)
 
 ```
 mkdir build/
@@ -12,17 +12,21 @@ cd build/
 cmake ../
 
 cmake --build .
+
+make install
 ```
 
-### McStas instrument
+### Install (server)
 In order to run the server, you need to have McStas installed.
 Then compile the instrument file with McStas:
+
 ```
-#!/usr/bin/fish
-set INSTRUMENT ILL_H512_D22
+mkdir build/
 cd build/
-mcstas -t  -o $INSTRUMENT.c  ../mcstas/$INSTRUMENT.instr 
-gcc -O3 -o $INSTRUMENT.out $INSTRUMENT.c -lm
+cmake -DSERVER=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
+cmake --build .
+
+make install
 ```
 
 
@@ -32,6 +36,7 @@ from your build directory
 firefox  doc/html/index.html &
 ```
 
+or you can find it at https://nourbakhsh.sites.code.ill.fr/mcstats_cameo_server/
 
 ## Cameo applications
 
