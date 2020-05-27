@@ -14,7 +14,7 @@ namespace panosc_sim_server
  * \class sim_request
  * \brief code simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
- * \ingroup clientAPI
+ * \addtogroup clientAPI
  * @{
  */
 

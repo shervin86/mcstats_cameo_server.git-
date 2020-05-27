@@ -14,10 +14,9 @@ namespace panosc_sim_server
  */
 
 /**
- * \class sim_result_detector
+ * \class sim_result
  * \brief code and decode simulation results (only detector image) between client and server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
- * \ingroup clientAPI
  */
 class sim_result
 {
