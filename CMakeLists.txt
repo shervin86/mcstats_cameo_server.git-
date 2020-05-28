@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7.2)
 
 # Project name and version
 project(cameo-mcstas VERSION 0.10.0 LANGUAGES CXX)
@@ -6,8 +6,8 @@ project(cameo-mcstas VERSION 0.10.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD_REQUIRED False)
 
 # Want to compile dynamic or static libraries
 set(BUILD_SHARED_LIBS False)
@@ -47,6 +47,8 @@ target_link_libraries(mcstas_server PRIVATE cameo)
 target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
 target_link_libraries(mcstas_server PRIVATE stdc++fs)
 target_link_libraries(mcstas_server PRIVATE sim_server)
+target_compile_options(mcstas_server PRIVATE -std=c++17)
+
 
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
