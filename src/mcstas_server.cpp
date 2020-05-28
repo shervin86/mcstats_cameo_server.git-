@@ -1,4 +1,5 @@
 #include "local_cache.hh"
+#include "mongo_cache.hh"
 #include "sim_request_server.hh"
 #include "sim_result_server.hh"
 
@@ -60,6 +61,9 @@ int main(int argc, char *argv[])
 {
 	cameo::application::This::init(argc, argv);
 
+	panosc::mongo_cache  mc;
+	mongocxx::collection coll = mc.collection(); // db["requests"];
+
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
 	{
@@ -99,11 +103,13 @@ int main(int argc, char *argv[])
 			// declare the APIs
 			panosc::sim_request_server sim_request_obj(request->getBinary());
 			panosc::sim_result_server  sim_result;
+			mc.set_request(sim_request_obj);
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
 			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
+			//			std::cout << bsoncxx::to_json(mc.bson()) << std::endl;
 
 			// define a temp dir in RAM
 			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
@@ -116,6 +122,12 @@ int main(int argc, char *argv[])
 				request->replyBinary(sim_result.to_cameo());
 				continue; // get ready to process new request
 			}
+
+			bool is_done = mc.is_done();
+			if (is_done == false and lc.is_done() == true) {
+				mc.save_request();
+			}
+			std::cout << "Done in Mongo: " << is_done << std::endl;
 
 			if (!lc.is_done()) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
@@ -183,6 +195,7 @@ int main(int argc, char *argv[])
 						                  panosc::sDETECTOR)); ///\todo to be fixed
 					}
 					lc.save_tgz();
+					mc.save_request();
 				}
 
 			} else {

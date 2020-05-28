@@ -18,7 +18,10 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
 
 # where to find the header files
 include_directories(include include/nlohmann)
-#add_definitions(-DDEBUG)
+
+find_package(libmongocxx 3.2.0 REQUIRED)
+message(${LIBMONGOCXX_INCLUDE_DIRS})
+include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
 
 # definitions for the client and server 
 add_definitions(-DSERVERNAME="mcstas_server")
@@ -44,12 +47,13 @@ target_link_libraries(fakeNomad PRIVATE sim_client)
 
 # Server
 add_executable(mcstas_server src/mcstas_server.cpp)
+target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
 target_link_libraries(mcstas_server PRIVATE cameo)
 target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
 target_link_libraries(mcstas_server PRIVATE stdc++fs)
 target_link_libraries(mcstas_server PRIVATE sim_server)
 target_compile_options(mcstas_server PRIVATE -std=c++17)
-
+target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
 
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
