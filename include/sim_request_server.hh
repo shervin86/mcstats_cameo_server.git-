@@ -25,11 +25,15 @@ class sim_request_server : public sim_request
 	{
 		_j = nlohmann::json::parse(message);
 		// check_json();
-		_instrument = _j["instrument"]["name"];
+		_instrument = _j["instrument"]["name"].get<instrument_t>(); // take the enum here
 	}
 
 	/// returing the string "SIM"+name of the instrument
-	std::string instrument_name(void) const { return "SIM" + _instrument; };
+	std::string instrument_name(void) const
+	{
+		return "SIM" + _j["instrument"]["name"]
+		                   .get<std::string>(); // take the string name here and not the enum
+	};
 
 	/// returns the arguments to be passed to the mcstas execution
 	std::vector<std::string> args(void) const;

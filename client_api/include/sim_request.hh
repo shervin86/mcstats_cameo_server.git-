@@ -10,6 +10,16 @@
 namespace panosc_sim_server
 {
 
+/** \brief implemented instruments */
+enum instrument_t { D22 /** D22 Detector */ };
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// map instrument_t values to JSON as strings
+NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
+                                               {D22, "D22"},
+                                           })
+#endif
+
 /**
  * \class sim_request
  * \brief code simulation requests from client to server
@@ -30,9 +40,6 @@ class sim_request
 		rALL,      ///< return the three pixel maps counts, errors, true MC neutrons
 		rFULL      ///< return the entire output directory in TGZ format
 	};
-
-	/** \brief implemented instruments */
-	enum instrument_t { D22 /** D22 Detector */ };
 
 	/** \brief empty constructor: parameters should be added one by one
 	 *                            with dedicated methods
@@ -105,7 +112,7 @@ class sim_request
 
 	protected:
 	nlohmann::json _j;
-	std::string    _instrument;
+	instrument_t   _instrument;
 };
 
 } // namespace panosc_sim_server

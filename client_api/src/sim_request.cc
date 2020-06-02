@@ -1,8 +1,6 @@
 #include "sim_request.hh"
 
-//#include <cassert>
 #include <iomanip>
-
 namespace panosc_sim_server
 {
 
@@ -14,8 +12,8 @@ void sim_request::set_instrument(instrument_t instr)
 {
 	switch (instr) {
 	case D22:
-		_instrument              = "D22";
-		_j["instrument"]["name"] = _instrument;
+		_instrument              = instr;
+		_j["instrument"]["name"] = instr;
 		_j["source"]             = nlohmann::json::object();
 		_j["detector"]           = nlohmann::json::object();
 		_j["sample"]             = nlohmann::json::object();
@@ -83,7 +81,7 @@ void sim_request::read_json(std::ifstream &jsonfile)
 {
 	_j = nlohmann::json::parse(jsonfile);
 	// assert(check_json()); ///\todo use exception
-	_instrument = _j["instrument"]["name"];
+	_instrument = _j["instrument"]["name"].get<instrument_t>();
 }
 
 std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s)
