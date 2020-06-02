@@ -10,6 +10,20 @@
 #include <sstream>
 #include <vector>
 
+/*
+  required double measurement_time        600 [seconds]
+  repeated double source_size rectangular [30e-3, 30e-3] [m] or circular [30e-3] [m]
+  required double col                     12.8, 10.3, 7.8, 5.3, or 2.8 [m]
+  repeated double sample_size             rectangular [10e-3, 10e-3] [m] or circular [10e-3] [m]
+  required double wav                     6 [angs]
+  optional double det 10 [m] (detector distance for single detector instrument
+  required double bx 0 [mm] (beamstop x position)
+  required double by 0 [mm] (beamstop y position)
+  required double attenuator 1, 100, 1000 (actual attenuation value in use)
+  required double thickness 0.1 [cm] (sample thickness - applies only to the sample scatter model, not the
+  background and blocked models
+*/
+
 namespace panosc_sim_server
 {
 /** \brief decode simulation requests from client to server
