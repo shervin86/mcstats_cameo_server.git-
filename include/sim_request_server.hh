@@ -24,7 +24,7 @@
   background and blocked models
 */
 
-namespace panosc_sim_server
+namespace panosc
 {
 /** \brief decode simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
@@ -92,6 +92,6 @@ class sim_request_server : public sim_request
 	private:
 	std::hash<nlohmann::json> _hash;
 };
-} // namespace panosc_sim_server
+} // namespace panosc
 
 #endif

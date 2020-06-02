@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace panosc_sim_server
+namespace panosc
 {
 
 void sim_result_server::read_file(std::ifstream &f)
@@ -47,4 +47,4 @@ std::string sim_result_server::to_cameo(void) const
 	// std::cout << j << std::endl;
 	return j.dump();
 }
-} // namespace panosc_sim_server
+} // namespace panosc

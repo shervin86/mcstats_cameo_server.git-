@@ -4,7 +4,7 @@
 #include <string>
 /** \ingroup clientAPI
  * global definitions */
-namespace panosc_sim_server
+namespace panosc
 {
 
 /** stages implemented as integers to allow for loops
@@ -22,5 +22,5 @@ static const stage_t sSOURCE   = 0; ///< stage not implemented, used to start th
 ///\brief here's the string names of the stages, useful for output directories, etc.
 static const std::map<stage_t, std::string> stages = {
     {sSOURCE, "sSOURCE"}, {sDETECTOR, "sDETECTOR"}, {sSAMPLE, "sSAMPLE"}, {sFULL, "sFULL"}};
-} // namespace panosc_sim_server
+} // namespace panosc
 #endif

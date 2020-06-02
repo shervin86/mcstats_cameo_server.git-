@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 			std::unique_ptr<cameo::application::Request> request = responder->receive();
 
 			// declare the APIs
-			panosc_sim_server::sim_request_server sim_request_obj(request->getBinary());
-			panosc_sim_server::sim_result_server  sim_result;
+			panosc::sim_request_server sim_request_obj(request->getBinary());
+			panosc::sim_result_server  sim_result;
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
@@ -106,9 +106,8 @@ int main(int argc, char *argv[])
 			          << "\n===========================" << std::endl;
 
 			// define a temp dir in RAM
-			panosc_sim_server::local_cache lc(sim_request_obj.instrument_name(),
-			                                  sim_request_obj.hash());
-			fs::path p = lc.output_dir(); // path of the entire mcstas ouput directory
+			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
+			fs::path            p = lc.output_dir(); // path of the entire mcstas ouput directory
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
 				          // available
@@ -144,8 +143,8 @@ int main(int argc, char *argv[])
 
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
-				std::string app_name = sim_request_obj.instrument_name() + "-" +
-				                       panosc_sim_server::stages.at(istage);
+				std::string app_name =
+				    sim_request_obj.instrument_name() + "-" + panosc::stages.at(istage);
 #ifdef DEBUG
 
 				std::cout << "[DEBUG] APP: #" << app_name << "#" << std::endl;
@@ -174,7 +173,7 @@ int main(int argc, char *argv[])
 				if (state == cameo::application::SUCCESS) {
 
 					lc.save_request(sim_request_obj.to_string());
-					if (istage == panosc_sim_server::sFULL) {
+					if (istage == panosc::sFULL) {
 						lc.save_stage(1, sim_request_obj.hash(1));
 					}
 					lc.save_tgz();

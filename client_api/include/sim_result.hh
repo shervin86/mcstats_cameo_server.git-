@@ -3,7 +3,7 @@
 #include "nlohmann/json.hpp"
 #include <vector>
 
-namespace panosc_sim_server
+namespace panosc
 {
 /** \addtogroup clientAPI
  * @{
@@ -41,5 +41,5 @@ class sim_result
 	std::vector<float>  _counts, errors, n;
 	int                 _status;
 };
-} // namespace panosc_sim_server
+} // namespace panosc
 #endif

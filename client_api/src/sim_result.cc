@@ -1,6 +1,6 @@
 #include "sim_result.hh"
 
-namespace panosc_sim_server
+namespace panosc
 {
 sim_result::sim_result(std::string message)
 {
@@ -11,4 +11,4 @@ sim_result::sim_result(std::string message)
 	//_counts          =
 	(j["data"]).get_to(_counts);
 }
-} // namespace panosc_sim_server
+} // namespace panosc

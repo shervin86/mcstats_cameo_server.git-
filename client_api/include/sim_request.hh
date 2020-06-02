@@ -7,7 +7,7 @@
 // definition of stages and their string representation
 #include "stages.hh"
 
-namespace panosc_sim_server
+namespace panosc
 {
 
 /** \brief implemented instruments */
@@ -64,9 +64,9 @@ class sim_request
 	/** \brief add simulation parameter
 	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
 	 * can be:
-	 *    - sim_request::#sFULL
-	 *    - sim_request::#sSAMPLE
-	 *    - sim_request::#sDETECTOR
+	 *    - panosc::#sFULL
+	 *    - panosc::#sSAMPLE
+	 *    - panosc::#sDETECTOR
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] value : the value of the parameter, only float is implemented
 	 */
@@ -75,9 +75,9 @@ class sim_request
 	/** \brief add simulation parameter
 	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
 	 * can be:
-	 *    - sim_request::#sFULL
-	 *    - sim_request::#sSAMPLE
-	 *    - sim_request::#sDETECTOR
+	 *    - panosc::#sFULL
+	 *    - panosc::#sSAMPLE
+	 *    - panosc::#sDETECTOR
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] vec : parameter is a vector of floats
 	 */
@@ -106,7 +106,7 @@ class sim_request
 	/*------------------------------ for fakeNomad */
 
 	/// \brief pretty print of the request in json format, for debug purposes
-	friend std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s);
+	friend std::ostream &operator<<(std::ostream &os, const panosc::sim_request &s);
 
 	void read_json(std::ifstream &jsonfile);
 
@@ -115,5 +115,5 @@ class sim_request
 	instrument_t   _instrument;
 };
 
-} // namespace panosc_sim_server
+} // namespace panosc
 #endif

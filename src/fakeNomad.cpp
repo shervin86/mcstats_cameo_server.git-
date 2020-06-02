@@ -85,19 +85,18 @@ int main(int argc, char *argv[])
 		}
 
 		//! [request]
-		panosc_sim_server::sim_request request;
+		panosc::sim_request request;
 		//! [request]
 		std::ifstream jsonfile("request.json");
 		if (useJSON)
 			request.read_json(jsonfile);
 		else {
 			/// [request2]
-			//			request.set_instrument(panosc_sim_server::sim_request::D22);
-			request.set_instrument(panosc_sim_server::D22);
+			request.set_instrument(panosc::D22);
 			request.set_num_neutrons(10000000);
-			request.add_parameter(panosc_sim_server::sFULL, "lambda", 4.51);
-			request.add_parameter(panosc_sim_server::sDETECTOR, "D22_collimation", 2.00);
-			request.set_return_data(panosc_sim_server::sim_request::rNONE);
+			request.add_parameter(panosc::sFULL, "lambda", 4.51);
+			request.add_parameter(panosc::sDETECTOR, "D22_collimation", 2.00);
+			request.set_return_data(panosc::sim_request::rNONE);
 			/// [request2]
 		}
 		jsonfile.close();
@@ -117,7 +116,7 @@ int main(int argc, char *argv[])
 			/// [receive result]
 			std::string response;
 			requester->receiveBinary(response);
-			panosc_sim_server::sim_result result(response);
+			panosc::sim_result result(response);
 			/// [receive result]
 			/// [return state]
 			returnState = result.get_status();

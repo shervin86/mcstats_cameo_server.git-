@@ -7,7 +7,7 @@ namespace fs = std::experimental::filesystem;
 #include <fstream>
 #include <iostream>
 
-namespace panosc_sim_server
+namespace panosc
 {
 static const std::string baseDir = "/dev/shm/";
 
@@ -121,5 +121,5 @@ class local_cache
 		return sp;
 	}
 };
-} // namespace panosc_sim_server
+} // namespace panosc
 #endif

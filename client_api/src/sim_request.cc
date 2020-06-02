@@ -1,7 +1,7 @@
 #include "sim_request.hh"
 
 #include <iomanip>
-namespace panosc_sim_server
+namespace panosc
 {
 
 void sim_request::set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
@@ -84,10 +84,10 @@ void sim_request::read_json(std::ifstream &jsonfile)
 	_instrument = _j["instrument"]["name"].get<instrument_t>();
 }
 
-std::ostream &operator<<(std::ostream &os, const panosc_sim_server::sim_request &s)
+std::ostream &operator<<(std::ostream &os, const panosc ::sim_request &s)
 {
 	os << std::setw(4) << s._j;
 	return os;
 }
 
-} // namespace panosc_sim_server
+} // namespace panosc

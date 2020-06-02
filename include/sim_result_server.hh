@@ -3,7 +3,7 @@
 #include "sim_result.hh"
 #include <fstream>
 #include <vector>
-namespace panosc_sim_server
+namespace panosc
 {
 /**
  * \class sim_result_server
@@ -36,5 +36,5 @@ class sim_result_server : public sim_result
 
 	inline void set_status(int s) { _status = s; };
 };
-} // namespace panosc_sim_server
+} // namespace panosc
 #endif

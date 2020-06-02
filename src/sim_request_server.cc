@@ -1,6 +1,6 @@
 #include "sim_request_server.hh"
 
-namespace panosc_sim_server
+namespace panosc
 {
 
 sim_request::returnType sim_request_server::get_return_data(void) const
@@ -54,4 +54,4 @@ std::vector<std::string> sim_request_server::args(void) const
 
 	return args;
 }
-} // namespace panosc_sim_server
+} // namespace panosc
