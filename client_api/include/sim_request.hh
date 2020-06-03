@@ -24,8 +24,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
  * \class sim_request
  * \brief code simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
- * \addtogroup clientAPI
- * @{
+ * \ingroup clientAPI
  */
 
 class sim_request
@@ -101,7 +100,6 @@ class sim_request
 	 */
 	std::string to_cameo(void) const;
 
-	/// @} here ends the client API documentation
 
 	/*------------------------------ for fakeNomad */
 

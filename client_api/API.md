@@ -3,7 +3,7 @@
 
 There are two classes to be included on the client side:
   - sim_request: \copybrief panosc::sim_request
-  - sim_result_detector: \copybrief panosc::sim_result_server
+  - sim_result: \copybrief panosc::sim_result
 
 
 # Workflow from the client side
@@ -15,7 +15,7 @@ There are two classes to be included on the client side:
  \snippet src/fakeNomad.cpp send request
  -# receive the answer (result + exit status)
    - answer received in a string
-   - parse the string with the sim_result_detector 
+   - parse the string with the sim_result
  \snippet src/fakeNomad.cpp receive result
  -# check the job exit status
  \snippet src/fakeNomad.cpp return state

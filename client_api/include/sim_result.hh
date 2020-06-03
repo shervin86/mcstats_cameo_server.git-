@@ -5,14 +5,12 @@
 
 namespace panosc
 {
-/** \addtogroup clientAPI
- * @{
- */
 
 /**
  * \class sim_result
  * \brief code and decode simulation results (only detector image) between client and server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
+ * \ingroup clientAPI
  */
 class sim_result
 {
@@ -30,7 +28,6 @@ class sim_result
 	/// return the linearized vector of values
 	const std::vector<float> &data() const { return _counts; };
 	int                       get_status(void) const { return _status; };
-	/** @} */
 
 	protected:
 	sim_result(void){};
