@@ -66,6 +66,16 @@ class local_cache
 	inline void save_stage(stage_t is, std::string hash) const
 	{
 		auto stage_name = stages.at(is);
+		auto l          = output_dir() / stage_name;
+		l += ".mcpl.gz";
+
+		// it is possible that the INSTRUMENT does not have implemented a MCPL output for all the
+		// stages
+		if (fs::exists(l) == false) {
+			std::cerr << "[WARNING] file: " << l << " does not exists" << std::endl;
+			return;
+		}
+
 		// strip the hash, add MCPL, add stage_name, add the hash
 		fs::path mcpl_path = _p.parent_path() / "MCPL" / stage_name / hash;
 		fs::create_directories(mcpl_path.parent_path());
@@ -76,8 +86,6 @@ class local_cache
 
 		// move the mcpl file and rename it
 		mcpl_path.replace_extension(".mcpl.gz");
-		auto l = output_dir() / stage_name;
-		l += ".mcpl.gz";
 		fs::rename(l, mcpl_path);
 		//}
 	}
