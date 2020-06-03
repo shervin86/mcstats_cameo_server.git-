@@ -158,7 +158,11 @@ int main(int argc, char *argv[])
 				    server.start(app_name, args);
 
 				std::cout << "Started simulation application " << *simulationApplication
-				          << std::endl;
+				          << "\n with arguments:\n";
+				for (auto singlearg : args)
+					std::cout << "->>>>#" << singlearg << "#"
+					          << "\n";
+				std::cout << std::endl;
 
 				state = simulationApplication->waitFor();
 
