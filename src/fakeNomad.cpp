@@ -93,7 +93,8 @@ int main(int argc, char *argv[])
 		else {
 			/// [request2]
 			request.set_instrument(panosc::D22);
-			request.set_num_neutrons(10000000);
+			// request.set_num_neutrons(10000000);
+			request.set_measurement_time(1);
 			request.add_parameter(panosc::sFULL, panosc::sim_request::pWAVELENGTH, 4.51);
 			request.add_parameter(panosc::sDETECTOR, "D22_collimation", 2.00);
 			request.set_return_data(panosc::sim_request::rNONE);
