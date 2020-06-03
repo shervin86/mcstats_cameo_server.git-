@@ -3,7 +3,20 @@
 #include <iomanip>
 namespace panosc
 {
+const double      sim_request::FLUX               = 1.2e8; ///< \brief D22 source flux
+const std::string sim_request::pWAVELENGTH        = "lambda";
+const std::string sim_request::pSOURCE_SIZE_X     = "source_size_x";
+const std::string sim_request::pSOURCE_SIZE_Y     = "source_size_y";
+const std::string sim_request::pSAMPLE_SIZE_X     = "sample_size_x";
+const std::string sim_request::pSAMPLE_SIZE_Y     = "sample_size_y";
+const std::string sim_request::pDETECTOR_DISTANCE = "det";
+const std::string sim_request::pBEAMSTOP_X        = "bs_x";
+const std::string sim_request::pBEAMSTOP_Y        = "bs_y";
+const std::string sim_request::pATTENUATOR        = "attenuator";
+const std::string sim_request::pTHINKNESS         = "thinkness";
+const std::string sim_request::pCOLLIMATION       = "collimation";
 
+void sim_request::set_measurement_time(double time) { set_num_neutrons((unsigned long int)(time / FLUX)); }
 void sim_request::set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
 
 std::string sim_request::to_cameo(void) const { return _j.dump(); }

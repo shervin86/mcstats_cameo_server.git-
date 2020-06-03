@@ -40,6 +40,29 @@ class sim_request
 		rFULL      ///< return the entire output directory in TGZ format
 	};
 
+	/// \brief neutron wavelength measured in 10^-10 m (ang)
+	static const std::string pWAVELENGTH;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pSOURCE_SIZE_X;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pSOURCE_SIZE_Y;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pSAMPLE_SIZE_X;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pSAMPLE_SIZE_Y;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pDETECTOR_DISTANCE;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pBEAMSTOP_X;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pBEAMSTOP_Y;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pATTENUATOR;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pTHINKNESS;
+	/// \brief NOT IMPLEMENTED
+	static const std::string pCOLLIMATION;
+
 	/** \brief empty constructor: parameters should be added one by one
 	 *                            with dedicated methods
 	 *
@@ -53,6 +76,11 @@ class sim_request
 
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long int n);
+
+  	/** \brief set the number of neutrons starting from the acquisition time and assuming a FLUX for the
+	 * source of 1.2e8
+	 */
+	void set_measurement_time(double time);
 
 	/** \brief sets the instrument
 	 * \details Implemented instruments:
@@ -111,6 +139,9 @@ class sim_request
 	protected:
 	nlohmann::json _j;
 	instrument_t   _instrument;
+
+	private:
+	static const double FLUX; ///< \brief D22 source flux
 };
 
 } // namespace panosc
