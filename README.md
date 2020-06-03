@@ -23,7 +23,7 @@ Then compile the instrument file with McStas:
 ```
 mkdir build/
 cd build/
-cmake -DSERVER=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
+cmake -DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
 cmake --build .
 
 make install
