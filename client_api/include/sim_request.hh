@@ -31,7 +31,7 @@ class sim_request
 {
 	public:
 	/** \brief Specify what you want the server to return in the result */
-	enum returnType {
+	enum return_t {
 		rNONE = 0, ///< return only the exit status and no data
 		rCOUNTS,   ///< return the weighted counts on the detector
 		rERRORS,   ///< return the per pixel errors
@@ -40,29 +40,19 @@ class sim_request
 		rFULL      ///< return the entire output directory in TGZ format
 	};
 
-	/// \brief neutron wavelength measured in 10^-10 m (ang)
-	static const std::string pWAVELENGTH;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pSOURCE_SIZE_X;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pSOURCE_SIZE_Y;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pSAMPLE_SIZE_X;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pSAMPLE_SIZE_Y;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pDETECTOR_DISTANCE;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pBEAMSTOP_X;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pBEAMSTOP_Y;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pATTENUATOR;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pTHINKNESS;
-	/// \brief NOT IMPLEMENTED
-	static const std::string pCOLLIMATION;
-
+	enum param_t {
+		pWAVELENGTH,        ///< neutron wavelength measured in 10^-10 m (ang)
+		pSOURCE_SIZE_X,     ///< NOT IMPLEMENTED YET
+		pSOURCE_SIZE_Y,     ///< NOT IMPLEMENTED YET
+		pSAMPLE_SIZE_X,     ///< NOT IMPLEMENTED YET
+		pSAMPLE_SIZE_Y,     ///< NOT IMPLEMENTED YET
+		pDETECTOR_DISTANCE, ///< NOT IMPLEMENTED YET
+		pBEAMSTOP_X,        ///< NOT IMPLEMENTED YET
+		pBEAMSTOP_Y,        ///< NOT IMPLEMENTED YET
+		pATTENUATOR,        ///< NOT IMPLEMENTED YET
+		pTHINKNESS,         ///< NOT IMPLEMENTED YET
+		pCOLLIMATION,       ///< NOT IMPLEMENTED YET
+	};
 	/** \brief empty constructor: parameters should be added one by one
 	 *                            with dedicated methods
 	 *
@@ -77,8 +67,8 @@ class sim_request
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long int n);
 
-  	/** \brief set the number of neutrons starting from the acquisition time and assuming a FLUX for the
-	 * source of 1.2e8
+	/** \brief set the number of neutrons starting from the acquisition time and assuming a FLUX
+	 * for the source of 1.2e8
 	 */
 	void set_measurement_time(double time);
 
@@ -89,15 +79,10 @@ class sim_request
 	void set_instrument(instrument_t instr = D22);
 
 	/** \brief add simulation parameter
-	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
-	 * can be:
-	 *    - panosc::#sFULL
-	 *    - panosc::#sSAMPLE
-	 *    - panosc::#sDETECTOR
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] value : the value of the parameter, only float is implemented
 	 */
-	void add_parameter(stage_t stage, std::string name, double value);
+	void add_parameter(param_t, double value);
 
 	/** \brief add simulation parameter
 	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
@@ -111,9 +96,9 @@ class sim_request
 	void add_parameter_array(stage_t stage, std::string name, std::vector<double> &vec);
 
 	/** \brief request results
-	 *  \param[in] iret : what to return as defined by #returnType.
+	 *  \param[in] iret : what to return as defined by #return_t.
 	 */
-	void set_return_data(returnType iret = rNONE);
+	void set_return_data(return_t iret = rNONE);
 
 	/** \brief transform the request into a string to be sent through CAMEO
 	 * \details
@@ -127,7 +112,6 @@ class sim_request
 	 * \todo replace plain json with MessagePack or CBOR or something else
 	 */
 	std::string to_cameo(void) const;
-
 
 	/*------------------------------ for fakeNomad */
 

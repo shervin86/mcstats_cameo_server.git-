@@ -53,7 +53,7 @@ class sim_request_server : public sim_request
 	std::vector<std::string> args(void) const;
 
 	/** \brief what is required to be returned */
-	returnType get_return_data(void) const;
+	return_t get_return_data(void) const;
 
 	// inline std::string string(void) const { return _j.dump(); }
 

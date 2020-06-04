@@ -3,7 +3,7 @@
 namespace panosc
 {
 
-sim_request::returnType sim_request_server::get_return_data(void) const
+sim_request::return_t sim_request_server::get_return_data(void) const
 {
 	if ((!_j.contains("return")) or _j["return"] == "NONE")
 		return rNONE;
@@ -21,7 +21,7 @@ sim_request::returnType sim_request_server::get_return_data(void) const
 
 std::vector<std::string> sim_request_server::args(void) const
 {
-	std::vector<std::string> args;
+	std::vector<std::string> argss;
 
 	for (const auto &i : _j.items()) {
 		if (i.value().type() == nlohmann::json::value_t::object)
@@ -31,27 +31,27 @@ std::vector<std::string> sim_request_server::args(void) const
 
 		std::stringstream s;
 		s << i.key() << "=" << i.value();
-		args.push_back(s.str());
+		argss.push_back(s.str());
 	}
 
 	for (const auto &i : _j["source"].items()) {
 		std::stringstream s;
 		s << i.key() << "=" << i.value();
-		args.push_back(s.str());
+		argss.push_back(s.str());
 	}
 
 	for (const auto &i : _j["sample"].items()) {
 		std::stringstream s;
 		s << i.key() << "=" << i.value();
-		args.push_back(s.str());
+		argss.push_back(s.str());
 	}
 
 	for (const auto &i : _j["detector"].items()) {
 		std::stringstream s;
 		s << i.key() << "=" << i.value();
-		args.push_back(s.str());
+		argss.push_back(s.str());
 	}
 
-	return args;
+	return argss;
 }
 } // namespace panosc
