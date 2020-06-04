@@ -101,7 +101,7 @@ class sim_request
 	 * \param[in] name : name of the parameter, it should match the name in McStas
 	 * \param[in] vec : parameter is a vector of floats
 	 */
-	void add_parameter_array(stage_t stage, std::string name, std::vector<double> &vec);
+	void add_parameter_array(param_t, std::vector<double> &vec);
 
 	/** \brief request results
 	 *  \param[in] iret : what to return as defined by #return_t.

@@ -2,8 +2,8 @@
 \brief Set of classes to be used on the client side
 
 There are two classes to be included on the client side:
-  - sim_request: \copybrief panosc::sim_request
-  - sim_result: \copybrief panosc::sim_result
+  - panosc::sim_request: \copybrief panosc::sim_request
+  - panosc::sim_result: \copybrief panosc::sim_result
 
 
 # Workflow from the client side

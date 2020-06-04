@@ -53,28 +53,24 @@ void sim_request::set_instrument(instrument_t instr)
 
 
 void sim_request::add_parameter(param_t par	, double value) {
-  const	auto& par_data = param_names.find(par)->second;
+  const	auto& par_data = param_names.at(par);
   if(par_data.stage == sNONE){
-	  throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ param_names.at(par).name+std::string("] not implemented in McStas instrument ****")).c_str());
+	  throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ par_data.name+std::string("] not implemented in McStas instrument ****")).c_str());
 	  return;
   }
   const auto stage_name = stages.find(par_data.stage)->second;
 	_j[stage_name][par_data.name] = value;
 }
 
-void sim_request::add_parameter_array(stage_t stage, std::string name, std::vector<double> &vec)
+void sim_request::add_parameter_array(param_t par, std::vector<double> &vec)
 {
-	switch (stage) {
-	case sFULL:
-		_j["source"][name] = vec;
-		break;
-	case sDETECTOR:
-		_j["detector"][name] = vec;
-		break;
-	case sSAMPLE:
-		_j["sample"][name] = vec;
-		break;
+	const	auto& par_data = param_names.at(par);
+	if(par_data.stage == sNONE){
+		throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ par_data.name+std::string("] not implemented in McStas instrument ****")).c_str());
+		return;
 	}
+	const auto stage_name = stages.at(par_data.stage);
+	_j[stage_name][par_data.name] = vec;
 }
 
 void sim_request::set_return_data(return_t iret)
