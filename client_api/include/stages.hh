@@ -14,16 +14,16 @@ typedef size_t stage_t;
 /** \ingroup clientAPI
  * @{
  */
-static const stage_t sFULL     = 3; ///< FULL detector simulation stage
+static const stage_t sFULL     = 3; ///< FULL detector simulation stage // this should always be the last!
 static const stage_t sSAMPLE   = 2; ///< simulation from source, excluding the sample and following parts
 static const stage_t sDETECTOR = 1; ///< simulation including the sample, not the detector
 static const stage_t sSOURCE   = 0; ///< stage not implemented, used to start the loop
-
+static const stage_t sNONE     = -1; ///< stage not implemented, to define not implemented parameters
 /// @}
 
 ///\brief here's the string names of the stages, useful for output directories, etc.
 static const std::map<stage_t, std::string> stages = {
-    {sSOURCE, "sSOURCE"}, {sDETECTOR, "sDETECTOR"}, {sSAMPLE, "sSAMPLE"}, {sFULL, "sFULL"}};
+	{sNONE, "sNONE"}, {sSOURCE, "sSOURCE"}, {sDETECTOR, "sDETECTOR"}, {sSAMPLE, "sSAMPLE"}, {sFULL, "sFULL"}};
 } // namespace panosc
 
 #endif

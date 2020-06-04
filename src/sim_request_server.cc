@@ -34,22 +34,12 @@ std::vector<std::string> sim_request_server::args(void) const
 		argss.push_back(s.str());
 	}
 
-	for (const auto &i : _j["source"].items()) {
-		std::stringstream s;
-		s << i.key() << "=" << i.value();
-		argss.push_back(s.str());
-	}
-
-	for (const auto &i : _j["sample"].items()) {
-		std::stringstream s;
-		s << i.key() << "=" << i.value();
-		argss.push_back(s.str());
-	}
-
-	for (const auto &i : _j["detector"].items()) {
-		std::stringstream s;
-		s << i.key() << "=" << i.value();
-		argss.push_back(s.str());
+	for(stage_t istage = sSOURCE; istage <= sFULL; ++istage){
+		for (const auto &i : _j[stages.at(istage)].items()) {
+			std::stringstream s;
+			s << i.key() << "=" << i.value();
+			argss.push_back(s.str());
+		}
 	}
 
 	return argss;

@@ -15,7 +15,7 @@ struct param_data{
 	// define here the stage for each parameter, it should match the McStas instrument implementation
 	// define here the name for each parameter, it should match the McStas instrument implementation
 static const std::map<sim_request::param_t, param_data> param_names = {
-	// clang-format off
+    // clang-format off
 	{sim_request::pWAVELENGTH				, {sFULL,		"lambda"		}},
 	{sim_request::pSOURCE_SIZE_X			, {sFULL,		"source_size_x"	}},
 	{sim_request::pSOURCE_SIZE_Y			, {sFULL,		"source_size_y"	}},
@@ -27,7 +27,7 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pATTENUATOR				, {sDETECTOR,	"attenuator"	}},
 	{sim_request::pTHINKNESS				, {sSAMPLE,		"thinkness"		}},
 	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
-	//clang-format on
+    // clang-format on
 };
 
 const double sim_request::FLUX = 1.2e7; ///< \brief D22 source flux 1.2e8
@@ -43,10 +43,10 @@ void sim_request::set_instrument(instrument_t instr)
 	case D22:
 		_instrument              = instr;
 		_j["instrument"]["name"] = instr;
-		_j["source"]             = nlohmann::json::object();
-		_j["detector"]           = nlohmann::json::object();
-		_j["sample"]             = nlohmann::json::object();
-		_j["mcpl"]               = nlohmann::json::object();
+		for (stage_t istage = sSOURCE; istage <= sFULL; istage++) {
+			_j[stages.at(istage)] = nlohmann::json::object();
+		}
+		_j["mcpl"] = nlohmann::json::object();
 		break;
 	}
 }

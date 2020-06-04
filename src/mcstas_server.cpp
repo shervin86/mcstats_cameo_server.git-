@@ -178,7 +178,9 @@ int main(int argc, char *argv[])
 
 					lc.save_request(sim_request_obj.to_string());
 					if (istage == panosc::sFULL) {
-						lc.save_stage(1, sim_request_obj.hash(1));
+						lc.save_stage(panosc::sDETECTOR,
+						              sim_request_obj.hash(
+						                  panosc::sDETECTOR)); ///\todo to be fixed
 					}
 					lc.save_tgz();
 				}
