@@ -3,6 +3,7 @@
 
 #include "nlohmann/json.hpp"
 #include <fstream>
+#include <stdexcept>
 
 // definition of stages and their string representation
 #include "stages.hh"
@@ -19,6 +20,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
                                                {D22, "D22"},
                                            })
 #endif
+
+class param_not_implemented :  public std::runtime_error
+{
+public:
+	param_not_implemented(const char* what): std::runtime_error(what){};
+};
+	
 
 /**
  * \class sim_request

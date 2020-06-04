@@ -97,6 +97,11 @@ int main(int argc, char *argv[])
 			request.set_measurement_time(1);
 			request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
 			request.add_parameter(panosc::sim_request::pCOLLIMATION, 2.00);
+			try {
+				request.add_parameter(panosc::sim_request::pTHINKNESS, 2.00);
+			} catch (const panosc::param_not_implemented &e) {
+				std::cerr << e.what() << std::endl;
+			}
 			request.set_return_data(panosc::sim_request::rNONE);
 			/// [request2]
 		}

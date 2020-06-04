@@ -1,5 +1,5 @@
 #include "sim_request.hh"
-
+#include <iostream>
 #include <iomanip>
 namespace panosc
 {
@@ -17,15 +17,15 @@ struct param_data{
 static const std::map<sim_request::param_t, param_data> param_names = {
     // clang-format off
 	{sim_request::pWAVELENGTH				, {sFULL,		"lambda"		}},
-	{sim_request::pSOURCE_SIZE_X			, {sFULL,		"source_size_x"	}},
-	{sim_request::pSOURCE_SIZE_Y			, {sFULL,		"source_size_y"	}},
-	{sim_request::pSAMPLE_SIZE_X			, {sSAMPLE,		"sample_size_x"	}},
-	{sim_request::pSAMPLE_SIZE_Y			, {sSAMPLE,		"sample_size_y"	}},
-	{sim_request::pDETECTOR_DISTANCE		, {sDETECTOR,	"det"			}},
-	{sim_request::pBEAMSTOP_X				, {sDETECTOR,	"bs_x"			}},
-	{sim_request::pBEAMSTOP_Y				, {sDETECTOR,	"bs_y"			}},
-	{sim_request::pATTENUATOR				, {sDETECTOR,	"attenuator"	}},
-	{sim_request::pTHINKNESS				, {sSAMPLE,		"thinkness"		}},
+	{sim_request::pSOURCE_SIZE_X			, {sNONE,	"source_size_x"	}},
+	{sim_request::pSOURCE_SIZE_Y			, {sNONE,	"source_size_y"	}},
+	{sim_request::pSAMPLE_SIZE_X			, {sNONE,	"sample_size_x"	}},
+	{sim_request::pSAMPLE_SIZE_Y			, {sNONE,	"sample_size_y"	}},
+	{sim_request::pDETECTOR_DISTANCE		, {sNONE,	"det"			}},
+	{sim_request::pBEAMSTOP_X				, {sNONE,	"bs_x"			}},
+	{sim_request::pBEAMSTOP_Y				, {sNONE,	"bs_y"			}},
+	{sim_request::pATTENUATOR				, {sNONE,	"attenuator"	}},
+	{sim_request::pTHINKNESS				, {sNONE,	"thinkness"		}},
 	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
     // clang-format on
 };
@@ -51,8 +51,13 @@ void sim_request::set_instrument(instrument_t instr)
 	}
 }
 
+
 void sim_request::add_parameter(param_t par	, double value) {
   const	auto& par_data = param_names.find(par)->second;
+  if(par_data.stage == sNONE){
+	  throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ param_names.at(par).name+std::string("] not implemented in McStas instrument ****")).c_str());
+	  return;
+  }
   const auto stage_name = stages.find(par_data.stage)->second;
 	_j[stage_name][par_data.name] = value;
 }
