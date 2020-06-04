@@ -4,14 +4,15 @@
 #include <string>
 /** \namespace panosc 
  * \brief namespace for simualation platform 
- * \ingroup clientAPI */
+ */
+ /* \ingroup clientAPI */
 namespace panosc
 {
 
 /** stages implemented as integers to allow for loops
  */
 typedef size_t stage_t;
-/** \ingroup clientAPI
+/** \ingroup stages
  * @{
  */
 static const stage_t sFULL     = 3; ///< FULL detector simulation stage // this should always be the last!

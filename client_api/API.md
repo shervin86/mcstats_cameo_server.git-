@@ -1,14 +1,28 @@
-\defgroup clientAPI Client API
-\brief Set of classes to be used on the client side
+\defgroup SIM_PARAMETERS Simulation parameters
 
+\defgroup clientAPI Client API
+\brief C++ client API
+
+\author Shervin Nourbakhsh nourbakhsh@ill.fr
+
+
+## Headers
 There are two classes to be included on the client side:
   - panosc::sim_request: \copybrief panosc::sim_request
   - panosc::sim_result: \copybrief panosc::sim_result
 
+## Implemented instruments
+Implemented instruments are listed in: panosc::instrument_t
 
-# Workflow from the client side
+## Parameters accepted
+The list of accepted parameters is listed in: panosc::sim_request::param_t
 
- -# declare a sim_request object and set the simulation parameters
+If you try to add a parameter in the list that has been marked as NOT IMPLEMENTED, an exception of type panosc::param_not_implemented
+
+## Workflow from the client side
+
+ -# declare a sim_request object and set the simulation parameters \n
+ Accepted simulation parameters are listed in panosc::sim_request::param_t
  \snippet src/fakeNomad.cpp request
  \snippet src/fakeNomad.cpp request2
  -# send the request via CAMEO to the server

@@ -21,6 +21,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
                                            })
 #endif
 
+/** \exception param_not_implemented
+ * \brief Exception thrown if trying to add a parameter that is defined but not implemented
+ * \ingroup clientAPI
+ */
 class param_not_implemented :  public std::runtime_error
 {
 public:
@@ -38,7 +42,8 @@ public:
 class sim_request
 {
 	public:
-	/** \brief Specify what you want the server to return in the result */
+	/** \brief Specify what you want the server to return in the result
+	 * \ingroup clientAPI */
 	enum return_t {
 		rNONE = 0, ///< return only the exit status and no data
 		rCOUNTS,   ///< return the weighted counts on the detector
@@ -48,6 +53,7 @@ class sim_request
 		rFULL      ///< return the entire output directory in TGZ format
 	};
 
+	/** \brief list of accepted parameters \ingroup clientAPI */
 	enum param_t {
 		pWAVELENGTH,        ///< neutron wavelength measured in 10^-10 m (ang)
 		pSOURCE_SIZE_X,     ///< NOT IMPLEMENTED YET
@@ -87,21 +93,16 @@ class sim_request
 	void set_instrument(instrument_t instr = D22);
 
 	/** \brief add simulation parameter
-	 * \param[in] name : name of the parameter, it should match the name in McStas
+	 * \param[in] par : parameter as defined in param_t
 	 * \param[in] value : the value of the parameter, only float is implemented
 	 */
-	void add_parameter(param_t, double value);
+	void add_parameter(param_t par, double value);
 
 	/** \brief add simulation parameter
-	 * \param[in] stage : it defines to which stage of the simulation the parameter belongs. It
-	 * can be:
-	 *    - panosc::#sFULL
-	 *    - panosc::#sSAMPLE
-	 *    - panosc::#sDETECTOR
-	 * \param[in] name : name of the parameter, it should match the name in McStas
+	 * \param[in] par : parameter as defined in param_t
 	 * \param[in] vec : parameter is a vector of floats
 	 */
-	void add_parameter_array(param_t, std::vector<double> &vec);
+	void add_parameter_array(param_t par, std::vector<double> &vec);
 
 	/** \brief request results
 	 *  \param[in] iret : what to return as defined by #return_t.
@@ -123,7 +124,7 @@ class sim_request
 
 	/*------------------------------ for fakeNomad */
 
-	/// \brief pretty print of the request in json format, for debug purposes
+	/// \internal \brief pretty print of the request in json format, for debug purposes  \endinternal
 	friend std::ostream &operator<<(std::ostream &os, const panosc::sim_request &s);
 
 	void read_json(std::ifstream &jsonfile);
@@ -133,7 +134,7 @@ class sim_request
 	instrument_t   _instrument;
 
 	private:
-	static const double FLUX; ///< \brief D22 source flux
+	static const double FLUX; ///< \brief Flux of the source assumed for the measurement time to number of neutrons conversion
 };
 
 } // namespace panosc

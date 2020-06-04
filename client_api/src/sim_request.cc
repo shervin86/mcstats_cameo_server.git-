@@ -30,7 +30,9 @@ static const std::map<sim_request::param_t, param_data> param_names = {
     // clang-format on
 };
 
-const double sim_request::FLUX = 1.2e7; ///< \brief D22 source flux 1.2e8
+  //1.2e8
+const double sim_request::FLUX = 1.2e7; ///< Flux of the source assumed for the measurement time to number of neutrons conversion
+  
 
 void sim_request::set_measurement_time(double time) { set_num_neutrons((unsigned long int)(time * FLUX)); }
 void sim_request::set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
