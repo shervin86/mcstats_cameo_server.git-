@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 			request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
 			request.add_parameter(panosc::sim_request::pCOLLIMATION, 2.00);
 			try {
-				request.add_parameter(panosc::sim_request::pTHINKNESS, 2.00);
+				request.add_parameter(panosc::sim_request::pTHICKNESS, 2.00);
 			} catch (const panosc::param_not_implemented &e) {
 				std::cerr << e.what() << std::endl;
 			}
@@ -116,12 +116,12 @@ int main(int argc, char *argv[])
 		// p += ".tgz";
 		if (true) {
 			/// [send request]
-			requester->sendBinary(request.to_cameo());
+			requester->send(request.to_cameo());
 			/// [send request]
 			// Wait for the response from the server.
 			/// [receive result]
 			std::string response;
-			requester->receiveBinary(response);
+			requester->receive(response);
 			panosc::sim_result result(response);
 			/// [receive result]
 			/// [return state]
