@@ -25,7 +25,7 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pBEAMSTOP_X				, {sNONE,	"bs_x"			}},
 	{sim_request::pBEAMSTOP_Y				, {sNONE,	"bs_y"			}},
 	{sim_request::pATTENUATOR				, {sNONE,	"attenuator"	}},
-	{sim_request::pTHINKNESS				, {sNONE,	"thinkness"		}},
+	{sim_request::pTHICKNESS				, {sNONE,	"thickness"		}},
 	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
     // clang-format on
 };

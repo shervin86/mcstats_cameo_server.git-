@@ -64,7 +64,7 @@ class sim_request
 		pBEAMSTOP_X,        ///< NOT IMPLEMENTED YET
 		pBEAMSTOP_Y,        ///< NOT IMPLEMENTED YET
 		pATTENUATOR,        ///< NOT IMPLEMENTED YET
-		pTHINKNESS,         ///< NOT IMPLEMENTED YET
+		pTHICKNESS,         ///< NOT IMPLEMENTED YET
 		pCOLLIMATION,       ///< NOT IMPLEMENTED YET
 	};
 	/** \brief empty constructor: parameters should be added one by one
