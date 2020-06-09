@@ -30,10 +30,13 @@ install(EXPORT ${PROJECT_NAME} DESTINATION share/${PROJECT_NAME}/cmake)
 export(TARGETS sim_client FILE ${PROJECT_NAME}.cmake)
 
 # Every library has unit tests, of course
-#add_executable(testlib
-#    test/testlib.cpp)
+add_executable(testclient ./test/client.cpp)
+target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> )
+target_link_libraries(testclient sim_client)
 
-#target_link_libraries(testlib
-#    lib)
+enable_testing()
+add_test(testclient testclient)
+add_test(test_json  diff -q testclient.json ../../request.json)
 
-#add_test(testlib testlib)
+
+  

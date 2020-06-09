@@ -27,7 +27,8 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pATTENUATOR				, {sNONE,	"attenuator"	}},
 	{sim_request::pTHICKNESS				, {sNONE,	"thickness"		}},
 	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
-    // clang-format on
+	{sim_request::pNOTIMPLEMENTED                   , {sNONE, "not_implemented"}},
+	// clang-format on
 };
 
   //1.2e8

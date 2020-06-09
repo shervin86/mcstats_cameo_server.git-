@@ -2,13 +2,13 @@ stages:
   - build
   - test
   - doc
- 
+
 before_script:
   - pwd
   - git status
   - mkdir build/
-  
-  
+
+
 compile_client_api:
   stage: build
   script:
@@ -22,11 +22,12 @@ compile_server:
     - cd build/
     - cmake -DSERVER=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
     - cmake --build .
-  
+
 test0:
   stage: test
   script:
-    - ./test/test1.sh
+    - cd build/
+    - ctest --output-on-failure
 
 pages:
   stage: doc

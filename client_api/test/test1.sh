@@ -1,4 +1,8 @@
 #!/bin/bash
+diff -q testclient.json ../request.json
+
+exit $!
+exit 0
 #create a test config
 sed 's|7123|7100|;s|logs|test/logs|' cameo_config.xml  > test/cameo_config_test.xml
 exit 0

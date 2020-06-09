@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7.2)
 
 # Project name and version
 project(cameo-mcstas VERSION 0.10.0 LANGUAGES CXX)
+enable_testing()
 
 include(GNUInstallDirs)
 
@@ -52,6 +53,7 @@ target_compile_options(mcstas_server PRIVATE -std=c++17)
 
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
+  add_test(NAME d22 COMMAND ILL_H512_D22.out -n 10000 lambda=4.5)
 endif(DO_INSTRUMENTS)
 endif(SERVER)
 
@@ -67,8 +69,6 @@ if(SERVER)
 
 endif(SERVER)
   
-#enable_testing()
-add_test(NAME d22 COMMAND ILL_H512_D22.out -n 10000 lambda=4.5)
 
 ################ Doc
 find_package(Doxygen)

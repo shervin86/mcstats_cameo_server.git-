@@ -66,6 +66,7 @@ class sim_request
 		pATTENUATOR,        ///< NOT IMPLEMENTED YET
 		pTHICKNESS,         ///< NOT IMPLEMENTED YET
 		pCOLLIMATION,       ///< NOT IMPLEMENTED YET
+		pNOTIMPLEMENTED,    ///< FOR UNIT TESTS
 	};
 	/** \brief empty constructor: parameters should be added one by one
 	 *                            with dedicated methods
