@@ -34,8 +34,8 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 const double sim_request::FLUX = 1.2e7; ///< Flux of the source assumed for the measurement time to number of neutrons conversion
   
 
-void sim_request::set_measurement_time(double time) { set_num_neutrons((unsigned long int)(time * FLUX)); }
-void sim_request::set_num_neutrons(unsigned long int n) { _j["--ncount"] = n; }
+  void sim_request::set_measurement_time(double time) { set_num_neutrons((unsigned long long int)(time * FLUX)); } ///\todo add a check that the value does not exceed the unsigned long int
+void sim_request::set_num_neutrons(unsigned long long int n) { _j["--ncount"] = n; }
 
 std::string sim_request::to_cameo(void) const { return _j.dump(); }
 

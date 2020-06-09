@@ -79,7 +79,7 @@ class sim_request
 	sim_request(void){};
 
 	/** \brief set the number of neutrons to simulate */
-	void set_num_neutrons(unsigned long int n);
+	void set_num_neutrons(unsigned long long int n);
 
 	/** \brief set the number of neutrons starting from the acquisition time and assuming a FLUX
 	 * for the source of 1.2e8
