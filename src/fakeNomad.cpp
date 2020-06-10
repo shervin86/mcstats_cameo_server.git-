@@ -113,12 +113,12 @@ int main(int argc, char *argv[])
 		// p += ".tgz";
 		if (true) {
 			/// [send request]
-			requester->send(request.to_cameo());
+			requester->sendBinary(request.to_cameo());
 			/// [send request]
 			// Wait for the response from the server.
 			/// [receive result]
 			std::string response;
-			requester->receive(response);
+			requester->receiveBinary(response);
 			panosc::sim_result result(response);
 			/// [receive result]
 			/// [return state]
