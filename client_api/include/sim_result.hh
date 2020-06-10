@@ -33,9 +33,9 @@ class sim_result
 	sim_result(void){};
 	static const size_t DIM_X = 128;
 	static const size_t DIM_Y = 128;
-	float               _dim_x;
-	float               _dim_y;
-	std::vector<float>  _counts, errors, n;
+	size_t              _dim_x;
+	size_t              _dim_y;
+	std::vector<float>  _counts, _errors, _n;
 	int                 _status;
 };
 } // namespace panosc

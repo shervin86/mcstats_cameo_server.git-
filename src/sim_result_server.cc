@@ -23,7 +23,7 @@ void sim_result_server::read_file(std::ifstream &f)
 				if (line.find("I:"))
 					z = &_counts;
 				else if (line.find("N:"))
-					z = &n;
+					z = &_n;
 			}
 		} else { // data block
 			std::stringstream ss(line);
