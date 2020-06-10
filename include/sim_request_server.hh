@@ -89,6 +89,8 @@ class sim_request_server : public sim_request
 
 	std::string to_string(void) const { return _j.dump(); }
 
+	bool is_test(void) const { return _j["--ncount"] == "0"; };
+
 	private:
 	std::hash<nlohmann::json> _hash;
 };

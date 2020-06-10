@@ -19,6 +19,15 @@ class sim_result_server : public sim_result
 
 	void read_file(std::ifstream &f);
 
+	void set_test(int status)
+	{
+		_status = status;
+		_dim_x  = 16;
+		_dim_y  = 16;
+		_counts = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		_errors = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+		_n      = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+	};
 	/** \brief transform the result into a string to be sent through CAMEO (server side)
 	 *
 	 * \details

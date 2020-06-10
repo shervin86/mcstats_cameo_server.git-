@@ -58,12 +58,13 @@ void readFile(const std::string &fileName, std::string &fileContent)
  */
 int main(int argc, char *argv[])
 {
-	bool isDevel=false;
+	bool        isDevel = false;
 	std::string baseDir = "/dev/shm/";
 	for (int i = 0; i < argc; ++i) {
 		if (strcmp(argv[i], "--baseDir") == 0 or strcmp(argv[i], "-d") == 0)
 			baseDir = argv[++i];
-		else if (strcmp(argv[i], "--devel") == 0) isDevel=true;
+		else if (strcmp(argv[i], "--devel") == 0)
+			isDevel = true;
 #ifdef DEBUG
 		std::cout << "#" << argv[i] << "#\t" << std::endl;
 #endif
@@ -112,13 +113,19 @@ int main(int argc, char *argv[])
 			// declare the APIs
 			panosc::sim_request_server sim_request_obj(request->getBinary());
 			panosc::sim_result_server  sim_result;
-			mc.set_request(sim_request_obj);
 
 			std::cout << "========== [REQ] ==========\n"
 			          << sim_request_obj << "\n"
 			          << "Request hash: " << sim_request_obj.hash()
 			          << "\n===========================" << std::endl;
-			//			std::cout << bsoncxx::to_json(mc.bson()) << std::endl;
+
+			if (sim_request_obj.is_test()) {
+				sim_result.set_test(cameo::application::SUCCESS);
+				std::cout << "REQUEST FOR TEST!\n" << sim_result.to_cameo() << std::endl;
+				request->replyBinary(sim_result.to_cameo());
+				continue;
+			}
+			mc.set_request(sim_request_obj);
 
 			// define a temp dir in RAM
 			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash(),
@@ -170,7 +177,8 @@ int main(int argc, char *argv[])
 #endif
 
 				// start the sim application
-				auto                                          start = clock();
+				auto start = clock();
+
 				std::unique_ptr<cameo::application::Instance> simulationApplication =
 				    server.start(app_name, args);
 
