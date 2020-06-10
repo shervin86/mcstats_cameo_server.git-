@@ -30,7 +30,10 @@ std::vector<std::string> sim_request_server::args(void) const
 			continue;
 
 		std::stringstream s;
-		s << i.key() << "=" << i.value();
+		if (i.key() == "--ncount")
+			s << i.key() << "=" << std::stoul(i.value().get<std::string>());
+		else
+			s << i.key() << "=" << i.value();
 		argss.push_back(s.str());
 	}
 

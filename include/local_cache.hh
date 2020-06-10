@@ -9,13 +9,12 @@ namespace fs = std::experimental::filesystem;
 
 namespace panosc
 {
-static const std::string baseDir = "/dev/shm/";
 
 class local_cache
 {
 
 	public:
-	local_cache(std::string instrument_name, std::string hash)
+	local_cache(std::string instrument_name, std::string hash, std::string baseDir="/dev/shm/")
 	{
 
 		// define a temp dir in RAM

@@ -10,6 +10,8 @@
 
 namespace panosc
 {
+///\brief Name of the responder in the CAMEO communication \ingroup clientAPI
+static const std::string CAMEO_RESPONDER = "mcstas_responder";
 
 /** \brief implemented instruments */
 enum instrument_t { D22 /** D22 Detector */ };
@@ -25,12 +27,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
  * \brief Exception thrown if trying to add a parameter that is defined but not implemented
  * \ingroup clientAPI
  */
-class param_not_implemented :  public std::runtime_error
+class param_not_implemented : public std::runtime_error
 {
-public:
-	param_not_implemented(const char* what): std::runtime_error(what){};
+	public:
+	param_not_implemented(const char *what) : std::runtime_error(what){};
 };
-	
 
 /**
  * \class sim_request
@@ -135,7 +136,8 @@ class sim_request
 	instrument_t   _instrument;
 
 	private:
-	static const double FLUX; ///< \brief Flux of the source assumed for the measurement time to number of neutrons conversion
+	static const double FLUX; ///< \brief Flux of the source assumed for the measurement time to number of
+	                          ///< neutrons conversion
 };
 
 } // namespace panosc

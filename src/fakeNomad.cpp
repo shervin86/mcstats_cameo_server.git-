@@ -10,9 +10,6 @@ namespace fs = std::experimental::filesystem;
 
 static const std::string baseDir = "/dev/shm/NOMAD/";
 
-//#define SERVERNAME "mcstas_server"
-//#define REQUESTER_RESPONDER_NAME "mcstas_responder"
-
 /**
  * Writes a string to a file as binary
  * @param fileName : the name of the output file
@@ -74,7 +71,7 @@ int main(int argc, char *argv[])
 		std::unique_ptr<cameo::application::Requester> requester =
 		    cameo::application::Requester::create(
 		        *responderServer,
-		        REQUESTER_RESPONDER_NAME); // the name here has to be the same as on the
+		        panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
 		                                   // server
 		std::cout << "Requester: " << *requester << " ["
 		          << "CREATED"

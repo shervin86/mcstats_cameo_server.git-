@@ -1,19 +1,18 @@
 #include "sim_request.hh"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 namespace panosc
 {
 
-
 // this struct is needed only in this library
-struct param_data{
-	stage_t stage;
+struct param_data {
+	stage_t     stage;
 	std::string name;
 };
 
-	//this map is only of internal use
-	// define here the stage for each parameter, it should match the McStas instrument implementation
-	// define here the name for each parameter, it should match the McStas instrument implementation
+// this map is only of internal use
+// define here the stage for each parameter, it should match the McStas instrument implementation
+// define here the name for each parameter, it should match the McStas instrument implementation
 static const std::map<sim_request::param_t, param_data> param_names = {
     // clang-format off
 	{sim_request::pWAVELENGTH				, {sFULL,		"lambda"		}},
@@ -28,15 +27,17 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pTHICKNESS				, {sNONE,	"thickness"		}},
 	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
 	{sim_request::pNOTIMPLEMENTED                   , {sNONE, "not_implemented"}},
-	// clang-format on
+    // clang-format on
 };
 
-  //1.2e8
-const double sim_request::FLUX = 1.2e7; ///< Flux of the source assumed for the measurement time to number of neutrons conversion
-  
+// 1.2e8
+const double sim_request::FLUX = 1.2e7;
 
-  void sim_request::set_measurement_time(double time) { set_num_neutrons((unsigned long long int)(time * FLUX)); } ///\todo add a check that the value does not exceed the unsigned long int
-void sim_request::set_num_neutrons(unsigned long long int n) { _j["--ncount"] = n; }
+void sim_request::set_measurement_time(double time)
+{
+	set_num_neutrons((unsigned long long int)(time * FLUX));
+} ///\todo add a check that the value does not exceed the unsigned long int
+void sim_request::set_num_neutrons(unsigned long long int n) { _j["--ncount"] = std::to_string(n); }
 
 std::string sim_request::to_cameo(void) const { return _j.dump(); }
 
@@ -54,25 +55,29 @@ void sim_request::set_instrument(instrument_t instr)
 	}
 }
 
-
-void sim_request::add_parameter(param_t par	, double value) {
-  const	auto& par_data = param_names.at(par);
-  if(par_data.stage == sNONE){
-	  throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ par_data.name+std::string("] not implemented in McStas instrument ****")).c_str());
-	  return;
-  }
-  const auto stage_name = stages.find(par_data.stage)->second;
+void sim_request::add_parameter(param_t par, double value)
+{
+	const auto &par_data = param_names.at(par);
+	if (par_data.stage == sNONE) {
+		throw param_not_implemented((std::string("**** [WARNING] Parameter [") + par_data.name +
+		                             std::string("] not implemented in McStas instrument ****"))
+		                                .c_str());
+		return;
+	}
+	const auto stage_name         = stages.find(par_data.stage)->second;
 	_j[stage_name][par_data.name] = value;
 }
 
 void sim_request::add_parameter_array(param_t par, std::vector<double> &vec)
 {
-	const	auto& par_data = param_names.at(par);
-	if(par_data.stage == sNONE){
-		throw param_not_implemented((std::string("**** [WARNING] Parameter [")+ par_data.name+std::string("] not implemented in McStas instrument ****")).c_str());
+	const auto &par_data = param_names.at(par);
+	if (par_data.stage == sNONE) {
+		throw param_not_implemented((std::string("**** [WARNING] Parameter [") + par_data.name +
+		                             std::string("] not implemented in McStas instrument ****"))
+		                                .c_str());
 		return;
 	}
-	const auto stage_name = stages.at(par_data.stage);
+	const auto stage_name         = stages.at(par_data.stage);
 	_j[stage_name][par_data.name] = vec;
 }
 

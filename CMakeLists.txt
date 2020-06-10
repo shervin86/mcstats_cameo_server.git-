@@ -24,8 +24,8 @@ message(${LIBMONGOCXX_INCLUDE_DIRS})
 include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
 
 # definitions for the client and server 
-add_definitions(-DSERVERNAME="mcstas_server")
-add_definitions(-DREQUESTER_RESPONDER_NAME="mcstas_responder")
+add_definitions(-DSERVERNAME="mcstas_server-dev")
+
 
 add_subdirectory(client_api)
 #------------------------------------------------------------

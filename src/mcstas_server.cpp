@@ -14,7 +14,6 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
-// static const std::string baseDir = "/dev/shm/";
 /********************************/
 /**
  * \brief name of the responder created by the server that can be
@@ -59,10 +58,18 @@ void readFile(const std::string &fileName, std::string &fileContent)
  */
 int main(int argc, char *argv[])
 {
+	std::string baseDir = "/dev/shm/";
+	for (int i = 0; i < argc; ++i) {
+		if (strcmp(argv[i], "baseDir") == 0 or strcmp(argv[i], "-d") == 0)
+			baseDir = argv[++i];
+#ifdef DEBUG
+		std::cout << "#" << argv[i] << "#\t"  << std::endl;
+#endif
+	}
+
 	cameo::application::This::init(argc, argv);
 
 	panosc::mongo_cache  mc;
-	mongocxx::collection coll = mc.collection(); // db["requests"];
 
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
@@ -79,7 +86,7 @@ int main(int argc, char *argv[])
 		// Define a responder.
 		std::unique_ptr<cameo::application::Responder> responder;
 		try {
-			responder = cameo::application::Responder::create(REQUESTER_RESPONDER_NAME);
+			responder = cameo::application::Responder::create(panosc::CAMEO_RESPONDER);
 			std::cout << "Created responder " << *responder << std::endl;
 		} catch (const cameo::ResponderCreationException &e) {
 			std::cout << "Responder error" << std::endl;
@@ -112,7 +119,7 @@ int main(int argc, char *argv[])
 			//			std::cout << bsoncxx::to_json(mc.bson()) << std::endl;
 
 			// define a temp dir in RAM
-			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash());
+			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash(), baseDir);
 			fs::path            p = lc.output_dir(); // path of the entire mcstas ouput directory
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
