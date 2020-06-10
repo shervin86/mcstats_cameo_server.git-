@@ -32,13 +32,13 @@ namespace panosc
 class mongo_cache
 {
 	public:
-	mongo_cache(void)
+	mongo_cache(bool isDevel=true)
 	    : _instance(), _uri("mongodb://localhost:27017"), _client(_uri),
 	      _bson(bsoncxx::builder::basic::document{})
 	{
 		//		_client = mongocxx::client(_uri);
 		_db   = _client["McStas"];
-		_coll = _db["requests"];
+		_coll = isDevel ? _db["requests_dev"] : _db["requests"];
 	};
 
 	const mongocxx::collection &collection(void) const { return _coll; };

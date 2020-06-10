@@ -58,10 +58,12 @@ void readFile(const std::string &fileName, std::string &fileContent)
  */
 int main(int argc, char *argv[])
 {
+	bool isDevel=false;
 	std::string baseDir = "/dev/shm/";
 	for (int i = 0; i < argc; ++i) {
-		if (strcmp(argv[i], "baseDir") == 0 or strcmp(argv[i], "-d") == 0)
+		if (strcmp(argv[i], "--baseDir") == 0 or strcmp(argv[i], "-d") == 0)
 			baseDir = argv[++i];
+		else if (strcmp(argv[i], "--devel") == 0) isDevel=true;
 #ifdef DEBUG
 		std::cout << "#" << argv[i] << "#\t" << std::endl;
 #endif
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
 
 	cameo::application::This::init(argc, argv);
 
-	panosc::mongo_cache mc;
+	panosc::mongo_cache mc(isDevel);
 
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
