@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 		    cameo::application::Requester::create(
 		        *responderServer,
 		        panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
-		                                   // server
+		                                  // server
 		std::cout << "Requester: " << *requester << " ["
 		          << "CREATED"
 		          << "]" << std::endl;

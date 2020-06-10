@@ -63,13 +63,13 @@ int main(int argc, char *argv[])
 		if (strcmp(argv[i], "baseDir") == 0 or strcmp(argv[i], "-d") == 0)
 			baseDir = argv[++i];
 #ifdef DEBUG
-		std::cout << "#" << argv[i] << "#\t"  << std::endl;
+		std::cout << "#" << argv[i] << "#\t" << std::endl;
 #endif
 	}
 
 	cameo::application::This::init(argc, argv);
 
-	panosc::mongo_cache  mc;
+	panosc::mongo_cache mc;
 
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
@@ -119,7 +119,8 @@ int main(int argc, char *argv[])
 			//			std::cout << bsoncxx::to_json(mc.bson()) << std::endl;
 
 			// define a temp dir in RAM
-			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash(), baseDir);
+			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash(),
+			                       baseDir);
 			fs::path            p = lc.output_dir(); // path of the entire mcstas ouput directory
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
@@ -139,12 +140,13 @@ int main(int argc, char *argv[])
 			if (!lc.is_done()) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
 
-				std::vector<std::string> hashes        = sim_request_obj.stage_hashes();
+				std::vector<std::string> hashes = sim_request_obj.stage_hashes();
 
-				// returns the stage corresponding to a previous simulation with same parameters
-				auto                     stage         = lc.get_stage(hashes); 
-				auto &                   istage        = stage.first;
-				auto &                   mcpl_filename = stage.second;
+				// returns the stage corresponding to a previous simulation with same
+				// parameters
+				auto  stage         = lc.get_stage(hashes);
+				auto &istage        = stage.first;
+				auto &mcpl_filename = stage.second;
 				// check here if any MCPL exists for one of the stages
 				// stages are ordered from the detector to the source
 

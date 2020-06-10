@@ -14,7 +14,7 @@ class local_cache
 {
 
 	public:
-	local_cache(std::string instrument_name, std::string hash, std::string baseDir="/dev/shm/")
+	local_cache(std::string instrument_name, std::string hash, std::string baseDir = "/dev/shm/")
 	{
 
 		// define a temp dir in RAM
