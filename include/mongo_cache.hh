@@ -32,7 +32,7 @@ namespace panosc
 class mongo_cache
 {
 	public:
-	mongo_cache(bool isDevel=true)
+	mongo_cache(bool isDevel = true)
 	    : _instance(), _uri("mongodb://localhost:27017"), _client(_uri),
 	      _bson(bsoncxx::builder::basic::document{})
 	{
