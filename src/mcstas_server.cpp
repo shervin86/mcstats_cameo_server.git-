@@ -132,16 +132,10 @@ int main(int argc, char *argv[])
 			if (!lc.is_done()) { // in this case we need to re-run the simulation
 				// if there is a failure, something should be reported somehow
 
-				// here I could check what has changed and decide if/when/how to
-				// re-use MCPL files
-				/*
-				  - sample
-				  - detector
-				  - source as well as instrument are bound.... so if any change,
-				  re-run the entire simulation...
-				 */
 				std::vector<std::string> hashes        = sim_request_obj.stage_hashes();
-				auto                     stage         = lc.get_stage(hashes);
+
+				// returns the stage corresponding to a previous simulation with same parameters
+				auto                     stage         = lc.get_stage(hashes); 
 				auto &                   istage        = stage.first;
 				auto &                   mcpl_filename = stage.second;
 				// check here if any MCPL exists for one of the stages
