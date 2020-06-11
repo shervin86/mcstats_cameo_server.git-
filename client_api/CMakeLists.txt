@@ -31,12 +31,17 @@ export(TARGETS sim_client FILE ${PROJECT_NAME}.cmake)
 
 # Every library has unit tests, of course
 add_executable(testclient ./test/client.cpp)
-target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> )
+target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../doctest/doctest/>)
 target_link_libraries(testclient sim_client)
 
 enable_testing()
-add_test(testclient testclient ${CMAKE_CURRENT_SOURCE_DIR}/../request.json)
-add_test(test_json  diff testclient.json ${CMAKE_CURRENT_SOURCE_DIR}/../request.json)
+add_test(testclient testclient )
+add_test(test_json  diff testclient.json request.json)
 
 
-  
+
+add_custom_command(
+  TARGET testclient POST_BUILD
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/request.json ${CMAKE_CURRENT_BINARY_DIR}/request.json
+  COMMENT "Copying request.json in the current directory for running the test")

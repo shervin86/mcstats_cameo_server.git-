@@ -1,10 +1,12 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
+  
 stages:
   - build
   - test
   - doc
 
 before_script:
-  - pwd
   - git status
   - mkdir build/
 
@@ -20,15 +22,17 @@ compile_server:
   stage: build
   script:
     - cd build/
-    - cmake -DSERVER=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
+    - cmake -DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
     - cmake --build .
 
 test0:
   stage: test
   script:
     - cd build/
-    - ctest --output-on-failure
-
+    - cmake -DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
+    - make -j8
+    - make test
+    
 pages:
   stage: doc
   script:

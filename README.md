@@ -20,6 +20,12 @@ make install
 In order to run the server, you need to have McStas installed.
 Then compile the instrument file with McStas:
 
+Make sure you have all the submodules cloned:
+```
+git submodule update --init
+```
+
+Compile
 ```
 mkdir build/
 cd build/
