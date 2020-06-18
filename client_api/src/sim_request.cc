@@ -1,6 +1,8 @@
 #include "sim_request.hh"
 #include <iomanip>
 #include <iostream>
+#include <cmath> // for nan
+#include <sstream>
 namespace panosc
 {
 
@@ -8,6 +10,9 @@ namespace panosc
 struct param_data {
 	stage_t     stage;
 	std::string name;
+	float min;
+	float max;
+	std::string units;
 };
 
 // this map is only of internal use
@@ -15,19 +20,19 @@ struct param_data {
 // define here the name for each parameter, it should match the McStas instrument implementation
 static const std::map<sim_request::param_t, param_data> param_names = {
     // clang-format off
-	{sim_request::pWAVELENGTH				, {sFULL,		"lambda"		}},
-	{sim_request::pSOURCE_SIZE_X			, {sNONE,	"source_size_x"	}},
-	{sim_request::pSOURCE_SIZE_Y			, {sNONE,	"source_size_y"	}},
-	{sim_request::pSAMPLE_SIZE_X			, {sNONE,	"sample_size_x"	}},
-	{sim_request::pSAMPLE_SIZE_Y			, {sNONE,	"sample_size_y"	}},
-	{sim_request::pDETECTOR_DISTANCE		, {sNONE,	"det"			}},
-	{sim_request::pBEAMSTOP_X				, {sNONE,	"bs_x"			}},
-	{sim_request::pBEAMSTOP_Y				, {sNONE,	"bs_y"			}},
-	{sim_request::pATTENUATOR				, {sNONE,	"attenuator"	}},
-	{sim_request::pTHICKNESS				, {sNONE,	"thickness"		}},
-	{sim_request::pCOLLIMATION				, {sSAMPLE,		"D22_collimation"	}},
-	{sim_request::pNOTIMPLEMENTED                   , {sNONE, "not_implemented"}},
-    // clang-format on
+	{sim_request::pWAVELENGTH     	, {sFULL  , "lambda"          , 3,  6                                                                             , "angs" }},
+	{sim_request::pSOURCE_SIZE_X  	, {sNONE  , "source_size_x"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSOURCE_SIZE_Y  	, {sNONE  , "source_size_y"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSAMPLE_SIZE_X  	, {sNONE  , "sample_size_x"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSAMPLE_SIZE_Y  	, {sNONE  , "sample_size_y"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pDETECTOR_DISTANCE, {sNONE  , "det"             , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pBEAMSTOP_X       , {sNONE  , "bs_x"            , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pBEAMSTOP_Y       , {sNONE  , "bs_y"            , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pATTENUATOR       , {sNONE  , "attenuator"      , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pTHICKNESS        , {sNONE  , "thickness"       , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pCOLLIMATION      , {sSAMPLE, "D22_collimation" , 2                                      ,  18                                      , "m"    }},
+	{sim_request::pNOTIMPLEMENTED   , {sNONE  , "not_implemented" , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	// clang-format on
 };
 
 // 1.2e8
@@ -64,7 +69,14 @@ void sim_request::add_parameter(param_t par, double value)
 		                                .c_str());
 		return;
 	}
-	const auto stage_name         = stages.find(par_data.stage)->second;
+	const auto stage_name = stages.find(par_data.stage)->second;
+	if(par == sim_request::pCOLLIMATION) value = 20-value; /// \todo remove: best would be to change the instr file
+	std::stringstream ss;
+	ss << "Parameter [" << par_data.name << "] assigned a value that is out of admitted range: " << value
+	   << " [" << par_data.min << ":" << par_data.max << "]";
+	if (value < par_data.min or value > par_data.max) {
+		throw std::out_of_range (ss.str().c_str());
+	}
 	_j[stage_name][par_data.name] = value;
 }
 
