@@ -11,7 +11,10 @@ include(GNUInstallDirs)
 #set(CMAKE_CXX_STANDARD_REQUIRED False)
 
 # Want to compile dynamic or static libraries
-set(BUILD_SHARED_LIBS False)
+set(BUILD_SHARED_LIBS True)
+if(SERVER)
+  set(BUILD_SHARED_LIBS False)
+endif(SERVER)
 
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
@@ -66,6 +69,8 @@ endif(SERVER)
 #set(CMAKE_INSTALL_PREFIX /tmp/devel/)
 #install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
 if(SERVER)
+  set(BUILD_SHARED_LIBS False)
+
   install(TARGETS fakeNomad mcstas_server RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
 
   if (BUILD_SHARED_LIBS)

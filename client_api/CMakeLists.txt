@@ -2,7 +2,7 @@ project(sim_client_api VERSION 0.10.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_library(sim_client SHARED src/sim_request.cc src/sim_result.cc)
+add_library(sim_client src/sim_request.cc src/sim_result.cc)
 
 
 # Define headers for this library. PUBLIC headers are used for
