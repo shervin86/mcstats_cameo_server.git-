@@ -36,7 +36,7 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 };
 
 // 1.2e8
-const double sim_request::FLUX = 1.2e7;
+const double sim_request::FLUX = 200000; // this is less than the 250 kHz to have some contingency
 
 void sim_request::set_measurement_time(double time)
 {
