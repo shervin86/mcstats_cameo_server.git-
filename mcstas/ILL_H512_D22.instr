@@ -335,7 +335,7 @@ EXTEND %{
   if (!SCATTERED) ABSORB;
 %}
 
-COMPONENT D22_Detector = Monitor_nD(xwidth=1, yheight=1, options="x y", bins=128)
+COMPONENT D22_Detector = Monitor_nD(xwidth=1, yheight=1, options="x bins=128 y bins=256")
 AT (0,0,D22_collimation) RELATIVE D22_Sample_Pos
 EXTEND %{
   ABSORB; /* H512 end here */

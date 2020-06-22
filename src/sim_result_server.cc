@@ -7,34 +7,44 @@ namespace panosc
 
 void sim_result_server::read_file(std::ifstream &f)
 {
+	
 	std::string type;
-	// std::shared_ptr< std::vector<float> > z(_counts);
 	std::vector<float> *z = nullptr;
 	while (f.good()) {
 		std::string line;
 		getline(f, line);
+		if (line.empty())
+			continue;
 		if (line.front() == '#') { // comment block
 			if (line.find("type") != std::string::npos) {
 				type = line.substr(2);
-				// need to parse the line to get the size
-				_dim_x = 128;
-				_dim_y = 128;
-			} else if (line.find("Data") != std::string::npos) {
-				if (line.find("I:"))
+				/// \todo throw exception
+				assert(sscanf(type.c_str(), "type: array_2d(%lu,%lu)", &_dim_x, &_dim_y) ==
+				       2);
+			} else {
+				if (line.find("I:") != std::string::npos) {
 					z = &_counts;
-				else if (line.find("N:"))
+					z->clear();
+				} else if (line.find("I_err:") != std::string::npos) {
+					z = &_errors;
+					z->clear();
+				} else if (line.find("N:") != std::string::npos) {
 					z = &_n;
+					z->clear();
+				}
 			}
 		} else { // data block
 			std::stringstream ss(line);
 			while (ss.good()) {
 				float iz;
 				ss >> iz;
-				z->push_back(iz);
+				if (ss.good())
+					z->push_back(iz);
 			}
 		}
 	}
-	std::cout << type << std::endl;
+
+	assert(z->size() == _dim_x * _dim_y);
 }
 
 std::string sim_result_server::to_cameo(void) const
