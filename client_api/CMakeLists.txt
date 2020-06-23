@@ -35,8 +35,8 @@ target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_S
 target_link_libraries(testclient sim_client)
 
 enable_testing()
-add_test(testclient testclient)
-add_test(test_json  diff -q testclient.json ../../request.json)
+add_test(testclient testclient ${CMAKE_CURRENT_SOURCE_DIR}/../request.json)
+add_test(test_json  diff testclient.json ${CMAKE_CURRENT_SOURCE_DIR}/../request.json)
 
 
   

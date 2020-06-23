@@ -13,24 +13,26 @@ link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
 message("${CMAKE_BINARY_DIR}")
 message("${CMAKE_BUILD_DIRECTORY}")
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
-  COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22-sSAMPLE.c ILL_H512_D22-sSAMPLE.instr 
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "creation of ILL_H512_D22-sSAMPLE.c"
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22-sSAMPLE.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 #
 add_custom_command(OUTPUT ILL_H512_D22.c
-  COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ILL_H512_D22.instr 
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "creation of mcstas ILL_H512_D22.c"
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 #
 
 add_executable(ILL_H512_D22-sSAMPLE.out ILL_H512_D22-sSAMPLE.c)
-add_executable(ILL_H512_D22.out ILL_H512_D22.c)
 target_link_libraries(ILL_H512_D22-sSAMPLE.out PUBLIC m mcpl)
 
+add_executable(ILL_H512_D22.out ILL_H512_D22.c)
+target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
 # target_compile_options(ILL_H512_D22.out PUBLIC -O3 -Wno-error -Wno-all -Wno-extra)
 # target_include_directories(ILL_H512_D22.out PUBLIC /usr/share/mcstas/2.6/libs/mcpl)
-target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
+
 
 install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
+add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.5 -s 554321 -n 5e5 --no-output-file)

@@ -2,8 +2,9 @@
 #include <cassert>
 
 
-int main(void){
-
+int main(int argc, char *argv[]){
+	if(argc!=2) return 1;
+	std::string requestfile = argv[1];
   panosc::sim_request request;
   request.set_instrument(panosc::D22);
 			// request.set_num_neutrons(10000000);
@@ -12,7 +13,7 @@ int main(void){
   // block of implemented parameters
   try{
     request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
-    request.add_parameter(panosc::sim_request::pCOLLIMATION, 2.00);
+    request.add_parameter(panosc::sim_request::pCOLLIMATION, 18.00);
   } catch (const panosc::param_not_implemented &e) {
     return 1;
   }
@@ -29,7 +30,7 @@ int main(void){
   std::ofstream fout("testclient.json");
   fout << request << std::endl;
 
-  std::ifstream fin("../../request.json");
+  std::ifstream fin(requestfile);
   panosc::sim_request req_json;
   req_json.read_json(fin);
 

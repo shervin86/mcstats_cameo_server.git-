@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 			// request.set_num_neutrons(10000000);
 			request.set_measurement_time(1);
 			request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
-			request.add_parameter(panosc::sim_request::pCOLLIMATION, 2.00);
+			request.add_parameter(panosc::sim_request::pCOLLIMATION, 18.00);
 			try {
 				request.add_parameter(panosc::sim_request::pTHICKNESS, 2.00);
 			} catch (const panosc::param_not_implemented &e) {
