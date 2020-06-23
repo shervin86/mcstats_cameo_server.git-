@@ -10,18 +10,20 @@ link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
 #------------------------------------------------------------
 # use mcstas to generate .c from the instrument file
 #------------------------------------------------------------
+message("${CMAKE_BINARY_DIR}")
+message("${CMAKE_BUILD_DIRECTORY}")
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
   COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o build/mcstas/ILL_H512_D22-sSAMPLE.c mcstas/ILL_H512_D22-sSAMPLE.instr
-  WORKING_DIRECTORY ../../
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22-sSAMPLE.c ILL_H512_D22-sSAMPLE.instr 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
-
+#
 add_custom_command(OUTPUT ILL_H512_D22.c
   COMMENT "creation of mcstas .c"
-  COMMAND mcstas -t -o build/mcstas/ILL_H512_D22.c mcstas/ILL_H512_D22.instr
-  WORKING_DIRECTORY ../../
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ILL_H512_D22.instr 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
-
+#
 
 add_executable(ILL_H512_D22-sSAMPLE.out ILL_H512_D22-sSAMPLE.c)
 add_executable(ILL_H512_D22.out ILL_H512_D22.c)
