@@ -38,6 +38,13 @@ firefox  doc/html/index.html &
 
 or you can find it at https://nourbakhsh.sites.code.ill.fr/mcstats_cameo_server/
 
+## Launch CAMEO server
+```
+bash
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/jni/:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib:/usr/share/java
+cameo-server cameo_config.xml
+```
+
 ## Cameo applications
 
  - fakeNomad: this program emulates what the Nomad server should/might do
