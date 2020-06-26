@@ -31,8 +31,6 @@ class sim_result
 
 	protected:
 	sim_result(void){};
-	static const size_t DIM_X = 128;
-	static const size_t DIM_Y = 128;
 	size_t              _dim_x;
 	size_t              _dim_y;
 	std::vector<float>  _counts, _errors, _n;

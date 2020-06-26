@@ -8,12 +8,13 @@ stages:
 
 before_script:
   - git status
-  - mkdir build/
+
 
 
 compile_client_api:
   stage: build
   script:
+    - mkdir build/
     - cd build/
     - cmake ..
     - cmake --build .
@@ -21,17 +22,24 @@ compile_client_api:
 compile_server:
   stage: build
   script:
+    - mkdir build/
     - cd build/
     - cmake -DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
     - cmake --build .
+  artifacts:
+    paths:
+      - build/
 
 test0:
   stage: test
+  needs:
+    - job: compile_server
+      artifacts: true
   script:
     - cd build/
-    - cmake -DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/ ..
-    - make -j8
-    - make test
+    - ctest --output-on-failure -L client
+    - ctest --output-on-failure -L mcstas
+    - ctest --output-on-failure -L server
     
 pages:
   stage: doc

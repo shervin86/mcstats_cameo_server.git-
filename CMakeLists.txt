@@ -61,7 +61,6 @@ target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
 
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
-  add_test(NAME d22 COMMAND ILL_H512_D22.out -n 10000 lambda=4.5)
 endif(DO_INSTRUMENTS)
 endif(SERVER)
 
@@ -77,6 +76,16 @@ if(SERVER)
 	install(TARGETS  sim_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
   endif(BUILD_SHARED_LIBS)
 
+  add_executable(testserver ./test/testserver.cpp)
+  target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
+  target_link_libraries(testserver PRIVATE sim_server)
+  target_link_libraries(testserver PRIVATE stdc++fs)
+  target_compile_options(testserver PRIVATE -std=c++17)
+
+  add_test(testserver testserver)
+  set_tests_properties(testserver PROPERTIES LABELS server)
+  
 endif(SERVER)
   
 

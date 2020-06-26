@@ -35,4 +35,5 @@ target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
 
 
 install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
-add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.5 -s 554321 -n 5e5 --no-output-file)
+add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.51 D22_collimation=2.0 -s 554321 -n 200000)
+set_tests_properties(test_ILL_D22 PROPERTIES LABELS mcstas)

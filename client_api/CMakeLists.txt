@@ -38,7 +38,7 @@ target_link_libraries(testclient sim_client)
 enable_testing()
 add_test(testclient testclient )
 add_test(test_json  diff testclient.json request.json)
-
+set_tests_properties(testclient test_json PROPERTIES LABELS client)
 
 
 add_custom_command(
