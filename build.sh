@@ -42,7 +42,7 @@ fi
 
 cd build/$1
 cmake $OPTS ../../
-cmake --build .
+cmake --build . || exit 1
 make
 ctest && $SUDO make install
 
