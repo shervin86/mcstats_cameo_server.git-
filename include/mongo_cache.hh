@@ -39,6 +39,7 @@ class mongo_cache
 		//		_client = mongocxx::client(_uri);
 		_db   = _client["McStas"];
 		_coll = isDevel ? _db["requests_dev"] : _db["requests"];
+		_coll.delete_many(_bson.view());
 	};
 
 	const mongocxx::collection &collection(void) const { return _coll; };
@@ -63,7 +64,7 @@ class mongo_cache
 
 	void save_request(void)
 	{
-		_coll.insert_one(bson()); ///\todo check return value
+		//_coll.insert_one(bson()); ///\todo uncomment and check return value
 	}
 
 	private:
