@@ -42,19 +42,21 @@ find_package(libmongocxx 3.2.0 REQUIRED)
 message(${LIBMONGOCXX_INCLUDE_DIRS})
 include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
 
+find_package (Threads)
+
   # Client
 add_executable(fakeNomad src/fakeNomad.cpp)
 target_link_libraries(fakeNomad PRIVATE cameo)
-target_link_libraries(fakeNomad PRIVATE stdc++fs)
 target_link_libraries(fakeNomad PRIVATE m zmq protobuf)
 target_link_libraries(fakeNomad PRIVATE sim_client)
+target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
 
 # Server
 add_executable(mcstas_server src/mcstas_server.cpp)
 target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
 target_link_libraries(mcstas_server PRIVATE cameo)
 target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
-target_link_libraries(mcstas_server PRIVATE stdc++fs)
+target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
 target_link_libraries(mcstas_server PRIVATE sim_server)
 target_compile_options(mcstas_server PRIVATE -std=c++17)
 target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)

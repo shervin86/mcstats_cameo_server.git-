@@ -41,10 +41,10 @@ if [ -n "$newbranch" ];then
 fi
 
 cd build/$1
-cmake $OPTS ../../
+cmake -DCMAKE_BUILD_TYPE=Debug $OPTS ../../
 cmake --build . || exit 1
 make
-ctest && $SUDO make install
+ctest --output-on-failure && $SUDO make install
 
 if [ -n "$newbranch" ]; then
 	git checkout $current_branch

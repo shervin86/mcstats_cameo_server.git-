@@ -67,7 +67,26 @@ xterm -e cmo -e tcp://localhost:7123 exec fakeNomad &
 
 ```
 
+# Attenzione
+Responder::reply e' blocking!
 
+If the client does:
+requesterA;
+requesterB;
+A->send();
+B->send();
+A->receive();
+B->receive();
+
+and the server processes serially the requests:
+ResponderX;
+while(true){
+ req =responderX->receive();
+ req->reply();
+ }
+ 
+ It seems to be blocking bacause A and B might be received in opposite order.
+ 
 
 # Workflow
 

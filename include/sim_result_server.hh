@@ -15,7 +15,7 @@ class sim_result_server : public sim_result
 	public:
 	/** \brief constructor reading the mcstas detector file (server-side)
 	 */
-	sim_result_server(void){};
+	sim_result_server(int stat = 0) { set_status(stat); }; // 0 = UNKNOWN in CAMEO
 
 	void read_file(std::ifstream &f);
 

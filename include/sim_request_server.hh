@@ -40,6 +40,8 @@ class sim_request_server : public sim_request
 		_j = nlohmann::json::parse(message);
 		// check_json();
 		_instrument = _j["instrument"]["name"].get<instrument_t>(); // take the enum here
+		_type       = _j["type"].get<req_t>();
+		//		_j.erase("type");
 	}
 
 	/// returing the string "SIM"+name of the instrument
@@ -55,15 +57,24 @@ class sim_request_server : public sim_request
 	/** \brief what is required to be returned */
 	return_t get_return_data(void) const;
 
+	/** \brief type of the request: defined by sim_request::req_t */
+	req_t type(void) const { return _type; };
+
 	// inline std::string string(void) const { return _j.dump(); }
 
 	/** \brief returns the hash of the entire request string */
 	// inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
-	inline std::string hash(void) const { return std::to_string(_hash(_j)); }
+	inline std::string hash(void) const
+	{
+		nlohmann::json j(_j);
+		j.erase("type");
+		return std::to_string(_hash(j));
+	}
 
 	inline std::string hash(size_t s) const
 	{
 		nlohmann::json j(_j);
+		j.erase("type");
 		switch (s) {
 		case sFULL:
 			break;

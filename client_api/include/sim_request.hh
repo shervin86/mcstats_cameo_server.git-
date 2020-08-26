@@ -12,6 +12,7 @@ namespace panosc
 {
 ///\brief Name of the responder in the CAMEO communication \ingroup clientAPI
 static const std::string CAMEO_RESPONDER = "mcstas_responder";
+static const std::string CAMEO_PUBLISHER = "mcstas_publisher";
 
 /** \brief implemented instruments */
 enum instrument_t { D22 /** D22 Detector */ };
@@ -43,6 +44,13 @@ class param_not_implemented : public std::runtime_error
 class sim_request
 {
 	public:
+	/** \brief Specify the request type
+	 * \ingroup clientAPI */
+	enum req_t {
+		SIMULATE = 0, ///< SIMULATE
+		STOP,         ///< stop the ongoing simulation
+	};
+
 	/** \brief Specify what you want the server to return in the result
 	 * \ingroup clientAPI */
 	enum return_t {
@@ -54,7 +62,7 @@ class sim_request
 		rFULL      ///< return the entire output directory in TGZ format
 	};
 
-	/** \brief list of accepted parameters \ingroup clientAPI */
+	/** \brief list of accepted parameters (floats) \ingroup clientAPI */
 	enum param_t {
 		pWAVELENGTH,        ///< neutron wavelength measured in 10^-10 m (ang)
 		pSOURCE_SIZE_X,     ///< NOT IMPLEMENTED YET
@@ -78,7 +86,7 @@ class sim_request
 	 *   - add_parameter()
 	 *   - set_return_data()
 	 */
-	sim_request(void){};
+	sim_request(req_t request_type = SIMULATE) : _type(request_type) { _j["type"] = request_type; };
 
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long long int n);
@@ -111,6 +119,13 @@ class sim_request
 	 */
 	void set_return_data(return_t iret = rNONE);
 
+	/** \brief sets the request as defined by req_t */
+	void set_type(req_t request_type = SIMULATE)
+	{
+		_type      = request_type;
+		_j["type"] = request_type;
+	};
+
 	/** \brief transform the request into a string to be sent through CAMEO
 	 * \details
 	 * this method is kept if one wants to decouple the printing and the encoding into string
@@ -134,6 +149,7 @@ class sim_request
 	protected:
 	nlohmann::json _j;
 	instrument_t   _instrument;
+	req_t          _type;
 
 	private:
 	static const double FLUX; ///< \brief Flux of the source assumed for the measurement time to number of

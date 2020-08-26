@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 		// p += ".tgz";
 		if (true) {
 			/// [send request]
-			requester->sendBinary(request.to_cameo());
+			requester->sendBinary(request.to_cameo()); // request number 1
 			/// [send request]
 			// Wait for the response from the server.
 			/// [receive result]
@@ -135,13 +135,93 @@ int main(int argc, char *argv[])
 					std::cout << "Data: " << *d << std::endl;
 				}
 			} else {
-				std::cerr << "ERROR" << std::endl;
+				std::cerr
+				    << "[ERROR] exit status is: " << cameo::application::toString(returnState)
+				    << std::endl;
 				ret = exitFAILURE;
+				return ret;
 			}
 		} else {
 			// std::cout << "[INFO] Result already present in " << p << std::endl;
 			std::cout << "[INFO] Result already present in " << std::endl;
 		}
+
+		std::cout << "Sending two requests: testing the threads" << std::endl;
+		// Create a requester.
+		std::unique_ptr<std::thread> thread_A, thread_B, thread_C, thread_D;
+		auto req_fun = [request, &responderServer](std::string thread_name, double measurement_time,
+		                                           panosc::sim_request::req_t type =
+		                                               panosc::sim_request::SIMULATE) {
+			std::cout << "[THREAD " << thread_name << "] "
+			          << "START" << std::endl;
+			std::unique_ptr<cameo::application::Requester> requester_thread =
+			    cameo::application::Requester::create(
+			        *responderServer,
+			        panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
+			panosc::sim_request req(type);    // = request;
+			req.set_instrument(panosc::D22);
+			req.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
+			req.add_parameter(panosc::sim_request::pCOLLIMATION, 18.00);
+			req.set_return_data(panosc::sim_request::rCOUNTS);
+
+			req.set_measurement_time(measurement_time);
+
+			std::string response;
+			requester_thread->sendBinary(req.to_cameo());
+			std::cout << "[THREAD " << thread_name << "] "
+			          << "sent" << std::endl;
+			requester_thread->receiveBinary(response);
+			std::cout << "[THREAD " << thread_name << "] " << response << std::endl;
+		};
+
+		thread_A.reset(new std::thread(req_fun, "A", 5)); // request number 2
+		thread_B.reset(new std::thread(req_fun, "B", 5)); // request number 3
+
+		// thread_A->join();
+		// thread_B->join();
+
+		thread_C.reset(new std::thread(req_fun, "C", 6)); // request number 4
+		thread_D.reset(new std::thread(req_fun, "D", 7)); // request number 5
+
+		if (thread_A.get() != nullptr)
+			thread_A->join();
+		if (thread_B.get() != nullptr)
+			thread_B->join();
+
+		thread_C->join();
+		thread_D->join();
+
+		// trying to stop an ongoing simulation
+
+		thread_A.reset(new std::thread(req_fun, "E", 20)); // request number 2
+
+		thread_B.reset(
+		    new std::thread(req_fun, "STOP", 20, panosc::sim_request::STOP)); // request number 2
+		if (thread_A.get() != nullptr)
+			thread_A->join();
+		if (thread_B.get() != nullptr)
+			thread_B->join();
+
+		// std::unique_ptr<cameo::application::Requester> requester_bis =
+		//     cameo::application::Requester::create(
+		//         *responderServer,
+		//         panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
+
+		// std::cout << "Old request: \n" << request << "\n";
+		// request.set_measurement_time(5); // in seconds
+		// std::cout << "New request: \n" << request << std::endl;
+		// std::cout << "Requester: " << *requester << "\n"
+		//           << "Requester_bis: " << *requester_bis << std::endl;
+
+		// requester->sendBinary(request.to_cameo());
+		// requester_bis->sendBinary(request.to_cameo());
+		// // Wait for the response from the server.
+		// std::string response;
+		// requester->receiveBinary(response);
+		// // std::cout << "[REQUESTER] " << response << std::endl;
+
+		// requester_bis->receiveBinary(response);
+		// std::cout << "[REQUESTER_BIS] " << response << std::endl;
 		std::cout << "Finished the application" << std::endl;
 
 	} // end of block to make sure zmq objects are closed properly
