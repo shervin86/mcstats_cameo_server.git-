@@ -28,6 +28,8 @@ std::vector<std::string> sim_request_server::args(void) const
 			continue;
 		if (i.key() == "return")
 			continue;
+		if (i.key() == "type")
+			continue;
 
 		std::stringstream s;
 		if (i.key() == "--ncount")

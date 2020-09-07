@@ -12,5 +12,6 @@
     "sSAMPLE": {
         "D22_collimation": 2.0
     },
-    "sSOURCE": {}
+    "sSOURCE": {},
+    "type": 0
 }

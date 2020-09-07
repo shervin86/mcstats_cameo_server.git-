@@ -6,6 +6,7 @@
 #include "c++/7/experimental/filesystem"
 namespace fs = std::experimental::filesystem;
 
+// make sure that the message is translated correctly
 TEST_CASE("Request server")
 {
 	std::ifstream       fin("client_api/request.json");
@@ -16,6 +17,7 @@ TEST_CASE("Request server")
 	CHECK(request.to_cameo() == server_req.to_cameo()); // make sure that the constructor works
 }
 
+// check that the sim_result_server class is correctly reading the McStas output file
 TEST_CASE("Server Result") {
 
 
@@ -40,3 +42,6 @@ TEST_CASE("Server Result") {
 	CHECK(sim_result.dim_y() == 256);
 	CHECK(sim_result.data().size() == 32768);
 }
+
+
+	

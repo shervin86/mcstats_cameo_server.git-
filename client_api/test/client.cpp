@@ -17,7 +17,7 @@ TEST_CASE("Testing test request (zero neutrons)")
 
 	CHECK(request.to_cameo() ==
 	      "{\"--ncount\":\"0\",\"instrument\":{\"name\":\"D22\"},\"mcpl\":{},\"return\":\"NONE\","
-	      "\"sDETECTOR\":{},\"sFULL\":{},\"sSAMPLE\":{},\"sSOURCE\":{}}");
+	      "\"sDETECTOR\":{},\"sFULL\":{},\"sSAMPLE\":{},\"sSOURCE\":{},\"type\":0}");
 
 	// panosc::sim_result result;
 	// result.set_test(0);

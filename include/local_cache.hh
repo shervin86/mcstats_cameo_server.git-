@@ -48,14 +48,15 @@ class local_cache
 		return p;
 	};
 
-	inline void save_request(std::string sim_request)
+	inline void save_request(std::string sim_request) const
 	{
 		// print the request json in the directory
 		std::ofstream request_dump_file((output_dir()).string() + "/request.json");
 		request_dump_file << sim_request << std::endl;
+		request_dump_file.close();
 	}
 
-	inline void save_tgz(void)
+	inline void save_tgz(void) const
 	{
 		system((std::string("tar -cz -C ") + _p.parent_path().string() + " " + _p.stem().string() +
 		        " > " + path_tgz().string())
@@ -98,17 +99,23 @@ class local_cache
 		for (istage = 0; istage < sFULL and mcpl_filename.empty();) {
 			const auto &stage_hash = hashes[istage];
 			const auto &sp         = stage_path(istage, stage_hash);
+#ifdef DEBUG
 			std::cout << "[INFO] check if MCPL file for stage " << istage
 			          << " exists\n       check existence of file" << sp << std::endl;
+#endif
 			if (fs::exists(sp)) {
 				mcpl_filename = sp.parent_path() / sp.stem();
 				mcpl_filename += ".mcpl.gz";
+#ifdef DEBUG
 				std::cout << "    -> file found" << std::endl;
+#endif
 			} else
 				++istage;
 		}
 		if (mcpl_filename.empty()) {
+#ifdef DEBUG
 			std::cout << "    -> file NOT found" << std::endl;
+#endif
 		}
 		if (mcpl_filename.empty())
 			istage = sFULL;

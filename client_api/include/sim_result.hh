@@ -30,7 +30,7 @@ class sim_result
 	int                       get_status(void) const { return _status; };
 
 	protected:
-	sim_result(void){};
+	sim_result(void): _dim_x(0), _dim_y(0), _status(0) {};
 	size_t              _dim_x;
 	size_t              _dim_y;
 	std::vector<float>  _counts, _errors, _n;
