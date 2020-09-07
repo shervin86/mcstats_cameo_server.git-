@@ -7,6 +7,7 @@
 
 // definition of stages and their string representation
 #include "stages.hh"
+#include "instruments.hh"
 
 namespace panosc
 {
@@ -14,15 +15,6 @@ namespace panosc
 static const std::string CAMEO_RESPONDER = "mcstas_responder";
 static const std::string CAMEO_PUBLISHER = "mcstas_publisher";
 
-/** \brief implemented instruments */
-enum instrument_t { D22 /** D22 Detector */ };
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-// map instrument_t values to JSON as strings
-NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
-                                               {D22, "D22"},
-                                           })
-#endif
 
 /** \exception param_not_implemented
  * \brief Exception thrown if trying to add a parameter that is defined but not implemented
@@ -125,6 +117,11 @@ class sim_request
 		_type      = request_type;
 		_j["type"] = request_type;
 	};
+
+	/** \brief type of sample among those implemented
+	 * \param[in] void : void
+	 */
+	void set_sample(void);
 
 	/** \brief transform the request into a string to be sent through CAMEO
 	 * \details
