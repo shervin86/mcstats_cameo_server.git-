@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
 				std::cerr << e.what() << std::endl;
 			}
 			request.set_return_data(panosc::sim_request::rNONE);
+
+			request.set_sample_material(panosc::H2O);
+//			request.set_sample_size(0.005, 0.05);
+			request.set_sample_size(0.005);
 			/// [request2]
 		}
 		jsonfile.close();

@@ -34,7 +34,7 @@
 *
 * %End
 *******************************************************************************/
-DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq")
+DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq", sample_size_r=0.005, sample_size_y=0.05 )
 
 DECLARE %{
 
@@ -328,7 +328,7 @@ COMPONENT H51_D22_Sample_L = Monitor_nD(xwidth=0.02, yheight=0.05,
   options="lambda limits=[1 10]", bins=50, restore_neutron=1)
 AT (0,0,0) RELATIVE D22_Sample_Pos
 
-SPLIT COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=0.005,yheight=0.05,
+SPLIT COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=sample_size_r, yheight=sample_size_y,
   Sqw_coh=D22_sample, Sqw_inc=NULL, d_phi=RAD2DEG*atan2(1, D22_collimation))
 AT (0,0,0) RELATIVE D22_Sample_Pos
 EXTEND %{

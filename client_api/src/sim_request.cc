@@ -1,7 +1,7 @@
 #include "sim_request.hh"
+#include <cmath> // for nan
 #include <iomanip>
 #include <iostream>
-#include <cmath> // for nan
 #include <sstream>
 namespace panosc
 {
@@ -10,8 +10,8 @@ namespace panosc
 struct param_data {
 	stage_t     stage;
 	std::string name;
-	float min;
-	float max;
+	float       min;
+	float       max;
 	std::string units;
 };
 
@@ -23,8 +23,10 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pWAVELENGTH     	, {sFULL  , "lambda"          , 3,  6                                                                             , "angs" }},
 	{sim_request::pSOURCE_SIZE_X  	, {sNONE  , "source_size_x"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pSOURCE_SIZE_Y  	, {sNONE  , "source_size_y"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSAMPLE_SIZE_R  	, {sSAMPLE  , "sample_size_r"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , "[m]"     }},
 	{sim_request::pSAMPLE_SIZE_X  	, {sNONE  , "sample_size_x"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
-	{sim_request::pSAMPLE_SIZE_Y  	, {sNONE  , "sample_size_y"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSAMPLE_SIZE_Y  	, {sSAMPLE  , "sample_size_y"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
+	{sim_request::pSAMPLE_SIZE_Z  	, {sNONE  , "sample_size_z"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pDETECTOR_DISTANCE, {sNONE  , "det"             , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pBEAMSTOP_X       , {sNONE  , "bs_x"            , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pBEAMSTOP_Y       , {sNONE  , "bs_y"            , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
@@ -32,7 +34,7 @@ static const std::map<sim_request::param_t, param_data> param_names = {
 	{sim_request::pTHICKNESS        , {sNONE  , "thickness"       , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pCOLLIMATION      , {sSAMPLE, "D22_collimation" , 2                                      ,  18                                      , "m"    }},
 	{sim_request::pNOTIMPLEMENTED   , {sNONE  , "not_implemented" , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
-	// clang-format on
+    // clang-format on
 };
 
 // 1.2e8
@@ -70,12 +72,13 @@ void sim_request::add_parameter(param_t par, double value)
 		return;
 	}
 	const auto stage_name = stages.find(par_data.stage)->second;
-	if(par == sim_request::pCOLLIMATION) value = 20-value; /// \todo remove: best would be to change the instr file
+	if (par == sim_request::pCOLLIMATION)
+		value = 20 - value; /// \todo remove: best would be to change the instr file
 	std::stringstream ss;
 	ss << "Parameter [" << par_data.name << "] assigned a value that is out of admitted range: " << value
 	   << " [" << par_data.min << ":" << par_data.max << "]";
 	if (value < par_data.min or value > par_data.max) {
-		throw std::out_of_range (ss.str().c_str());
+		throw std::out_of_range(ss.str().c_str());
 	}
 	_j[stage_name][par_data.name] = value;
 }
@@ -115,6 +118,29 @@ void sim_request::set_return_data(return_t iret)
 		_j["return"] = "FULL";
 		break;
 	}
+}
+
+void sim_request::set_sample_material(sample_material_t material)
+{
+	_j["sSAMPLE"]["material"] = material;
+}
+
+void sim_request::set_sample_size(double radius) {
+	add_parameter(sim_request::pSAMPLE_SIZE_R, radius);
+	add_parameter(sim_request::pSAMPLE_SIZE_Y, 0);
+}
+
+void sim_request::set_sample_size(double radius, double height)
+{
+	add_parameter(sim_request::pSAMPLE_SIZE_R, radius);
+	add_parameter(sim_request::pSAMPLE_SIZE_Y, height);
+}
+
+void sim_request::set_sample_size(double x, double y, double z)
+{
+	add_parameter(sim_request::pSAMPLE_SIZE_X, x);
+	add_parameter(sim_request::pSAMPLE_SIZE_Y, y);
+	add_parameter(sim_request::pSAMPLE_SIZE_Z, z);
 }
 
 void sim_request::read_json(std::ifstream &jsonfile)

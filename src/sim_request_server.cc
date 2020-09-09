@@ -42,7 +42,14 @@ std::vector<std::string> sim_request_server::args(void) const
 	for (stage_t istage = sSOURCE; istage <= sFULL; ++istage) {
 		for (const auto &i : _j[stages.at(istage)].items()) {
 			std::stringstream s;
-			s << i.key() << "=" << i.value();
+			if (istage == sSAMPLE and i.key() == "material") {
+				switch (i.value().get<sample_material_t>()) {
+				case H2O:
+					s << "D22_sample=H2O_liq.qSq";
+				};
+			} else {
+				s << i.key() << "=" << i.value();
+			}
 			argss.push_back(s.str());
 		}
 	}

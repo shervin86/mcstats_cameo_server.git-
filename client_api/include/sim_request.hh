@@ -6,15 +6,15 @@
 #include <stdexcept>
 
 // definition of stages and their string representation
-#include "stages.hh"
 #include "instruments.hh"
+#include "stages.hh"
+#include "samples.hh"
 
 namespace panosc
 {
 ///\brief Name of the responder in the CAMEO communication \ingroup clientAPI
 static const std::string CAMEO_RESPONDER = "mcstas_responder";
 static const std::string CAMEO_PUBLISHER = "mcstas_publisher";
-
 
 /** \exception param_not_implemented
  * \brief Exception thrown if trying to add a parameter that is defined but not implemented
@@ -25,6 +25,7 @@ class param_not_implemented : public std::runtime_error
 	public:
 	param_not_implemented(const char *what) : std::runtime_error(what){};
 };
+
 
 /**
  * \class sim_request
@@ -56,11 +57,13 @@ class sim_request
 
 	/** \brief list of accepted parameters (floats) \ingroup clientAPI */
 	enum param_t {
-		pWAVELENGTH,        ///< neutron wavelength measured in 10^-10 m (ang)
+		pWAVELENGTH,        ///< neutron wavelength measured in 10^-10 m [ang]
 		pSOURCE_SIZE_X,     ///< NOT IMPLEMENTED YET
 		pSOURCE_SIZE_Y,     ///< NOT IMPLEMENTED YET
+		pSAMPLE_SIZE_R,     ///< sample radius if sphere or cylinder [m]
 		pSAMPLE_SIZE_X,     ///< NOT IMPLEMENTED YET
-		pSAMPLE_SIZE_Y,     ///< NOT IMPLEMENTED YET
+		pSAMPLE_SIZE_Y,     ///< height of the sample for cylinder or box [m]
+		pSAMPLE_SIZE_Z,     ///< NOT IMPLEMENTED YET
 		pDETECTOR_DISTANCE, ///< NOT IMPLEMENTED YET
 		pBEAMSTOP_X,        ///< NOT IMPLEMENTED YET
 		pBEAMSTOP_Y,        ///< NOT IMPLEMENTED YET
@@ -69,6 +72,12 @@ class sim_request
 		pCOLLIMATION,       ///< NOT IMPLEMENTED YET
 		pNOTIMPLEMENTED,    ///< FOR UNIT TESTS
 	};
+
+	/** \brief list of sample shapes */
+	// enum sample_shape_t {
+	// 	ssSPHERE, ///< sphere, radious defined bt the p_SAMPLE_SIZE_X parameter
+	// }
+
 	/** \brief empty constructor: parameters should be added one by one
 	 *                            with dedicated methods
 	 *
@@ -78,7 +87,10 @@ class sim_request
 	 *   - add_parameter()
 	 *   - set_return_data()
 	 */
-	sim_request(req_t request_type = SIMULATE) : _type(request_type) { _j["type"] = request_type; };
+	sim_request(req_t request_type = SIMULATE) : _type(request_type)
+	{
+		_j["type"] = request_type;
+	};
 
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long long int n);
@@ -119,9 +131,18 @@ class sim_request
 	};
 
 	/** \brief type of sample among those implemented
-	 * \param[in] void : void
+	 * \param[in] material : choosing a material among those implemented
 	 */
-	void set_sample(void);
+	void set_sample_material(sample_material_t material = H2O);
+
+	/**{@ \brief the shape of the sample is inferred from the number of parameters
+	 * this is not supposed to be like that, but the sample parameters should
+	 * come from a dedicated class
+	 */
+	void set_sample_size(double radius);                ///< sphere
+	void set_sample_size(double radius, double height); ///< cylinder
+	void set_sample_size(double x, double y, double z); ///< box/plate
+	/**@}*/
 
 	/** \brief transform the request into a string to be sent through CAMEO
 	 * \details
