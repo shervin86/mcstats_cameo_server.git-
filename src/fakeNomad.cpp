@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 			/// [request2]
 			request.set_instrument(panosc::D22);
 			// request.set_num_neutrons(10000000);
-			request.set_measurement_time(1);
+			request.set_measurement_time(60 * 60);
 			request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
 			request.add_parameter(panosc::sim_request::pCOLLIMATION, 18.00);
 			try {
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 			request.set_return_data(panosc::sim_request::rNONE);
 
 			request.set_sample_material(panosc::H2O);
-//			request.set_sample_size(0.005, 0.05);
+			//			request.set_sample_size(0.005, 0.05);
 			request.set_sample_size(0.005);
 			/// [request2]
 		}
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 			// std::cout << "[INFO] Result already present in " << p << std::endl;
 			std::cout << "[INFO] Result already present in " << std::endl;
 		}
-
+		return 0;
 		std::cout << "Sending two requests: testing the threads" << std::endl;
 		// Create a requester.
 		std::unique_ptr<std::thread> thread_A, thread_B, thread_C, thread_D;
