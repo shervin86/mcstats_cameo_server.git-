@@ -12,6 +12,8 @@ include(GNUInstallDirs)
 
 # Want to compile dynamic or static libraries
 set(BUILD_SHARED_LIBS True)
+
+option(SERVER "Build the server" ON)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
 endif(SERVER)
@@ -26,7 +28,6 @@ include_directories(include include/nlohmann)
 # definitions for the client and server 
 add_definitions(-DSERVERNAME="mcstas_server-dev")
 
-
 add_subdirectory(client_api)
 #------------------------------------------------------------
 # Libraries
@@ -38,9 +39,9 @@ target_link_libraries(sim_server sim_client)
 # Executables
 #------------------------------------------------------------
 if(SERVER)
-find_package(libmongocxx 3.2.0 REQUIRED)
-message(${LIBMONGOCXX_INCLUDE_DIRS})
-include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
+find_package(mongocxx 3.2.0 REQUIRED)
+#message(${LIBMONGOCXX_INCLUDE_DIRS})
+#include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
 
 find_package (Threads)
 
@@ -50,6 +51,7 @@ target_link_libraries(fakeNomad PRIVATE cameo)
 target_link_libraries(fakeNomad PRIVATE m zmq protobuf)
 target_link_libraries(fakeNomad PRIVATE sim_client)
 target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
+target_compile_features(fakeNomad PUBLIC cxx_std_17)
 
 # Server
 add_executable(mcstas_server src/mcstas_server.cpp)
@@ -58,8 +60,9 @@ target_link_libraries(mcstas_server PRIVATE cameo)
 target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
 target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
 target_link_libraries(mcstas_server PRIVATE sim_server)
-target_compile_options(mcstas_server PRIVATE -std=c++17)
-target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
+target_compile_features(mcstas_server PUBLIC cxx_std_17)
+#target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
+target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
 
 if(DO_INSTRUMENTS)
   add_subdirectory(mcstas)
@@ -83,7 +86,7 @@ if(SERVER)
 	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
   target_link_libraries(testserver PRIVATE sim_server)
   target_link_libraries(testserver PRIVATE stdc++fs)
-  target_compile_options(testserver PRIVATE -std=c++17)
+  target_compile_features(testserver PUBLIC cxx_std_17)
 
   add_test(testserver testserver)
   set_tests_properties(testserver PROPERTIES LABELS server)

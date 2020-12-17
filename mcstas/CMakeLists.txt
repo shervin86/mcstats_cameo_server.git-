@@ -4,9 +4,11 @@ project(mcstas_instruments VERSION 0.10.0 LANGUAGES C)
 set(CMAKE_C_FLAGS "-O3 -Wno-error -Wno-all -Wno-extra -Wno-unused-result -Wno-format-truncation -Wno-format-overflow -Wno-format")
 
 ############################# MCSTAS
+message(STATUS "MCSTAS: ${MCSTAS}")
 include_directories(/usr/share/mcstas/2.6/libs/mcpl)
 link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
-
+include_directories(${MCSTAS}/libs/mcpl)
+link_directories(${MCSTAS}/libs/mcpl/)
 #------------------------------------------------------------
 # use mcstas to generate .c from the instrument file
 #------------------------------------------------------------

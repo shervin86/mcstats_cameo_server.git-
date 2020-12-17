@@ -1,10 +1,25 @@
-### Clone
+
+Clone
+==============================
 After cloning the repository, setup the githooks:
 ```
 git config --local core.hooksPath .githooks/
 ```
 
-### Install (client API only)
+INSTALL
+==============================
+
+client API only
+------------------------------
+
+### Dependencies
+ - cmake
+ - mongo
+
+### CENTOS 8
+```
+yum install -y cmake mongo-c-driver-devel 
+```
 
 ```
 mkdir build/

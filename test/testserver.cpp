@@ -3,8 +3,10 @@
 
 #include "sim_request_server.hh"
 #include "sim_result_server.hh"
-#include "c++/7/experimental/filesystem"
-namespace fs = std::experimental::filesystem;
+//#include "c++/7/experimental/filesystem"
+//namespace fs = std::experimental::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 // make sure that the message is translated correctly
 TEST_CASE("Request server")

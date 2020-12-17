@@ -3,7 +3,6 @@
 #include "sim_request_server.hh"
 #include "sim_result_server.hh"
 
-#include "c++/7/experimental/filesystem"
 #include <cameo/cameo.h>
 #include <cassert>
 #include <fstream>
@@ -12,7 +11,9 @@
 #include <sstream>
 #include <string>
 #include <thread>
-namespace fs = std::experimental::filesystem;
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 /********************************/
 /**

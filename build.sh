@@ -9,6 +9,14 @@ if [ "$#" != "1" ];then
 	usage >> /dev/stderr
 	exit 1
 fi
+
+if [ -z "$MCSTAS" ];then
+    PREFIX=/usr/local/
+    export MCSTAS=${PREFIX}/mcstas/2.6.1
+    export MCSTAS_TOOLS=$PREFIX/mcstas/2.6.1/tools/Perl/
+    export PATH=$PREFIX/mcstas/2.6.1/miniconda3/bin:$PREFIX/mcstas/2.6.1/bin:$PATH
+fi
+
 current_branch=`git status --porcelain -b | head -1 | cut -d ' ' -f 2 | sed 's|\..*||g'`
 mkdir build/{DEVEL,PROD,TEST,API} -p
 case $1 in
@@ -41,7 +49,7 @@ if [ -n "$newbranch" ];then
 fi
 
 cd build/$1
-cmake -DCMAKE_BUILD_TYPE=Debug $OPTS ../../
+cmake -DCMAKE_BUILD_TYPE=Debug $OPTS -DMCSTAS=${MCSTAS} ../../
 cmake --build . || exit 1
 make
 ctest --output-on-failure && $SUDO make install
