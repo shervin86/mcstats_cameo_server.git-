@@ -6,6 +6,7 @@ namespace panosc
 
 /** \brief list of implemented materials */
 enum sample_material_t { H2O /** water */ };
+// cannot use enum class with nlohmann json
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // map sample_material_t values to JSON as strings

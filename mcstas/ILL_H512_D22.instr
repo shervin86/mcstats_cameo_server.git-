@@ -38,11 +38,11 @@ DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, stri
 
 DECLARE %{
 
-  /* HCS (H5) source 'Measured' parameters */
-  double sT3=413.5,sI3=10.22e12;
-  double sT2=145.8,sI2=3.44e13;
-  double sT1=40.1 ,sI1=2.78e13;
-
+	/* HCS (H5) source 'Measured' parameters */
+	/*  double sT3=413.5,sI3=10.22e12;
+	    double sT2=145.8,sI2=3.44e13;
+	    double sT1=40.1 ,sI1=2.78e13;
+	*/
   /* guide coating parameters */
   double gR0          = 1;
   double gQc          = 0.0216;
@@ -73,6 +73,7 @@ TRACE
 COMPONENT Origin = Progress_bar()
 AT(0,0,0) ABSOLUTE
 
+	/*this defines the source HCS*/
 %include "ILL_source.instr"
 
 /* Ni common guide: wide entry window for all guides */
@@ -89,60 +90,8 @@ AT (-(0.04+0.004+0.015+0.004+0.06)/2+0.04/2,0,0) RELATIVE H5 ROTATED (0,-1.3269,
 /* ================================ H51 ===================================== */
 /* feeds: IN15, D22 */
 
-COMPONENT H51_Start = Arm()
-AT (0,0,0) RELATIVE H51_origin
-
-COMPONENT H51_inpile = Guide_gravity(h1=0.12,w1=0.04, m=1.2, l=2.775,
-  R0=gR0, Qc=gQc, alpha=gAlpha, W=gW)
-AT (0,0,0) RELATIVE PREVIOUS
-
-/* Gap 25 mm before BOG (barillet obturateur general). Carter BOG             */
-
-COMPONENT H51_Obt_1 = COPY(PREVIOUS)(l=0.863)
-AT (0,0,2.775+0.025) RELATIVE PREVIOUS
-
-COMPONENT H51_Obt_2 = COPY(PREVIOUS)(l=1.433)
-AT (0,0,0.863+0.012) RELATIVE PREVIOUS
-
-COMPONENT H51_Obt_3 = COPY(PREVIOUS)(l=0.745)
-AT (0,0,1.433+0.012) RELATIVE PREVIOUS
-
-COMPONENT COPY(HCS_Al) = COPY(HCS_Al)(xwidth=0.04)
-AT (0,0,0.745+0.01) RELATIVE PREVIOUS
-
-/* Gap 75 mm after BOG (barillet obturateur general): VS */
-
-COMPONENT H51_Obt_Out = COPY(H5)(xwidth=0.04, restore_neutron=1)
-AT (0,0,0.06) RELATIVE PREVIOUS
-
-COMPONENT COPY(HCS_Al) = COPY(HCS_Al)(xwidth=0.04)
-AT (0,0,0) RELATIVE PREVIOUS
-
-/* Sections 2,3 in NoteDPT11/H51 - curved R=3000 m. Length=2.5 m down to splitter */
-/* Carter VS+Movable+Common                                                   */
-
-COMPONENT H51_S2 = COPY(H51_inpile)(l=2.5/3)
-AT (0,0,0.05)                      RELATIVE PREVIOUS
-
-COMPONENT COPY(H51_S2) = COPY(H51_S2)
-AT (0,0,2.5/3)                    RELATIVE PREVIOUS
-ROTATED (0,-2.5/3/3000*RAD2DEG,0) RELATIVE PREVIOUS
-
-COMPONENT COPY(H51_S2) = COPY(H51_S2)
-AT (0,0,2.5/3)                    RELATIVE PREVIOUS
-ROTATED (0,-2.5/3/3000*RAD2DEG,0) RELATIVE PREVIOUS
-
-COMPONENT HCS_Al_H51 = COPY(HCS_Al)(xwidth=0.04)
-AT (0,0,2.5/3+0.01) RELATIVE PREVIOUS
-
-/* Splitter (polarising "Deviateur") H511/H512 L=1.5                          */
-/* D22 in transmission, IN15 in reflection: 79.70-76.45 = 3.25 deg angle      */
-/* bottom   part direct to d22 height=55mm                                    */
-/* top part part in reflection to in15 height=55mm: transmitted part lost     */
-
-/* split the beam to either D22 or IN15  (monitors)                           */
-COMPONENT H51_S2_Out = COPY(H5)(xwidth=0.04, yheight=0.12)
-AT (0,0,0.05) RELATIVE PREVIOUS
+	/* ILL_H51.instr starts at H51_origin and provides H51_S2_Out */
+%include "ILL_H51.instr"
 
 COMPONENT H51_split_2 = COPY(H5)(xwidth=0.04, restore_neutron=1, yheight=0.055)
 AT (0,0.12/2-0.055/2,0)  RELATIVE H51_S2_Out

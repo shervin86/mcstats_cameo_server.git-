@@ -13,7 +13,8 @@ include(GNUInstallDirs)
 # Want to compile dynamic or static libraries
 set(BUILD_SHARED_LIBS True)
 
-option(SERVER "Build the server" ON)
+option(DO_INSTRUMENTS "Compile the instruments with mcstas" OFF)
+option(SERVER "Build the server" OFF)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
 endif(SERVER)
@@ -21,6 +22,7 @@ endif(SERVER)
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
 
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 # where to find the header files
 include_directories(include include/nlohmann)
 
@@ -32,41 +34,42 @@ add_subdirectory(client_api)
 #------------------------------------------------------------
 # Libraries
 #------------------------------------------------------------
-add_library(sim_server  src/sim_request_server.cc src/sim_result_server.cc)  # server
-target_link_libraries(sim_server sim_client)
+add_library(libserver  src/sim_request_server.cc src/sim_result_server.cc)  # server
+target_link_libraries(libserver libclient)
 
 #------------------------------------------------------------
 # Executables
 #------------------------------------------------------------
 if(SERVER)
-find_package(mongocxx 3.2.0 REQUIRED)
-#message(${LIBMONGOCXX_INCLUDE_DIRS})
-#include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
-
-find_package (Threads)
-
+  find_package(cameo 1.1.0 REQUIRED)
+  find_package(mongocxx 3.2.0 REQUIRED)
+  #message(${LIBMONGOCXX_INCLUDE_DIRS})
+  #include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
+  
+  find_package (Threads)
+  
   # Client
-add_executable(fakeNomad src/fakeNomad.cpp)
-target_link_libraries(fakeNomad PRIVATE cameo)
-target_link_libraries(fakeNomad PRIVATE m zmq protobuf)
-target_link_libraries(fakeNomad PRIVATE sim_client)
-target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
-target_compile_features(fakeNomad PUBLIC cxx_std_17)
-
-# Server
-add_executable(mcstas_server src/mcstas_server.cpp)
-target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
-target_link_libraries(mcstas_server PRIVATE cameo)
-target_link_libraries(mcstas_server PRIVATE m zmq protobuf)
-target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
-target_link_libraries(mcstas_server PRIVATE sim_server)
-target_compile_features(mcstas_server PUBLIC cxx_std_17)
-#target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
-target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
-
-if(DO_INSTRUMENTS)
-  add_subdirectory(mcstas)
-endif(DO_INSTRUMENTS)
+  add_executable(fakeNomad src/fakeNomad.cpp)
+  target_link_libraries(fakeNomad PRIVATE cameo)
+  target_link_libraries(fakeNomad PRIVATE m zmq)
+  target_link_libraries(fakeNomad PRIVATE libclient)
+  target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
+  target_compile_features(fakeNomad PUBLIC cxx_std_17)
+  
+  # Server
+  add_executable(mcstas_server src/mcstas_server.cpp)
+  target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
+  target_link_libraries(mcstas_server PRIVATE cameo)
+  target_link_libraries(mcstas_server PRIVATE m zmq)
+  target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
+  target_link_libraries(mcstas_server PRIVATE libserver)
+  target_compile_features(mcstas_server PUBLIC cxx_std_17)
+  #target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
+  target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
+  
+  if(DO_INSTRUMENTS)
+    add_subdirectory(mcstas)
+  endif(DO_INSTRUMENTS)
 endif(SERVER)
 
 ################ Install
@@ -74,25 +77,25 @@ endif(SERVER)
 #install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
-
+  
   install(TARGETS fakeNomad mcstas_server RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
-
+  
   if (BUILD_SHARED_LIBS)
-	install(TARGETS  sim_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
+    install(TARGETS  libserver  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
   endif(BUILD_SHARED_LIBS)
-
+  
   add_executable(testserver ./test/testserver.cpp)
   target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
-  target_link_libraries(testserver PRIVATE sim_server)
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
+  target_link_libraries(testserver PRIVATE libserver)
   target_link_libraries(testserver PRIVATE stdc++fs)
   target_compile_features(testserver PUBLIC cxx_std_17)
-
+  
   add_test(testserver testserver)
   set_tests_properties(testserver PROPERTIES LABELS server)
   
 endif(SERVER)
-  
+
 
 ################ Doc
 find_package(Doxygen)

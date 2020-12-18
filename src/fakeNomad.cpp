@@ -10,8 +10,6 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-static const std::string baseDir = "/dev/shm/NOMAD/";
-
 /**
  * Writes a string to a file as binary
  * @param fileName : the name of the output file
@@ -123,9 +121,10 @@ int main(int argc, char *argv[])
 			/// [send request]
 			// Wait for the response from the server.
 			/// [receive result]
-			std::string response;
-			requester->receiveBinary(response);
-			panosc::sim_result result(response);
+			std::optional<std::string> response = requester->receiveBinary();
+			if(response.has_value() == false) throw std::runtime_error("no message received");
+				
+			panosc::sim_result result(response.value());
 			/// [receive result]
 			/// [return state]
 			returnState = result.get_status();
@@ -172,12 +171,12 @@ int main(int argc, char *argv[])
 
 			req.set_measurement_time(measurement_time);
 
-			std::string response;
+
 			requester_thread->sendBinary(req.to_cameo());
 			std::cout << "[THREAD " << thread_name << "] "
 			          << "sent" << std::endl;
-			requester_thread->receiveBinary(response);
-			std::cout << "[THREAD " << thread_name << "] " << response << std::endl;
+			std::optional<std::string> response = requester_thread->receiveBinary();
+			std::cout << "[THREAD " << thread_name << "] " << response.value() << std::endl;
 		};
 
 		thread_A.reset(new std::thread(req_fun, "A", 5)); // request number 2

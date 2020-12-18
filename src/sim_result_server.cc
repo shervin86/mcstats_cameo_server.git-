@@ -43,7 +43,7 @@ void sim_result_server::read_file(std::ifstream &f)
 			}
 		}
 	}
-
+	if(z == nullptr) assert(false);
 	assert(z->size() == _dim_x * _dim_y);
 }
 

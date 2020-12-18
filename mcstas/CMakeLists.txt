@@ -5,8 +5,8 @@ set(CMAKE_C_FLAGS "-O3 -Wno-error -Wno-all -Wno-extra -Wno-unused-result -Wno-fo
 
 ############################# MCSTAS
 message(STATUS "MCSTAS: ${MCSTAS}")
-include_directories(/usr/share/mcstas/2.6/libs/mcpl)
-link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
+#include_directories(/usr/share/mcstas/2.6/libs/mcpl)
+#link_directories(/usr/share/mcstas/2.6/libs/mcpl/)
 include_directories(${MCSTAS}/libs/mcpl)
 link_directories(${MCSTAS}/libs/mcpl/)
 #------------------------------------------------------------
@@ -14,16 +14,21 @@ link_directories(${MCSTAS}/libs/mcpl/)
 #------------------------------------------------------------
 message("${CMAKE_BINARY_DIR}")
 message("${CMAKE_BUILD_DIRECTORY}")
+
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
   COMMENT "creation of ILL_H512_D22-sSAMPLE.c"
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/ILL_source.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/ILL_H51.instr
   COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22-sSAMPLE.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 #
 add_custom_command(OUTPUT ILL_H512_D22.c
   COMMENT "creation of mcstas ILL_H512_D22.c"
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/ILL_source.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/ILL_H51.instr
   COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
@@ -39,5 +44,5 @@ target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
 
 
 install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
-add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.51 D22_collimation=2.0 -s 554321 -n 200000)
+add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.51 D22_collimation=2.0 -s 554321 -n 200000 sample_size_r=0.010 sample_size_y=0.001)
 set_tests_properties(test_ILL_D22 PROPERTIES LABELS mcstas)

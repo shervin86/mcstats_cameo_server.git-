@@ -21,15 +21,15 @@ current_branch=`git status --porcelain -b | head -1 | cut -d ' ' -f 2 | sed 's|\
 mkdir build/{DEVEL,PROD,TEST,API} -p
 case $1 in
 	DEVEL)
-		OPTS="-DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/tmp/devel/"
+		OPTS="-DSERVER=ON -DDO_INSTRUMENTS=ON -DCMAKE_INSTALL_PREFIX=/tmp/devel/"
 		unset SUDO
 		;;
 	PROD)
-		OPTS="-DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/usr/local/"
+		OPTS="-DSERVER=ON -DDO_INSTRUMENTS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/"
 		;;
 	TEST)
 		newbranch=TEST
-		OPTS="-DSERVER=True -DDO_INSTRUMENTS=True -DCMAKE_INSTALL_PREFIX=/usr/local/"
+		OPTS="-DSERVER=ON -DDO_INSTRUMENTS=ON -DCMAKE_INSTALL_PREFIX=/usr/local/"
 		;;
 	API)
 		OPTS=""

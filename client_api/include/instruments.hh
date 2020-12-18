@@ -1,3 +1,5 @@
+#ifndef PANOSC_ILL_INSTRUMENT_HH
+#define PANOSC_ILL_INSTRUMENT_HH
 namespace panosc
 {
 
@@ -11,4 +13,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
                                            })
 #endif
 
-}
+} // namespace panosc
+
+#endif
