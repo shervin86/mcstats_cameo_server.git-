@@ -1,0 +1,29 @@
+I_file=ARGV[1]
+Ierr_file=ARGV[1]
+N_file=ARGV[1]
+outfile=ARGV[2]
+
+print(I_file)
+set size square
+set auto fix
+set offsets graph 0.05, graph 0.05, graph 0.05, graph 0.05
+
+set xlabel 'x [m]'
+set ylabel 'y [m]'
+
+set term pdf size 5in,5in
+set output outfile
+
+set title "Intensity"
+p I_file index "I" w image t ''
+
+set title "Intensity uncertainty"
+p Ierr_file index "I_err" w image t ''
+
+set title "True MC neutrons"
+p N_file index "N" w image t ''
+
+set output
+set term x11
+
+#show offsets

@@ -1,0 +1,27 @@
+DEFINE INSTRUMENT ILL_source_test( lambda=4.5, dlambda=.45)
+
+DECLARE %{
+  double Al_Thickness = 0.001;
+
+%}
+
+
+INITIALIZE %{
+%}
+
+TRACE
+
+COMPONENT Origin = Progress_bar()
+AT(0,0,0) ABSOLUTE
+
+%include "ILL_source_simple.instr"
+
+/* Ni common guide: wide entry window for all guides */
+COMPONENT H5 = Monitor_nD(xwidth=0.04+0.004+0.015+0.004+0.06, yheight=0.12,
+  options="x y, slit", bins=50)
+AT(0,0,2.155) RELATIVE HCS
+
+/*COMPONENT Source_Vout = MCPL_output( filename = "SourceVout_simple")
+AT (0, 0, 0) RELATIVE PREVIOUS
+*/
+END

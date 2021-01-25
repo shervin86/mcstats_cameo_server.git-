@@ -9,7 +9,7 @@ matplotlib.use('TkAgg')
 from pandas.plotting import scatter_matrix
 
 
-filename = '/tmp/ILL_2.6e6/H512_Vout.mcpl.gz' #sys.argv[1]
+filename = sys.argv[1] #'/tmp/ILL_2.6e6/H512_Vout.mcpl.gz' #sys.argv[1]
 myfile = mcpl.MCPLFile(filename)
 
 print( 'Number of particles in file: %i' % myfile.nparticles )

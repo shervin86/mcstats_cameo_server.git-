@@ -122,8 +122,9 @@ int main(int argc, char *argv[])
 			// Wait for the response from the server.
 			/// [receive result]
 			std::optional<std::string> response = requester->receiveBinary();
-			if(response.has_value() == false) throw std::runtime_error("no message received");
-				
+			if (response.has_value() == false)
+				throw std::runtime_error("no message received");
+
 			panosc::sim_result result(response.value());
 			/// [receive result]
 			/// [return state]
@@ -170,7 +171,6 @@ int main(int argc, char *argv[])
 			req.set_return_data(panosc::sim_request::rCOUNTS);
 
 			req.set_measurement_time(measurement_time);
-
 
 			requester_thread->sendBinary(req.to_cameo());
 			std::cout << "[THREAD " << thread_name << "] "

@@ -12,8 +12,8 @@ link_directories(${MCSTAS}/libs/mcpl/)
 #------------------------------------------------------------
 # use mcstas to generate .c from the instrument file
 #------------------------------------------------------------
-message("${CMAKE_BINARY_DIR}")
-message("${CMAKE_BUILD_DIRECTORY}")
+#message("${CMAKE_BINARY_DIR}")
+#message("${CMAKE_BUILD_DIRECTORY}")
 
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
   COMMENT "creation of ILL_H512_D22-sSAMPLE.c"
@@ -26,9 +26,10 @@ add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
 #
 add_custom_command(OUTPUT ILL_H512_D22.c
   COMMENT "creation of mcstas ILL_H512_D22.c"
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp
   COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/ILL_source.instr
   COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/ILL_H51.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp ${CMAKE_BINARY_DIR}/MCPL_output.comp
   COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
