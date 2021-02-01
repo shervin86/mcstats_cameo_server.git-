@@ -120,8 +120,18 @@ AT (0,0,0) RELATIVE H51_split_2
 /* relative to H512_Start */
 %include "ILL_H512.instr"
 
-COMPONENT Vin = MCPL_input(filename=Vin_filename, verbose=1) 
+
+COMPONENT H512_Before_VS = Arm()
 AT (0,0,0) RELATIVE PREVIOUS
+
+
+COMPONENT Vin = MCPL_input(filename=Vin_filename, verbose=1) 
+WHEN (stage>0)
+AT (0,0,0) RELATIVE PREVIOUS
+
+COMPONENT Vout = MCPL_output( filename = "sSAMPLE")
+WHEN (stage==0)
+AT (0, 0, 0.01) RELATIVE PREVIOUS
 
 COMPONENT D22_PreV = Monitor_nD(xwidth=0.04, yheight=0.05,
   options="x y", bins=50, restore_neutron=1)

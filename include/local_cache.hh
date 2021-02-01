@@ -96,7 +96,8 @@ class local_cache
 		stage_t     istage = sSOURCE;
 		// check here if any MCPL exists for one of the stages
 		// stages are ordered from the detector to the source
-		for (istage = 0; istage < sFULL and mcpl_filename.empty();) {
+		for (istage = sSOURCE;
+		     istage > sFULL and mcpl_filename.empty();) { // there is no MCPL for the full stage
 			const auto &stage_hash = hashes[istage];
 			const auto &sp         = stage_path(istage, stage_hash);
 #ifdef DEBUG
@@ -110,7 +111,7 @@ class local_cache
 				std::cout << "    -> file found" << std::endl;
 #endif
 			} else
-				++istage;
+				--istage;
 		}
 		if (mcpl_filename.empty()) {
 #ifdef DEBUG

@@ -98,8 +98,10 @@ class sim_request_server : public sim_request
 	inline std::vector<std::string> stage_hashes(void) const
 	{
 		std::vector<std::string> hashes;
-		for (size_t istage = 0; istage < sFULL; ++istage) {
-			hashes.push_back(hash(istage));
+		for (auto stage : stages) {
+			if (stage.first == sNONE)
+				continue;
+			hashes.push_back(hash(stage.first));
 		}
 		return hashes;
 	}

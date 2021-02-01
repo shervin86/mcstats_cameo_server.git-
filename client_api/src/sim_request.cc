@@ -54,8 +54,9 @@ void sim_request::set_instrument(instrument_t instr)
 	case D22:
 		_instrument              = instr;
 		_j["instrument"]["name"] = instr;
-		for (stage_t istage = sSOURCE; istage <= sFULL; istage++) {
-			_j[stages.at(istage)] = nlohmann::json::object();
+		for( auto istage : stages){
+			if(istage.first==sNONE)continue;
+			_j[stages.at(istage.first)] = nlohmann::json::object();
 		}
 		_j["mcpl"] = nlohmann::json::object();
 		break;

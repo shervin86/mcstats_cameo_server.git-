@@ -39,8 +39,12 @@ std::vector<std::string> sim_request_server::args(void) const
 		argss.push_back(s.str());
 	}
 
-	for (stage_t istage = sSOURCE; istage <= sFULL; ++istage) {
-		for (const auto &i : _j[stages.at(istage)].items()) {
+	for (auto stage : stages) {
+		auto istage    = stage.first;
+		auto stagename = stage.second;
+		if (istage == sNONE)
+			continue;
+		for (const auto &i : _j[stagename].items()) {
 			std::stringstream s;
 			if (istage == sSAMPLE and i.key() == "material") {
 				switch (i.value().get<sample_material_t>()) {

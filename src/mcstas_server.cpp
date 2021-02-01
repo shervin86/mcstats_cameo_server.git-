@@ -26,8 +26,8 @@ namespace fs = std::filesystem;
 	          << request->connectToRequester()->exists() << std::endl;
 
 #define MAX_BUFFER 1000000
-//#define VERBOSE
-//#define DEBUG
+#define VERBOSE
+#define DEBUG
 /**
  * Reads the file to a string as binary
  * @param fileName      : the name of the input file
@@ -287,10 +287,19 @@ int main(int argc, char *argv[])
 				auto &istage        = stage.first;
 				auto &mcpl_filename = stage.second;
 
+#ifdef DEBUG
+				std::cout << "------------------------------ Stages\n"
+				          << stage.first << "\t" << stage.second << "\n"
+				          << std::endl;
+				for (auto i : hashes) {
+					std::cout << i << std::endl;
+				}
+#endif
 				//--------------------- build list of arguments for the simulation program
 				std::vector<std::string> args = sim_request_obj.args();
 				args.push_back("--dir=" + (lc.output_dir()).string());
 
+				args.push_back("stage=" + std::to_string(istage));
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
 
