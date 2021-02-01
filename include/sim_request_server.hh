@@ -10,6 +10,9 @@
 #include <sstream>
 #include <vector>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
 /*
   required double measurement_time        600 [seconds]
   repeated double source_size rectangular [30e-3, 30e-3] [m] or circular [30e-3] [m]
@@ -71,7 +74,7 @@ class sim_request_server : public sim_request
 		return std::to_string(_hash(j));
 	}
 
-	inline std::string hash(size_t s) const
+	inline std::string hash(stage_t s) const
 	{
 		nlohmann::json j(_j);
 		j.erase("type");
@@ -79,13 +82,16 @@ class sim_request_server : public sim_request
 		case sFULL:
 			break;
 		case sDETECTOR:
-			j.erase("detector");
+			j.erase(stages.at(sDETECTOR));
 			break;
 		case sSAMPLE:
-			j.erase("detector");
-			j.erase("sample");
+			j.erase(stages.at(sDETECTOR));
+			j.erase(stages.at(sSAMPLE));
 			break;
 		}
+#ifdef DEBUG
+		std::cout << "hash: " << std::to_string(_hash(j)) << "\n" << j << std::endl;
+#endif
 		return std::to_string(_hash(j));
 	}
 
