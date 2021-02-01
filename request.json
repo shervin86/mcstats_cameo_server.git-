@@ -1,5 +1,5 @@
 {
-    "--ncount": "200000",
+    "--ncount": "5000000000",
     "instrument": {
         "name": "D22"
     },
@@ -10,7 +10,10 @@
         "lambda": 4.51
     },
     "sSAMPLE": {
-        "D22_collimation": 2.0
+        "D22_collimation": 2.0,
+        "material": "H2O",
+        "sample_size_r": 0.0051,
+        "sample_size_y": 0.0052
     },
     "sSOURCE": {},
     "type": 0

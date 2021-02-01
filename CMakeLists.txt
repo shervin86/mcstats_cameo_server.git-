@@ -28,7 +28,8 @@ include_directories(include include/nlohmann)
 
 
 # definitions for the client and server 
-add_definitions(-DSERVERNAME="mcstas_server-dev")
+#add_definitions(-DSERVERNAME="mcstas_server-dev")
+add_definitions(-DSERVERNAME="mcstas_server")
 
 add_subdirectory(client_api)
 #------------------------------------------------------------

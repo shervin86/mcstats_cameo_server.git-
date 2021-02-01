@@ -1,7 +1,7 @@
 #!/bin/bash
 INSTALL_PREFIX=/tmp/devel2/
 
-#git clone -b r3.6.2 https://github.com/mongodb/mongo-cxx-driver.git || exit 1
+git clone -b r3.6.2 https://github.com/mongodb/mongo-cxx-driver.git || exit 1
 
 cd mongo-cxx-driver/
 mkdir build/

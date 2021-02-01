@@ -17,11 +17,13 @@ if [ -z "$MCSTAS" ];then
     export PATH=$PREFIX/mcstas/2.6.1/miniconda3/bin:$PREFIX/mcstas/2.6.1/bin:$PATH
 fi
 
+
+
 current_branch=`git status --porcelain -b | head -1 | cut -d ' ' -f 2 | sed 's|\..*||g'`
 mkdir build/{DEVEL,PROD,TEST,API} -p
 case $1 in
 	DEVEL)
-		OPTS="-DSERVER=ON -DDO_INSTRUMENTS=ON -DCMAKE_INSTALL_PREFIX=/tmp/devel/"
+		OPTS="-DSERVER=ON -DDO_INSTRUMENTS=ON -DCMAKE_INSTALL_PREFIX=/tmp/devel/ -DCMAKE_PREFIX_PATH=/usr/local/lib/cmake"
 		unset SUDO
 		;;
 	PROD)
