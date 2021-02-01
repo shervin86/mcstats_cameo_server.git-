@@ -46,6 +46,10 @@ std::vector<std::string> sim_request_server::args(void) const
 				switch (i.value().get<sample_material_t>()) {
 				case H2O:
 					s << "D22_sample=H2O_liq.qSq";
+					break;
+				case D2O:
+					s << "D22_sample=D2O_liq.qSq";
+					break;
 				};
 			} else {
 				s << i.key() << "=" << i.value();
