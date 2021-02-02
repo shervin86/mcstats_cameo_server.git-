@@ -1,4 +1,6 @@
+cmake_minimum_required(VERSION 3.7.2)
 project(mcstas_instruments VERSION 0.10.0 LANGUAGES C)
+include(GNUInstallDirs)
 
 # mcstas code generates plenty of warnings!!! 
 set(CMAKE_C_FLAGS "-O3 -Wno-error -Wno-all -Wno-extra -Wno-unused-result -Wno-format-truncation -Wno-format-overflow -Wno-format")
@@ -14,25 +16,26 @@ link_directories(${MCSTAS}/libs/mcpl/)
 #------------------------------------------------------------
 #message("${CMAKE_BINARY_DIR}")
 #message("${CMAKE_BUILD_DIRECTORY}")
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas)
 
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
   COMMENT "creation of ILL_H512_D22-sSAMPLE.c"
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/ILL_source.instr
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/ILL_H51.instr
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22-sSAMPLE.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_source.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H51.instr
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/ILL_H512_D22-sSAMPLE.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas
   )
 #
 add_custom_command(OUTPUT ILL_H512_D22.c
   COMMENT "creation of mcstas ILL_H512_D22.c"
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512.instr ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/ILL_source.instr
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/ILL_H51.instr
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512.instr ${CMAKE_BINARY_DIR}/ILL_H512.instr
-  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp ${CMAKE_BINARY_DIR}/MCPL_output.comp
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/mcstas/ILL_H512_D22.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_source.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H51.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H512.instr
+  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp ${CMAKE_BINARY_DIR}/mcstas/MCPL_output.comp
+  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/ILL_H512_D22.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas
   )
 #
 
