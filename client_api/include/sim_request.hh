@@ -42,6 +42,7 @@ class sim_request
 	enum req_t {
 		SIMULATE = 0, ///< SIMULATE
 		STOP,         ///< stop the ongoing simulation
+		QUICK
 	};
 
 	/** \brief Specify what you want the server to return in the result

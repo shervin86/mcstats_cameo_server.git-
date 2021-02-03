@@ -10,47 +10,39 @@ BEGIN{
 	xlabel = sprintf("%s %s",$3, $4)
 }
 
-(/#/ && /I:/){
-	variable="I"
-	filename=sprintf("%s.dat",variable)
-	printf("#%s",variable) > filename
-	y=ymin
-	printf("\n\n#%s\n",variable)
-}
-
-(/#/ && /I_err:/){
-	variable="I_err"
-	filename=sprintf("%s.dat",variable)
-	printf("#%s",variable) > filename
-	y=ymin
-	printf("\n\n#%s\n",variable)
-}
-
-(/#/ && /N:/){
-	variable="N"
-	filename=sprintf("%s.dat",variable)
-	printf("#%s",variable) > filename
-	y=ymin
-	printf("\n\n#%s\n",variable)
-
-}
-
 (/xylimits/){
 	xmin=$3
 	xmax=$4
 	ymin=$5
 	ymax=$6
+	xbin_width=(xmax-xmin)/xbins
+	ybin_width=(ymax-ymin)/ybins
 }
+
+(/# type:/){
+	xbins=$3
+	ybins=$4
+	sub("array_2d.", "", xbins)
+	sub("\\(", "", xbins)
+	sub(",", "", xbins)
+	sub("\\)", "", ybins)
+}
+
+(/#/ && (/I:/ || /I_err:/ || /N:/) ){
+	variable=$4
+	sub(":","",variable)
+	filename=sprintf("%s.dat",variable)
+#	printf("#%s",variable) > filename
+	y=ymin-ybin_width/2
+	printf("\n\n#%s\n",variable)
+}
+
 	
 (!/#/){
-	print $0 >> filename
-	xbin_width=(xmax-xmin)/(NF+1)
-	ybin_width=(ymax-ymin)/(NF+1)
-	x=xmin+xbin_width/2
-
+	x=xmin-xbin_width/2
 	for(i =0; i <=NF; i++){
 		z=$i
-		printf("%f\t%f\t%f\n", x, y, z)
+		printf("%f\t%f\t%.4g\n", x, y, z)
 		x+=xbin_width
 	}
 	y+=ybin_width

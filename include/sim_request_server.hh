@@ -54,6 +54,11 @@ class sim_request_server : public sim_request
 		                   .get<std::string>(); // take the string name here and not the enum
 	};
 
+	/// returning the number of neutrons to simulate
+	unsigned long long int get_num_neutrons(void){
+		return std::stoull(_j["ncount"]);
+	}
+	
 	/// returns the arguments to be passed to the mcstas execution
 	std::vector<std::string> args(void) const;
 

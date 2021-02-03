@@ -76,7 +76,8 @@ TRACE
 
 COMPONENT Origin = Progress_bar()
 AT(0,0,0) ABSOLUTE
-JUMP H512_Before_VS WHEN (stage>0 || stage==-1)
+JUMP H512_Before_VS WHEN (stage>0)
+JUMP H512_After_VS  WHEN (stage==-1)
 
 	/*this defines the source HCS*/
 %include "ILL_source.instr"
@@ -133,19 +134,6 @@ COMPONENT Vout = MCPL_output( filename = "sSAMPLE")
 WHEN (stage==0)
 AT (0, 0, 0.001) RELATIVE H512_Before_VS
 
-COMPONENT QuickSource = Source_simple(
-	xwidth = 0.04,
-	yheight = 0.05,
-	target_index = +5,
-  focus_xw = 0.04,
-  focus_yh = 0.05,
-  lambda0     = lambda,
-  dlambda     = lambda/10/2.35,
-  flux=1,
-  gauss=1)
-WHEN(stage==-1)
-AT (0, 0, 0.002) RELATIVE H512_Before_VS
-
 
 
 COMPONENT D22_PreV = Monitor_nD(xwidth=0.08, yheight=0.10,
@@ -163,15 +151,33 @@ COMPONENT D22_Vselector = V_selector(xwidth=0.04, yheight=0.05, zdepth=0.30, rad
 AT (0,0,0.3+0.01) RELATIVE H512_Before_VS
 
 
+COMPONENT H512_After_VS = Arm()
+AT (0,0,0.3) RELATIVE PREVIOUS
+	
+
 COMPONENT D22_PostV_L = Monitor_nD(xwidth=0.04, yheight=0.05,
   options="lambda limits=[3 7]", bins=50, restore_neutron=1)
 AT (0,0,0.301) RELATIVE PREVIOUS
+
 COMPONENT D22_PostV = COPY(D22_PreV)
 AT (0,0,0.001) RELATIVE PREVIOUS
 
 COMPONENT D22_Collimation = COPY(H51_inpile)(
   l=20-D22_collimation, nelements=ceil(D22_collimation/1.5))
 AT (0,0,0.302) RELATIVE D22_Vselector
+
+COMPONENT QuickSource = Source_simple(
+				      xwidth = 0.04,
+				      yheight = 0.12,
+				      target_index = +5,
+				      focus_xw = sample_size_r,
+				      focus_yh = sample_size_y,
+				      lambda0     = lambda,
+				      dlambda     = lambda/10/2.35,
+				      flux=1,
+				      gauss=1)
+WHEN(stage==-1)
+AT (0, 0, 0.3021) RELATIVE D22_Vselector
 
 COMPONENT D22_Sample_Pos = Arm()
 AT (0,0,20+0.3) RELATIVE D22_Vselector
@@ -180,8 +186,7 @@ COMPONENT H51_D22_Sample_Div = Monitor_nD(xwidth=0.02, yheight=0.05,
   options="dx limits=[-2 2], dy limits=[-2 2]", bins=100, restore_neutron=1)
 AT (0,0,0) RELATIVE D22_Sample_Pos
 
-COMPONENT H51_D22_Sample_XY = Monitor_nD(xwidth=0.02, yheight=0.05,
-  options="x y", bins=50, restore_neutron=1)
+COMPONENT H51_D22_Sample_XY = COPY(D22_PreV)
 AT (0,0,0) RELATIVE D22_Sample_Pos
 
 COMPONENT H51_D22_Sample_L = Monitor_nD(xwidth=0.02, yheight=0.05,
