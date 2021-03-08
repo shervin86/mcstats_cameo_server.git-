@@ -32,6 +32,7 @@ namespace panosc
 /** \brief decode simulation requests from client to server
  * \author Shervin Nourbakhsh nourbakhsh@ill.fr
  */
+typedef std::string simHash_t;
 class sim_request_server : public sim_request
 {
 	public:
@@ -55,10 +56,8 @@ class sim_request_server : public sim_request
 	};
 
 	/// returning the number of neutrons to simulate
-	unsigned long long int get_num_neutrons(void){
-		return std::stoull(_j["ncount"]);
-	}
-	
+	unsigned long long int get_num_neutrons(void) { return _j["ncount"].get<unsigned long long int>(); }
+
 	/// returns the arguments to be passed to the mcstas execution
 	std::vector<std::string> args(void) const;
 
@@ -72,14 +71,14 @@ class sim_request_server : public sim_request
 
 	/** \brief returns the hash of the entire request string */
 	// inline std::string hash(void) const { return std::to_string(_hash(to_string())); }
-	inline std::string hash(void) const
+	inline simHash_t hash(void) const
 	{
 		nlohmann::json j(_j);
 		j.erase("type");
 		return std::to_string(_hash(j));
 	}
 
-	inline std::string hash(stage_t s) const
+	inline simHash_t hash(stage_t s) const
 	{
 		nlohmann::json j(_j);
 		j.erase("type");
@@ -100,7 +99,7 @@ class sim_request_server : public sim_request
 		return std::to_string(_hash(j));
 	}
 
-	inline std::vector<std::string> stage_hashes(void) const
+	inline std::vector<simHash_t> stage_hashes(void) const
 	{
 		std::vector<std::string> hashes;
 		for (auto stage : stages) {

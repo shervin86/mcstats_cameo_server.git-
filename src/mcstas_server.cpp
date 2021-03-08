@@ -102,6 +102,11 @@ panosc::sim_result_server send_result(const std::string output_dir, const cameo:
  */
 int main(int argc, char *argv[])
 {
+	// use fixed seeds for the simulations
+	const std::vector<unsigned long long int> seeds = {654321, 86453211, 129543451, 9857291,  1846923,
+	                                                   863223, 553296,   89292913,  98318469, 323549,
+	                                                   223569, 97832431, 1246873,   6759302,  97684372};
+
 	bool        isDevel = false;
 	std::string baseDir = "/dev/shm/";
 	for (int i = 0; i < argc; ++i) {
@@ -149,9 +154,11 @@ int main(int argc, char *argv[])
 		// 	std::cout << "[ERROR] Publisher creation error" << std::endl;
 		// 	return -1;
 		// }
+		std::map<panosc::simHash_t, std::unique_ptr<std::thread>> simulation_threads;
+		std::unique_ptr<std::thread>                              thread;
+		std::map<panosc::simHash_t, cameo::application::InstanceArray>
+		    running_simulations; // maps the hash to the list of running instances
 
-		std::unique_ptr<std::thread>       thread;
-		std::map<std::string, std::string> running_simulations; // maps the hash to the app_name
 		std::unique_ptr<cameo::application::Request>
 		    request_thread; // this is the request being treated in the thread
 
@@ -193,12 +200,19 @@ int main(int argc, char *argv[])
 			//------------------------------ Request for stopping the current simulation
 			if (sim_request_obj.type() == panosc::sim_request::STOP) {
 				std::cout << "[REQUEST] Received stop request" << std::endl;
-				std::unique_ptr<cameo::application::Instance> simulationApplication =
-				    server.connect(running_simulations[sim_request_obj.hash()]);
-				std::cout << "[STOPPING] " << *simulationApplication << "\t"
-				          << simulationApplication->getLastState() << "\t"
-				          << simulationApplication->getActualState() << std::endl;
-				simulationApplication->stop();
+				for (size_t i = 0; i < running_simulations[sim_request_obj.hash()].size();
+				     ++i) {
+
+					auto &simulationApplication =
+					    running_simulations[sim_request_obj.hash()][i];
+
+					//				    server.connect(running_simulations[sim_request_obj.hash()]);
+
+					std::cout << "[STOPPING] " << *simulationApplication << "\t"
+					          << simulationApplication->getLastState() << "\t"
+					          << simulationApplication->getActualState() << std::endl;
+					simulationApplication->stop();
+				}
 				running_simulations.erase(sim_request_obj.hash());
 
 				panosc::sim_result_server sim_result(cameo::application::STOPPING);
@@ -275,8 +289,17 @@ int main(int argc, char *argv[])
 				if (thread.get() != nullptr) { // wait that any previous simulation has ended
 					thread->join();
 				}
+				// NEED TO CHANGE THE SINGLE SIMULATION THREAD INTO A VECTOR OF THREADS WITH A
+				// MAXIMUM NUMBER OF ... 6?
 				std::cout << "[STATUS] Running simulations: " << running_simulations.size()
 				          << std::endl;
+
+				// set the number of jobs
+				unsigned long long int NEUTRONS_PER_JOB = 10000;
+
+				size_t nJobs = std::ceil(sim_request_obj.get_num_neutrons() /
+				                         ((double)NEUTRONS_PER_JOB));
+
 				// get the hash for all the stages
 				std::vector<std::string> hashes = sim_request_obj.stage_hashes();
 
@@ -297,7 +320,8 @@ int main(int argc, char *argv[])
 #endif
 				//--------------------- build list of arguments for the simulation program
 				std::vector<std::string> args = sim_request_obj.args();
-				args.push_back("--dir=" + (lc.output_dir()).string());
+				//				args.push_back("--dir=" +
+				//(lc.output_dir()).string());
 
 				args.push_back("stage=" + std::to_string(istage));
 				if (!mcpl_filename.empty())
@@ -313,26 +337,91 @@ int main(int argc, char *argv[])
 					std::cout << "[DEBUG] arg: #" << singlearg << "#" << std::endl;
 #endif
 
-				std::unique_ptr<cameo::application::Instance> simulationApplication =
-				    server.start(app_name, args);
-				running_simulations[sim_request_obj.hash()] =
-				    simulationApplication->getName(); // getNameId(); // app_name;
+				assert(nJobs > seeds.size());
+				for (size_t i = 0; i < nJobs; ++i) {
+					args.push_back(
+					    "--dir=" + (lc.output_dir()).string() + "/" +
+					    std::to_string(i)); // let the simulation know the index in order
+					                        // to set the output directories
 
-				std::cout << "------------------------------------------------------------\n"
-				             "| Started simulation application "
-				          << simulationApplication->getNameId() << "\t"
-				          << *simulationApplication << "\n| with arguments:\n";
-				for (auto singlearg : args)
-					std::cout << "| >>>>#" << singlearg << "#\n";
+					args.push_back("--seed=" + std::to_string(seeds[i]));
+					running_simulations[sim_request_obj.hash()].push_back(
+					    server.start(app_name, args));
 
-				std::cout << "------------------------------------------------------------"
-				          << std::endl;
+					auto &simulationApplication =
+					    *running_simulations[sim_request_obj.hash()].rbegin();
+					std::cout << "-------------------------------------------------------"
+					             "-----\n"
+					             "| Started simulation application "
+					          << simulationApplication->getNameId() << "\t"
+					          << *simulationApplication << "\n| with arguments:\n";
+					for (auto singlearg : args)
+						std::cout << "| >>>>#" << singlearg << "#\n";
+
+					std::cout
+					    << "------------------------------------------------------------"
+					    << std::endl;
+				}
+
+				thread.reset(new std::thread([&server, app_name, lc, istage, sim_request_obj,
+				                              &running_simulations, &request_thread]() {
+					std::vector<cameo::application::State> states;
+					for (auto &running_sim :
+					     running_simulations[sim_request_obj.hash()]) {
+
+						cameo::application::State state_thread =
+						    running_sim->waitFor();
+						states.push_back(state_thread);
+						std::cout << "[THREAD] Finished the simulation application "
+						             "with state "
+						          << cameo::application::toString(state_thread)
+						          << std::endl;
+					}
+
+					//     if (state_thread == cameo::application::SUCCESS) {
+
+					//         lc.save_request(sim_request_obj.to_string());
+					//         if (istage == panosc::sFULL) {
+					// 	        lc.save_stage(
+					// 	            panosc::sSAMPLE,
+					// 	            sim_request_obj.hash(
+					// 	                panosc::sSAMPLE)); ///\todo to
+					// 	                                   /// be fixed
+					//         }
+					//         lc.save_tgz();
+					//         // mc.save_request();
+					//     }
+					// auto sim_result =
+					//     send_result(lc.output_dir(), state_thread,
+					//                 sim_request_obj.get_return_data() ==
+					//                     panosc::sim_request::rCOUNTS);
+					// std::cout << "[THREAD] after send result" << std::endl;
+					// std::cout << "[THREAD] Requester exists? " <<
+					// std::boolalpha
+					//           << *(request_thread->connectToRequester()) <<
+					//           "\t"
+					//           << request_thread->connectToRequester()->exists()
+					//           << std::endl;
+
+					// request_thread->replyBinary(sim_result.to_cameo());
+
+					running_simulations.erase(
+					    sim_request_obj.hash()); // remove it from the list of
+					                             // running simulations
+					std::cout << "[THREAD] END" << std::endl;
+				}));
+
+				//				panosc::sim_result_server  sim_result;
+				//				sim_result.set_status(cameo::application::RUNNING);
+				//				request->replyBinary(sim_result.to_cameo());
+
+#ifdef NNNN
 
 				// by reference objects outside the while(true) loop
 				// the rest by value
-				// if the request is not put a in more global scope, it can be deleted at the
-				// end of the while(true) loop but before the thread starts, so that the reply
-				// in the thread cannot happen
+				// if the request is not put a in more global scope, it can be deleted
+				// at the end of the while(true) loop but before the thread starts, so
+				// that the reply in the thread cannot happen
 				request_thread = std::move(request);
 				std::cout << "[BEFORE THREAD]: " << request_count << std::endl;
 				thread.reset(new std::thread([&server, app_name, lc, istage, sim_request_obj,
@@ -342,18 +431,18 @@ int main(int argc, char *argv[])
 
 					cameo::application::State state_thread = running_sim->waitFor();
 
-					std::cout
-					    << "[THREAD] Finished the simulation application with state "
-					    << cameo::application::toString(state_thread) << std::endl;
+					std::cout << "[THREAD] Finished the simulation application "
+					             "with state "
+					          << cameo::application::toString(state_thread) << std::endl;
 
 					if (state_thread == cameo::application::SUCCESS) {
 
 						lc.save_request(sim_request_obj.to_string());
 						if (istage == panosc::sFULL) {
-							lc.save_stage(
-							    panosc::sSAMPLE,
-							    sim_request_obj.hash(
-							        panosc::sSAMPLE)); ///\todo to be fixed
+							lc.save_stage(panosc::sSAMPLE,
+							              sim_request_obj.hash(
+							                  panosc::sSAMPLE)); ///\todo to be
+							                                     /// fixed
 						}
 						lc.save_tgz();
 						// mc.save_request();
@@ -363,11 +452,12 @@ int main(int argc, char *argv[])
 					                              sim_request_obj.get_return_data() ==
 					                                  panosc::sim_request::rCOUNTS);
 					std::cout << "[THREAD] after send result" << std::endl;
-					// I want to make sure that the client has not died... otherwise the
-					// server would crash
+					// I want to make sure that the client has not died...
+					// otherwise the server would crash
 					// std::unique_ptr<cameo::application::Instance> requester =
 					//    request_thread->connectToRequester();
-					//					std::cout << "after connect to
+					//					std::cout << "after connect
+					// to
 					// requester" << std::endl;
 					// if (requester.get() == nullptr) {
 					// 	std::cout << "[THREAD ERROR] Instance does not exist"
@@ -385,11 +475,11 @@ int main(int argc, char *argv[])
 					request_thread->replyBinary(sim_result.to_cameo());
 
 					running_simulations.erase(
-					    sim_request_obj
-					        .hash()); // remove it from the list of running simulations
+					    sim_request_obj.hash()); // remove it from the list of
+					                             // running simulations
 					std::cout << "[THREAD] END" << std::endl;
 				}));
-
+#endif
 				//				panosc::sim_result_server  sim_result;
 				//				sim_result.set_status(cameo::application::RUNNING);
 				//				request->replyBinary(sim_result.to_cameo());

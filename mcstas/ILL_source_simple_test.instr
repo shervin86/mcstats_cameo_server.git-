@@ -106,7 +106,7 @@ COMPONENT H51_D22_Sample_L = Monitor_nD(xwidth=0.02, yheight=0.05,
   options="lambda limits=[1 10]", bins=50, restore_neutron=1)
 AT (0,0,0) RELATIVE D22_Sample_Pos
 
-SPLIT COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=sample_size_r, yheight=sample_size_y,
+COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=sample_size_r, yheight=sample_size_y,
   Sqw_coh=D22_sample, Sqw_inc=NULL, d_phi=RAD2DEG*atan2(1, D22_collimation))
 AT (0,0,0) RELATIVE D22_Sample_Pos
 EXTEND %{
