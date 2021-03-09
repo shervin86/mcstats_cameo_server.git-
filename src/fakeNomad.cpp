@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 		else {
 			/// [request2]
 			request.set_instrument(panosc::D22);
-			request.set_num_neutrons(1000000000);
-			// request.set_measurement_time(60);
+			//			request.set_num_neutrons(1000000);
+			request.set_measurement_time(10);
 			request.add_parameter(panosc::sim_request::pWAVELENGTH, 4.51);
 			request.add_parameter(panosc::sim_request::pCOLLIMATION, 18.00);
 			try {
@@ -99,11 +99,11 @@ int main(int argc, char *argv[])
 			} catch (const panosc::param_not_implemented &e) {
 				std::cerr << e.what() << std::endl;
 			}
-			request.set_return_data(panosc::sim_request::rNONE);
+			request.set_return_data(panosc::sim_request::rCOUNTS);
 
-			request.set_sample_material(panosc::H2O);
+			//			request.set_sample_material(panosc::H2O);
 			//			request.set_sample_size(0.005, 0.05);
-			request.set_sample_size(0.005);
+			//request.set_sample_size(0.005);
 			/// [request2]
 		}
 		jsonfile.close();

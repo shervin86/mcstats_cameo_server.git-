@@ -34,6 +34,7 @@ std::vector<std::string> sim_request_server::args(void) const
 		std::stringstream s;
 		if (i.key() == "--ncount")
 			s << i.key() << "=" << std::stoul(i.value().get<std::string>());
+		else if (i.key() == "sample_size_y" and i.value() <= 0) continue;
 		else
 			s << i.key() << "=" << i.value();
 		argss.push_back(s.str());

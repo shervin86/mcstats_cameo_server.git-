@@ -342,14 +342,20 @@ int main(int argc, char *argv[])
 					std::cout << "[DEBUG] arg: #" << singlearg << "#" << std::endl;
 #endif
 
-				assert(nJobs < seeds.size());
+				if(nJobs > seeds.size()){
+						  std::cerr << "[ERROR] Jobs with ID > " << seeds.size() << " will have the same seed!" << std::endl;
+				}
+
 				std::string filenames;
 				for (size_t i = 0; i < nJobs; ++i) {
 					// let the simulation know the index in
 					// order to set the output directories
 					args.push_back("--dir=" + lc.output_dir(i).string());
 
-					args.push_back("--seed=" + std::to_string(seeds[i]));
+					if(i < seeds.size())
+						args.push_back("--seed=" + std::to_string(seeds[i]));
+					else
+						args.push_back("--seed=58868584939");
 					if (lc.is_done(i) == true) {
 						filenames += (lc.output_dir(i) / "sDETECTOR.mcpl.gz;");
 						continue;
