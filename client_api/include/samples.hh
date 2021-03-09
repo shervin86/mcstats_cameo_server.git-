@@ -17,6 +17,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(sample_material_t, {
                                                     {H2O, "H2O"},
                                                     {D2O, "D2O"},
                                                 })
+#endif
 } // namespace panosc
 
-#endif
+#endif 
