@@ -18,6 +18,15 @@ link_directories(${MCSTAS}/libs/mcpl/)
 #message("${CMAKE_BUILD_DIRECTORY}")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas)
 
+add_custom_command(OUTPUT ILL_D22_quick_merge.c
+  COMMENT "creation of ILL_D22_quick_merge.c"
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_D22_quick_merge.instr ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_input.comp
+  COMMAND mcstas -t -o ${CMAKE_CURRENT_BINARY_DIR}/ILL_D22_quick_merge.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_D22_quick_merge.instr 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+  )
+add_executable(ILL_D22_quick_merge.out ILL_D22_quick_merge.c)
+target_link_libraries(ILL_D22_quick_merge.out PUBLIC m mcpl)
+  
 
 add_custom_command(OUTPUT ILL_D22_quick.c
   COMMENT "creation of ILL_D22_quick.c"
@@ -69,7 +78,7 @@ target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
 add_executable(ILL_source_simple_test.out ILL_source_simple_test.c)
 target_link_libraries(ILL_source_simple_test.out PUBLIC m)
 
-install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out ILL_D22_quick.out
+install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out ILL_D22_quick.out ILL_D22_quick_merge.out
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
 

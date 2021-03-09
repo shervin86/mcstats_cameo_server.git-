@@ -57,13 +57,13 @@ class sim_request_server : public sim_request
 	};
 
 	/// returning the number of neutrons to simulate
-	unsigned long long int get_num_neutrons(void) {
+	unsigned long long int get_num_neutrons(void)
+	{
 		std::string a = _j["--ncount"];
 		std::cout << "[SUPERDEBUG] " << a << std::endl;
 		return std::stoull(a);
 	}
 
-	
 	/// returns the arguments to be passed to the mcstas execution
 	std::vector<std::string> args(void) const;
 

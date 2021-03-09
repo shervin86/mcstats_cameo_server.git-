@@ -28,10 +28,8 @@ class local_cache
 
 	// in the form of baseDir/instrument_name/hash/
 	inline fs::path output_dir(void) const { return _p; };
-	inline fs::path output_dir(size_t job_index) const
-	{
-		return _p / std::to_string(job_index);
-	};
+	inline fs::path output_dir(size_t job_index) const { return _p / std::to_string(job_index); };
+	fs::path        output_dir_merge(void) const { return _p / "merge"; }
 
 	inline bool isOK(void) const
 	{
@@ -45,7 +43,11 @@ class local_cache
 		return true;
 	}
 
-	inline bool is_done(void) const { return fs::exists(path_tgz()); }
+	inline bool is_done(void) const { return fs::exists(output_dir_merge()); }
+	inline bool is_done(size_t job_index) const
+	{
+		return fs::exists(output_dir(job_index) / "sDETECTOR.mcpl.gz");
+	}
 
 	inline fs::path path_tgz(void) const
 	{

@@ -256,8 +256,8 @@ int main(int argc, char *argv[])
 			// define a temp dir in RAM depending on the simulation type requested
 			panosc::local_cache lc(
 			    sim_request_obj.instrument_name(), sim_request_obj.hash(),
-			    baseDir +
-			        ((sim_request_obj.type() == panosc::sim_request::QUICK) ? "QUICK/" : "FULL/"));
+			    baseDir + ((sim_request_obj.type() == panosc::sim_request::QUICK) ? "QUICK/"
+			                                                                      : "FULL/"));
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
 				          // available
@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
 				std::vector<std::string> args = sim_request_obj.args();
 				//				args.push_back("--dir=" +
 				//(lc.output_dir()).string());
-				args.push_back("--ncount="+ std::to_string(NEUTRONS_PER_JOB));
+				args.push_back("--ncount=" + std::to_string(NEUTRONS_PER_JOB));
 				args.push_back("stage=" + std::to_string(istage));
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
@@ -349,12 +349,17 @@ int main(int argc, char *argv[])
 #endif
 
 				assert(nJobs < seeds.size());
+				std::string filenames;
 				for (size_t i = 0; i < nJobs; ++i) {
 					// let the simulation know the index in
 					// order to set the output directories
 					args.push_back("--dir=" + lc.output_dir(i).string());
 
 					args.push_back("--seed=" + std::to_string(seeds[i]));
+					if (lc.is_done(i) == true) {
+						filenames += (lc.output_dir(i) / "sDETECTOR.mcpl.gz;");
+						continue;
+					}
 					running_simulations[sim_request_obj.hash()].push_back(
 					    server.start(app_name, args));
 
@@ -376,7 +381,11 @@ int main(int argc, char *argv[])
 				request_thread = std::move(request);
 				std::cout << "[BEFORE THREAD]: " << request_count << std::endl;
 				thread.reset(new std::thread([&server, app_name, lc, istage, sim_request_obj,
-				                              &running_simulations, &request_thread]() {
+				                              &running_simulations, &request_thread,
+				                              filenames]() {
+					// check how to do it
+
+					std::string                            filenames_ = filenames;
 					std::vector<cameo::application::State> states;
 
 					for (auto &running_sim :
@@ -405,19 +414,33 @@ int main(int argc, char *argv[])
 					//         // mc.save_request();
 					//     }
 					cameo::application::State returnState = cameo::application::UNKNOWN;
-					for (size_t iState = 0; iState < states.size(); ++iState){
+
+					for (size_t iState = 0; iState < states.size(); ++iState) {
 						returnState |= states[iState];
 #ifdef DEBUG
 						std::cout << "JOB #" << iState << ": "
-						          << cameo::application::toString(states[iState]) << "\n";
+						          << cameo::application::toString(states[iState])
+						          << "\n";
 #endif
+						if (states[iState] == cameo::application::SUCCESS) {
+							filenames_ +=
+							    (lc.output_dir(iState) / "sDETECTOR.mcpl.gz");
+							filenames_ += ";";
+						}
 					}
 #ifdef DEBUG
 					std::cout << std::endl;
 #endif
-					//					if (returnState and (not cameo::application::SUCCESS))
+					std::vector<std::string> args;
+					args.push_back("filenames=" + filenames_);
+					args.push_back("--dir=" + (lc.output_dir() / "merge").string());
+					auto mergingJob = server.start("SIMD22-QUICKMERGE", args);
+					cameo::application::State merging_state = mergingJob->waitFor();
+					returnState                             = merging_state;
+					//					if (returnState and (not
+					// cameo::application::SUCCESS))
 					// any job not successful;
-					auto sim_result = send_result(lc.output_dir(), returnState,
+					auto sim_result = send_result(lc.output_dir_merge(), returnState,
 					                              sim_request_obj.get_return_data() ==
 					                                  panosc::sim_request::rCOUNTS);
 					std::cout << "[THREAD] after send result" << std::endl;
