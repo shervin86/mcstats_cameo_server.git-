@@ -5,9 +5,11 @@
 #include <fstream>
 #include <stdexcept>
 
-// definition of stages and their string representation
+// which instruments are defined
 #include "instruments.hh"
+// definition of stages and their string representation
 #include "stages.hh"
+// which samples are implemented
 #include "samples.hh"
 
 namespace panosc
@@ -70,7 +72,7 @@ class sim_request
 		pBEAMSTOP_Y,        ///< NOT IMPLEMENTED YET
 		pATTENUATOR,        ///< NOT IMPLEMENTED YET
 		pTHICKNESS,         ///< NOT IMPLEMENTED YET
-		pCOLLIMATION,       ///< NOT IMPLEMENTED YET
+		pCOLLIMATION,       ///< collimation
 		pNOTIMPLEMENTED,    ///< FOR UNIT TESTS
 	};
 
@@ -88,7 +90,7 @@ class sim_request
 	 *   - add_parameter()
 	 *   - set_return_data()
 	 */
-	sim_request(req_t request_type = SIMULATE) : _type(request_type)
+	sim_request(req_t request_type = QUICK) : _type(request_type)
 	{
 		_j["type"] = request_type;
 	};

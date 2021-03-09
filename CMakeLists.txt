@@ -13,10 +13,13 @@ include(GNUInstallDirs)
 # Want to compile dynamic or static libraries
 set(BUILD_SHARED_LIBS True)
 
+option(ENABLE_TESTING "Enable testing" OFF)
+option(USE_MONGO "Use MongoDB to store requests and results" OFF)
 option(DO_INSTRUMENTS "Compile the instruments with mcstas" OFF)
 option(SERVER "Build the server" OFF)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
+  set(DO_INSTRUMENTS ON)
 endif(SERVER)
 
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
@@ -27,9 +30,9 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 include_directories(include include/nlohmann)
 
 
-# definitions for the client and server 
-add_definitions(-DSERVERNAME="mcstas_server-dev")
-#add_definitions(-DSERVERNAME="mcstas_server")
+# definition for the fakeNomad client
+#add_definitions(-DSERVERNAME="mcstas_server-dev")
+add_definitions(-DSERVERNAME="mcstas_server")
 
 add_subdirectory(client_api)
 #------------------------------------------------------------
@@ -43,7 +46,9 @@ target_link_libraries(libserver libclient)
 #------------------------------------------------------------
 if(SERVER)
   find_package(cameo 1.1.0 REQUIRED)
-  find_package(mongocxx 3.2.0 REQUIRED)
+  if(USE_MONGO)
+    find_package(mongocxx 3.2.0 REQUIRED)
+  endif()
   #message(${LIBMONGOCXX_INCLUDE_DIRS})
   #include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
   
@@ -59,16 +64,15 @@ if(SERVER)
   
   # Server
   add_executable(mcstas_server src/mcstas_server.cpp)
-  target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
   target_link_libraries(mcstas_server PRIVATE cameo)
   target_link_libraries(mcstas_server PRIVATE m zmq)
   target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
-  target_link_libraries(mcstas_server PRIVATE libserver)
   target_compile_features(mcstas_server PUBLIC cxx_std_17)
-  #target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
-if(MONGO)
-  target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
-endif()
+  target_link_libraries(mcstas_server PRIVATE libserver)
+  if(USE_MONGO)
+    target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
+    target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
+  endif()
 
   if(DO_INSTRUMENTS)
     add_subdirectory(mcstas)
@@ -76,11 +80,7 @@ endif()
 endif(SERVER)
 
 ################ Install
-#set(CMAKE_INSTALL_PREFIX /tmp/devel/)
-#install(TARGETS fakeNomad mcstas_server ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out DESTINATION bin)
 if(SERVER)
-  set(BUILD_SHARED_LIBS False)
-  
   install(TARGETS fakeNomad mcstas_server RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
   
   if (BUILD_SHARED_LIBS)
