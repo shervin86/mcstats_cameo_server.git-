@@ -18,12 +18,20 @@ link_directories(${MCSTAS}/libs/mcpl/)
 #message("${CMAKE_BUILD_DIRECTORY}")
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas)
 
+
+add_custom_command(OUTPUT ILL_D22_quick.c
+  COMMENT "creation of ILL_D22_quick.c"
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_D22_quick.instr
+  COMMAND mcstas -t -o ${CMAKE_CURRENT_BINARY_DIR}/ILL_D22_quick.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_D22_quick.instr 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+  )
+#
 add_custom_command(OUTPUT ILL_H512_D22-sSAMPLE.c
   COMMENT "creation of ILL_H512_D22-sSAMPLE.c"
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr
 #  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_source.instr
 #  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H51.instr
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/ILL_H512_D22-sSAMPLE.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
+  COMMAND mcstas -t -o ${CMAKE_CURRENT_BINARY_DIR}/ILL_H512_D22-sSAMPLE.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22-sSAMPLE.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas
   )
 #
@@ -34,7 +42,7 @@ add_custom_command(OUTPUT ILL_H512_D22.c
 #  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H51.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H51.instr
 #  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_H512.instr
 #  COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/MCPL_output.comp ${CMAKE_BINARY_DIR}/mcstas/MCPL_output.comp
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/ILL_H512_D22.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
+  COMMAND mcstas -t -o ${CMAKE_CURRENT_BINARY_DIR}/ILL_H512_D22.c -I ${CMAKE_CURRENT_SOURCE_DIR}/ -I ${CMAKE_CURRENT_SOURCE_DIR}/mcstas/ ${CMAKE_CURRENT_SOURCE_DIR}/ILL_H512_D22.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas
   )
 #
@@ -43,9 +51,12 @@ add_custom_command(OUTPUT ILL_source_simple_test.c
   COMMENT "creation of ILL_source_simple_test.c"
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source_simple_test.instr
   COMMAND  ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source_simple.instr ${CMAKE_BINARY_DIR}/mcstas/ILL_source_simple.instr
-  COMMAND mcstas -t -o ${CMAKE_BINARY_DIR}/ILL_source_simple_test.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source_simple_test.instr 
+  COMMAND mcstas -t -o ${CMAKE_CURRENT_BINARY_DIR}/ILL_source_simple_test.c ${CMAKE_CURRENT_SOURCE_DIR}/ILL_source_simple_test.instr 
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mcstas
   )
+
+add_executable(ILL_D22_quick.out ILL_D22_quick.c)
+target_link_libraries(ILL_D22_quick.out PUBLIC m mcpl)
 
 add_executable(ILL_H512_D22-sSAMPLE.out ILL_H512_D22-sSAMPLE.c)
 target_link_libraries(ILL_H512_D22-sSAMPLE.out PUBLIC m mcpl)
@@ -58,6 +69,9 @@ target_link_libraries(ILL_H512_D22.out PUBLIC m mcpl)
 add_executable(ILL_source_simple_test.out ILL_source_simple_test.c)
 target_link_libraries(ILL_source_simple_test.out PUBLIC m)
 
-install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
+install(TARGETS  ILL_H512_D22-sSAMPLE.out ILL_H512_D22.out ILL_D22_quick.out
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+
 add_test(test_ILL_D22  ILL_H512_D22.out  lambda=4.51 D22_collimation=2.0 -s 554321 -n 200000 sample_size_r=0.010 sample_size_y=0.001)
 set_tests_properties(test_ILL_D22 PROPERTIES LABELS mcstas)

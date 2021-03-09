@@ -5,7 +5,8 @@
 *
 * %Identification
 * Written by: FARHI Emmanuel (farhi@ill.fr)
-* Date: May, 2011
+* Modified by NOURBAKHSH Shervin (nourbakhsh@ill.fr) in 2020
+ Date: May, 2011
 * Origin:ILL
 * %INSTRUMENT_SITE: ILL
 *
@@ -31,10 +32,12 @@
 * dlambda: [Angs]       half width of guide wavelength band
 * D22_sample: [string]  D22 liquid/powder/amorphous sample
 * D_collimation: []     
+* Vin_filename: [string] name of the virtual input mcpl file
+* stage:                 integer indicating the simulation stage as implemented in sim_request
 *
 * %End
 *******************************************************************************/
-DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq", sample_size_r=0.005, sample_size_y=0.05, stage=-1 )
+DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq", sample_size_r=0.005, sample_size_y=0.05, string Vin_filename="none", stage=-1 )
 
 DECLARE %{
 
@@ -58,6 +61,7 @@ DECLARE %{
 %}
 
 INITIALIZE %{
+  if(!strcmp("none", Vin_filename) || stage<=0) Vin_filename[0]='\0';
 
   /* compute H512 parameters: D22 Velocity Selector */
   D22_nu   = 3956*48.3*DEG2RAD/2/PI/lambda/0.25;
@@ -70,73 +74,25 @@ TRACE
 
 /* ================================ H5 common =============================== */
 
-COMPONENT Origin = Progress_bar()
+COMPONENT H512_Before_VS = Progress_bar()
 AT(0,0,0) ABSOLUTE
 
-	/*this defines the source HCS*/
-%include "ILL_source.instr"
+COMPONENT QuickSource = Source_simple(
+	xwidth = 0.04,
+	yheight = 0.04,
+	target_index = +5,
+	focus_xw = sample_size_r,
+	focus_yh = sample_size_y,
+	lambda0     = lambda,
+	dlambda     = dlambda,
+	flux=1,
+	gauss=0)
+AT (0, 0, 0) RELATIVE H512_Before_VS
 
-/* Ni common guide: wide entry window for all guides */
-COMPONENT H5 = Monitor_nD(xwidth=0.04+0.004+0.015+0.004+0.06, yheight=0.12,
-  options="x y, slit", bins=50)
-AT(0,0,2.155) RELATIVE HCS
 
-COMPONENT H51_origin = COPY(H5)(options="dx limits=[-6 6] dy limits=[-6 6]", xwidth=0.04, restore_neutron=1)
-AT (-(0.04+0.004+0.015+0.004+0.06)/2+0.04/2,0,0) RELATIVE H5 ROTATED (0,-1.3269,0) RELATIVE H5
-
-
-                       /* start of guide sections */
-
-/* ================================ H51 ===================================== */
-/* feeds: IN15, D22 */
-
-	/* ILL_H51.instr starts at H51_origin and provides H51_S2_Out */
-%include "ILL_H51.instr"
-
-COMPONENT H51_split_2 = COPY(H5)(xwidth=0.04, restore_neutron=1, yheight=0.055)
-AT (0,0.12/2-0.055/2,0)  RELATIVE H51_S2_Out
-JUMP H512_Start WHEN SCATTERED
-
-COMPONENT H51_split_1 = COPY(H5)(xwidth=0.04, restore_neutron=1, yheight=0.055)
-AT (0,-0.12/2+0.055/2,0)  RELATIVE H51_S2_Out
-JUMP H511_Start WHEN SCATTERED
-
-/* H511 bottom to IN15 ====================================================== */
-COMPONENT H511_Start = Arm()
-AT (0,0,0) RELATIVE H51_split_1
-EXTEND %{
-  ABSORB; /* H511/IN15 not simulated here */
-%}
-
-/* H512 top to D22 ========================================================== */
-COMPONENT H512_Start = Arm()
-AT (0,0,0) RELATIVE H51_split_2
-
-	/*COMPONENT H512_Vout = MCPL_output( filename = "H512_Vout")
-AT (0, 0, 0) RELATIVE PREVIOUS
-	*/
-
-/* relative to H512_Start */
-%include "ILL_H512.instr"
-
-COMPONENT Vout = MCPL_output( filename = "sSAMPLE")
-AT (0, 0, 0.01) RELATIVE PREVIOUS
-
-COMPONENT D22_PreV = Monitor_nD(xwidth=0.04, yheight=0.05,
-  options="x y", bins=50, restore_neutron=1)
-AT (0,0,0.01) RELATIVE PREVIOUS
-
-/* D22 Velocity Selector: just like D11 EADS/Astrium NVS 023 in 60 cm gap */
-COMPONENT D22_Vselector = V_selector(xwidth=0.04, yheight=0.05, zdepth=0.30, radius=0.12,
-  alpha=48.3, length=0.25, d=0.0004, nu=D22_nu, nslit=72)
-AT (0,0,3+0.01+0.3+0.01) RELATIVE H512_S11
-
-COMPONENT D22_Collimation = COPY(H51_inpile)(
-  l=20-D22_collimation, nelements=ceil(D22_collimation/1.5))
-AT (0,0,0.3) RELATIVE D22_Vselector
 
 COMPONENT D22_Sample_Pos = Arm()
-AT (0,0,20+0.3) RELATIVE D22_Vselector
+AT (0,0,20+0.3+0.3) RELATIVE H512_Before_VS
 
 COMPONENT H51_D22_Sample_Div = Monitor_nD(xwidth=0.02, yheight=0.05,
   options="dx limits=[-2 2], dy limits=[-2 2]", bins=100, restore_neutron=1)
@@ -150,14 +106,18 @@ COMPONENT H51_D22_Sample_L = Monitor_nD(xwidth=0.02, yheight=0.05,
   options="lambda limits=[1 10]", bins=50, restore_neutron=1)
 AT (0,0,0) RELATIVE D22_Sample_Pos
 
-SPLIT COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=sample_size_r, yheight=sample_size_y,
+COMPONENT H51_D22_Sample = Isotropic_Sqw(radius=sample_size_r, yheight=sample_size_y,
   Sqw_coh=D22_sample, Sqw_inc=NULL, d_phi=RAD2DEG*atan2(1, D22_collimation))
 AT (0,0,0) RELATIVE D22_Sample_Pos
 EXTEND %{
   if (!SCATTERED) ABSORB;
 %}
 
-COMPONENT D22_Detector = Monitor_nD(xwidth=1, yheight=1, options="x bins=128 y bins=256")
+/*1 cm before the detector */
+COMPONENT Vout = MCPL_output( filename = "sDETECTOR")
+AT (0, 0, D22_collimation-0.01) RELATIVE PREVIOUS
+
+COMPONENT D22_Detector = Monitor_nD(xwidth=0.98, yheight=1.024, options="x bins=128 y bins=256")
 AT (0,0,D22_collimation) RELATIVE D22_Sample_Pos
 EXTEND %{
   ABSORB; /* H512 end here */

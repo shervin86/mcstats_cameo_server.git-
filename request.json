@@ -1,5 +1,5 @@
 {
-    "--ncount": "5000000000",
+    "--ncount": "20000000",
     "instrument": {
         "name": "D22"
     },
@@ -16,5 +16,5 @@
         "sample_size_y": 0.0052
     },
     "sSOURCE": {},
-    "type": 0
+    "type": 2
 }

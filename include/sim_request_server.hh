@@ -10,6 +10,7 @@
 #include <sstream>
 #include <vector>
 
+#define DEBUG
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -56,8 +57,13 @@ class sim_request_server : public sim_request
 	};
 
 	/// returning the number of neutrons to simulate
-	unsigned long long int get_num_neutrons(void) { return _j["ncount"].get<unsigned long long int>(); }
+	unsigned long long int get_num_neutrons(void) {
+		std::string a = _j["--ncount"];
+		std::cout << "[SUPERDEBUG] " << a << std::endl;
+		return std::stoull(a);
+	}
 
+	
 	/// returns the arguments to be passed to the mcstas execution
 	std::vector<std::string> args(void) const;
 
@@ -101,7 +107,7 @@ class sim_request_server : public sim_request
 
 	inline std::vector<simHash_t> stage_hashes(void) const
 	{
-		std::vector<std::string> hashes;
+		std::vector<simHash_t> hashes;
 		for (auto stage : stages) {
 			if (stage.first == sNONE)
 				continue;

@@ -28,8 +28,8 @@ include_directories(include include/nlohmann)
 
 
 # definitions for the client and server 
-#add_definitions(-DSERVERNAME="mcstas_server-dev")
-add_definitions(-DSERVERNAME="mcstas_server")
+add_definitions(-DSERVERNAME="mcstas_server-dev")
+#add_definitions(-DSERVERNAME="mcstas_server")
 
 add_subdirectory(client_api)
 #------------------------------------------------------------
@@ -66,8 +66,10 @@ if(SERVER)
   target_link_libraries(mcstas_server PRIVATE libserver)
   target_compile_features(mcstas_server PUBLIC cxx_std_17)
   #target_link_libraries(mcstas_server PRIVATE mongocxx bsoncxx)
+if(MONGO)
   target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
-  
+endif()
+
   if(DO_INSTRUMENTS)
     add_subdirectory(mcstas)
   endif(DO_INSTRUMENTS)

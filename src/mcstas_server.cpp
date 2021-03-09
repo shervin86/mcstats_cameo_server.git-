@@ -1,5 +1,7 @@
 #include "local_cache.hh"
+#ifdef MONGO
 #include "mongo_cache.hh"
+#endif
 #include "sim_request_server.hh"
 #include "sim_result_server.hh"
 
@@ -118,11 +120,13 @@ int main(int argc, char *argv[])
 		std::cout << "#" << argv[i] << "#\t" << std::endl;
 #endif
 	}
-
+#ifndef MONGO
+	std::cout << isDevel << std::endl;
+#endif
 	cameo::application::This::init(argc, argv);
-
+#ifdef MONGO
 	panosc::mongo_cache mc(isDevel);
-
+#endif
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
 	{
@@ -246,11 +250,14 @@ int main(int argc, char *argv[])
 			}
 
 			//--------------- New request and no other simulation running
+#ifdef MONGO
 			mc.set_request(sim_request_obj);
-
-			// define a temp dir in RAM
-			panosc::local_cache lc(sim_request_obj.instrument_name(), sim_request_obj.hash(),
-			                       baseDir);
+#endif
+			// define a temp dir in RAM depending on the simulation type requested
+			panosc::local_cache lc(
+			    sim_request_obj.instrument_name(), sim_request_obj.hash(),
+			    baseDir +
+			        ((sim_request_obj.type() == panosc::sim_request::QUICK) ? "QUICK/" : "FULL/"));
 
 			if (!lc.isOK()) { // check if the simulation has already run and tgz
 				          // available
@@ -265,12 +272,13 @@ int main(int argc, char *argv[])
 				// continue; // get ready to process new request
 			}
 
+#ifdef MONGO
 			// save the result in the MongoDB if not yet there
 			bool is_done = mc.is_done();
 			if (is_done == false and lc.is_done() == true) {
 				mc.save_request();
 			}
-
+#endif
 			if (lc.is_done()) { // in this case re-use the previous results
 
 				std::cout << "simulation exists, re-using the same results" << std::endl;
@@ -295,11 +303,12 @@ int main(int argc, char *argv[])
 				          << std::endl;
 
 				// set the number of jobs
-				unsigned long long int NEUTRONS_PER_JOB = 10000;
+				unsigned long long int NEUTRONS_PER_JOB = 10000000;
 
 				size_t nJobs = std::ceil(sim_request_obj.get_num_neutrons() /
 				                         ((double)NEUTRONS_PER_JOB));
 
+				std::cout << "[INFO] Splitting in " << nJobs << " jobs" << std::endl;
 				// get the hash for all the stages
 				std::vector<std::string> hashes = sim_request_obj.stage_hashes();
 
@@ -322,14 +331,16 @@ int main(int argc, char *argv[])
 				std::vector<std::string> args = sim_request_obj.args();
 				//				args.push_back("--dir=" +
 				//(lc.output_dir()).string());
-
+				args.push_back("--ncount="+ std::to_string(NEUTRONS_PER_JOB));
 				args.push_back("stage=" + std::to_string(istage));
 				if (!mcpl_filename.empty())
 					args.push_back("Vin_filename=" + mcpl_filename);
 
 				// the app_name is the one defined in the cameo.xml file
 				std::string app_name =
-				    sim_request_obj.instrument_name() + "-" + panosc::stages.at(istage);
+				    (sim_request_obj.type() == panosc::sim_request::QUICK)
+				        ? sim_request_obj.instrument_name() + "-QUICK"
+				        : sim_request_obj.instrument_name() + "-" + panosc::stages.at(istage);
 
 #ifdef DEBUG
 				std::cout << "[DEBUG] APP: #" << app_name << "#" << std::endl;
@@ -337,12 +348,11 @@ int main(int argc, char *argv[])
 					std::cout << "[DEBUG] arg: #" << singlearg << "#" << std::endl;
 #endif
 
-				assert(nJobs > seeds.size());
+				assert(nJobs < seeds.size());
 				for (size_t i = 0; i < nJobs; ++i) {
-					args.push_back(
-					    "--dir=" + (lc.output_dir()).string() + "/" +
-					    std::to_string(i)); // let the simulation know the index in order
-					                        // to set the output directories
+					// let the simulation know the index in
+					// order to set the output directories
+					args.push_back("--dir=" + lc.output_dir(i).string());
 
 					args.push_back("--seed=" + std::to_string(seeds[i]));
 					running_simulations[sim_request_obj.hash()].push_back(
@@ -363,9 +373,12 @@ int main(int argc, char *argv[])
 					    << std::endl;
 				}
 
+				request_thread = std::move(request);
+				std::cout << "[BEFORE THREAD]: " << request_count << std::endl;
 				thread.reset(new std::thread([&server, app_name, lc, istage, sim_request_obj,
 				                              &running_simulations, &request_thread]() {
 					std::vector<cameo::application::State> states;
+
 					for (auto &running_sim :
 					     running_simulations[sim_request_obj.hash()]) {
 
@@ -391,19 +404,29 @@ int main(int argc, char *argv[])
 					//         lc.save_tgz();
 					//         // mc.save_request();
 					//     }
-					// auto sim_result =
-					//     send_result(lc.output_dir(), state_thread,
-					//                 sim_request_obj.get_return_data() ==
-					//                     panosc::sim_request::rCOUNTS);
-					// std::cout << "[THREAD] after send result" << std::endl;
-					// std::cout << "[THREAD] Requester exists? " <<
-					// std::boolalpha
-					//           << *(request_thread->connectToRequester()) <<
-					//           "\t"
-					//           << request_thread->connectToRequester()->exists()
-					//           << std::endl;
+					cameo::application::State returnState = cameo::application::UNKNOWN;
+					for (size_t iState = 0; iState < states.size(); ++iState){
+						returnState |= states[iState];
+#ifdef DEBUG
+						std::cout << "JOB #" << iState << ": "
+						          << cameo::application::toString(states[iState]) << "\n";
+#endif
+					}
+#ifdef DEBUG
+					std::cout << std::endl;
+#endif
+					//					if (returnState and (not cameo::application::SUCCESS))
+					// any job not successful;
+					auto sim_result = send_result(lc.output_dir(), returnState,
+					                              sim_request_obj.get_return_data() ==
+					                                  panosc::sim_request::rCOUNTS);
+					std::cout << "[THREAD] after send result" << std::endl;
+					std::cout << "[THREAD] Requester exists? " << std::boolalpha
+					          << *(request_thread->connectToRequester()) << "\t"
+					          << request_thread->connectToRequester()->exists()
+					          << std::endl;
 
-					// request_thread->replyBinary(sim_result.to_cameo());
+					request_thread->replyBinary(sim_result.to_cameo());
 
 					running_simulations.erase(
 					    sim_request_obj.hash()); // remove it from the list of

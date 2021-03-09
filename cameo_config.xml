@@ -7,8 +7,14 @@
 	
 
 		<!-- The Java application with name subpubjava -->
-		<application name="SIMD22-sFULL" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
-		  <start executable="/usr/local/bin/ILL_H512_D22.out" args="-n 1e4 -s 65453" />
+		<application name="SIMD22-sFULL" stream="yes" multiple="yes"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <!--		  <start executable="/usr/local/bin/ILL_H512_D22.out" args="-n 1e4 -s 65453" /> -->
+		  <start executable="/tmp/devel/bin/ILL_H512_D22.out" args="" /> 
+		  <stop executable="kill" args="-2 $PID"/>
+		</application>
+
+		<application name="SIMD22-QUICK" stream="yes" multiple="yes"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="/tmp/devel/bin/ILL_D22_quick.out" args="" /> 
 		  <stop executable="kill" args="-2 $PID"/>
 		</application>
 

@@ -20,16 +20,22 @@ class local_cache
 		// define a temp dir in RAM
 		std::string dirName = baseDir + instrument_name + "/";
 		_p                  = dirName;
-		fs::create_directories(_p);
+		//	fs::create_directories(_p);
 		_p /= hash;
+		fs::create_directories(_p);
 		//	_p += ".tgz";
 	};
 
 	// in the form of baseDir/instrument_name/hash/
 	inline fs::path output_dir(void) const { return _p; };
+	inline fs::path output_dir(size_t job_index) const
+	{
+		return _p / std::to_string(job_index);
+	};
 
 	inline bool isOK(void) const
 	{
+		return true;
 		if (!fs::exists(path_tgz()) && fs::exists(output_dir())) {
 			std::cerr << "[ERROR] Sim dir already exists but not TGZ, "
 			             "please clean up"
@@ -63,6 +69,12 @@ class local_cache
 		           .c_str());
 	}
 
+	/** \brief rename and move the MCPL file according to a given stage to a specific path
+	 * as defined by this method
+	 *
+	 *  - the MCPL file is moved to the directory defined by panosc::local_cache::stage_path()
+	 *  - the request is saved in the output directory
+	 */
 	inline void save_stage(stage_t is, std::string hash) const
 	{
 		auto stage_name = stages.at(is);
@@ -77,7 +89,7 @@ class local_cache
 		}
 
 		// strip the hash, add MCPL, add stage_name, add the hash
-		fs::path mcpl_path = _p.parent_path() / "MCPL" / stage_name / hash;
+		fs::path mcpl_path = stage_path(is, hash);
 		fs::create_directories(mcpl_path.parent_path());
 
 		// copy the request json
@@ -87,7 +99,6 @@ class local_cache
 		// move the mcpl file and rename it
 		mcpl_path.replace_extension(".mcpl.gz");
 		fs::rename(l, mcpl_path);
-		//}
 	}
 
 	inline std::pair<size_t, std::string> get_stage(std::vector<std::string> hashes) const
@@ -124,13 +135,14 @@ class local_cache
 		return std::pair<size_t, std::string>(istage, mcpl_filename);
 	}
 
+	//	void set_job_dir(size_t jobIndex) { fs::create_directories(_p / std::to_string(jobIndex)); }
+
 	private:
 	fs::path _p;
 
 	inline fs::path stage_path(stage_t istage, std::string stage_hash) const
 	{
-		// const auto stage_name = stages[istage];
-
+		// auto stage_name = stages.at(is);
 		fs::path sp(_p.parent_path() / "MCPL" / stages.at(istage) / stage_hash);
 		sp += ".json";
 		return sp;
