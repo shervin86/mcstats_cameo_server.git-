@@ -30,7 +30,7 @@ install(EXPORT ${PROJECT_NAME} DESTINATION share/${PROJECT_NAME}/cmake)
 export(TARGETS libclient FILE ${PROJECT_NAME}.cmake)
 
 # Every library has unit tests, of course
-if(ENABLE_TESTS)
+if(ENABLE_TESTING)
   add_executable(testclient ./test/client.cpp)
   target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../doctest/doctest/>)

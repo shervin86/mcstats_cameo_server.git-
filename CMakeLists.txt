@@ -31,8 +31,8 @@ include_directories(include include/nlohmann)
 
 
 # definition for the fakeNomad client
-#add_definitions(-DSERVERNAME="mcstas_server-dev")
-add_definitions(-DSERVERNAME="mcstas_server")
+add_definitions(-DSERVERNAME="mcstas_server-dev")
+#add_definitions(-DSERVERNAME="mcstas_server")
 
 add_subdirectory(client_api)
 #------------------------------------------------------------
@@ -86,16 +86,18 @@ if(SERVER)
   if (BUILD_SHARED_LIBS)
     install(TARGETS  libserver  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
   endif(BUILD_SHARED_LIBS)
-  
-  add_executable(testserver ./test/testserver.cpp)
-  target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
-  target_link_libraries(testserver PRIVATE libserver)
-  target_link_libraries(testserver PRIVATE stdc++fs)
-  target_compile_features(testserver PUBLIC cxx_std_17)
-  
-  add_test(testserver testserver)
-  set_tests_properties(testserver PROPERTIES LABELS server)
+
+  if(ENABLE_TESTING)
+    add_executable(testserver ./test/testserver.cpp)
+    target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
+    target_link_libraries(testserver PRIVATE libserver)
+    target_link_libraries(testserver PRIVATE stdc++fs)
+    target_compile_features(testserver PUBLIC cxx_std_17)
+    
+    add_test(testserver testserver)
+    set_tests_properties(testserver PROPERTIES LABELS server)
+  endif(ENABLE_TESTING)
   
 endif(SERVER)
 

@@ -54,8 +54,15 @@ cd build/$1
 cmake -DCMAKE_BUILD_TYPE=Debug $OPTS -DMCSTAS=${MCSTAS} ../../
 cmake --build . || exit 1
 make
-ctest --output-on-failure && $SUDO make install
-make install
+case $1 in
+    DEVEL)
+	ctest --output-on-failure
+	make install
+	;;
+    *)
+	ctest --output-on-failure && $SUDO make install
+	;;
+esac
 if [ -n "$newbranch" ]; then
 	git checkout $current_branch
 	git branch -d $newbranch

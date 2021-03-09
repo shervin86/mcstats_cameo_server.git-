@@ -30,6 +30,10 @@ namespace fs = std::filesystem;
 #define MAX_BUFFER 1000000
 #define VERBOSE
 #define DEBUG
+
+unsigned long long int NEUTRONS_PER_JOB = 10000000; // 1e7 neutrons -> 280MB MCPL file
+size_t MAX_PARALLEL_JOBS = 3;
+
 /**
  * Reads the file to a string as binary
  * @param fileName      : the name of the input file
@@ -149,16 +153,7 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
-		// // Define a publisher for the results
-		// std::unique_ptr<cameo::application::Publisher> publisher;
-		// try {
-		// 	publisher = cameo::application::Publisher::create(panosc::CAMEO_PUBLISHER, 1);
-		// 	std::cout << "Created publisher " << *publisher << std::endl;
-		// } catch (const cameo::PublisherCreationException &e) {
-		// 	std::cout << "[ERROR] Publisher creation error" << std::endl;
-		// 	return -1;
-		// }
-		std::map<panosc::simHash_t, std::unique_ptr<std::thread>> simulation_threads;
+		//		std::map<panosc::simHash_t, std::unique_ptr<std::thread>> simulation_threads;
 		std::unique_ptr<std::thread>                              thread;
 		std::map<panosc::simHash_t, cameo::application::InstanceArray>
 		    running_simulations; // maps the hash to the list of running instances
@@ -303,7 +298,6 @@ int main(int argc, char *argv[])
 				          << std::endl;
 
 				// set the number of jobs
-				unsigned long long int NEUTRONS_PER_JOB = 10000000;
 
 				size_t nJobs = std::ceil(sim_request_obj.get_num_neutrons() /
 				                         ((double)NEUTRONS_PER_JOB));
