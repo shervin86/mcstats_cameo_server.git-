@@ -85,7 +85,7 @@ COMPONENT QuickSource = Source_simple(
 	focus_yh = sample_size_y,
 	lambda0     = lambda,
 	dlambda     = dlambda,
-	flux=1,
+	flux=1e13,
 	gauss=0)
 AT (0, 0, 0) RELATIVE H512_Before_VS
 

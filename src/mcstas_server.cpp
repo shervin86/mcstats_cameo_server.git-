@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 				request->replyBinary(sim_result.to_cameo());
 
 			} else { // in this case we need to re-run the simulation
-
+				sim_request_obj.set_type(panosc::sim_request::QUICK);
 				// in the current implementation, this is not needed unless a stop request has
 				// been received. In that case the number of running simulations is zero, but
 				// the thread might be still running for a bit
