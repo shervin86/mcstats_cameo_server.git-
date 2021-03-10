@@ -61,11 +61,12 @@ int main(int argc, char *argv[])
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
 		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(SERVERNAME);
-		if(responderServer->exists()==false){ // start it for me
+		if (responderServer->exists() == false) { // start it for me
 			responderServer = server.start(SERVERNAME);
 		}
-		std::cout << "responder: " << *responderServer << "   --"<< responderServer->exists()<<"--                 ["
-		          << cameo::application::toString(responderServer->now()) << "]" << std::endl;
+		std::cout << "responder: " << *responderServer << "   --" << responderServer->exists()
+		          << "--                 [" << cameo::application::toString(responderServer->now())
+		          << "]" << std::endl;
 
 		// check that the server is running, otherwise wait till a given timeOut
 

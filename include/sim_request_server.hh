@@ -92,7 +92,7 @@ class sim_request_server : public sim_request
 		j.erase("type");
 		j.erase("--ncount");
 		j.erase("return");
-		
+
 		switch (s) {
 		case sFULL:
 			break;
