@@ -44,7 +44,9 @@ class sim_request
 	enum req_t {
 		SIMULATE = 0, ///< SIMULATE
 		STOP,         ///< stop the ongoing simulation
-		QUICK
+		QUICK,        ///< run a QUICK simulation using the SimpleSource component before the sample
+		CLEAR,         ///< clear the cache (to be used only by experts)
+		REQUNKNOWN     ///< for checking not implemented requests
 	};
 
 	/** \brief Specify what you want the server to return in the result

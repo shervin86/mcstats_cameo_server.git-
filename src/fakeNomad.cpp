@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 			return exitNOSERVER;
 		}
 
+		auto mcstas_server_instance = server.start(SERVERNAME);
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
 		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(SERVERNAME);
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
 
 			//			request.set_sample_material(panosc::H2O);
 			//			request.set_sample_size(0.005, 0.05);
-			//request.set_sample_size(0.005);
+			// request.set_sample_size(0.005);
 			/// [request2]
 		}
 		jsonfile.close();
@@ -151,6 +152,8 @@ int main(int argc, char *argv[])
 			// std::cout << "[INFO] Result already present in " << p << std::endl;
 			std::cout << "[INFO] Result already present in " << std::endl;
 		}
+
+		mcstas_server_instance->stop();
 		return 0;
 		std::cout << "Sending two requests: testing the threads" << std::endl;
 		// Create a requester.

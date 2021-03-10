@@ -1,10 +1,10 @@
 {
-    "--ncount": "20000000",
+    "--ncount": "5000000",
     "instrument": {
         "name": "D22"
     },
     "mcpl": {},
-    "return": "NONE",
+    "return": "COUNTS",
     "sDETECTOR": {},
     "sFULL": {
         "lambda": 4.51

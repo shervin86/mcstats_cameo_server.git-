@@ -31,8 +31,8 @@ namespace fs = std::filesystem;
 #define VERBOSE
 #define DEBUG
 
-unsigned long long int NEUTRONS_PER_JOB = 10000000; // 1e7 neutrons -> 280MB MCPL file
-size_t MAX_PARALLEL_JOBS = 3;
+unsigned long long int NEUTRONS_PER_JOB  = 1000000; // 1e7 neutrons -> 280MB MCPL file
+size_t                 MAX_PARALLEL_JOBS = 3;
 
 /**
  * Reads the file to a string as binary
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 		}
 
 		//		std::map<panosc::simHash_t, std::unique_ptr<std::thread>> simulation_threads;
-		std::unique_ptr<std::thread>                              thread;
+		std::unique_ptr<std::thread> thread;
 		std::map<panosc::simHash_t, cameo::application::InstanceArray>
 		    running_simulations; // maps the hash to the list of running instances
 
@@ -185,6 +185,12 @@ int main(int argc, char *argv[])
 #endif
 			          << std::endl;
 
+			if (sim_request_obj.type() >= panosc::sim_request::REQUNKNOWN) {
+					panosc::sim_result_server sim_result(cameo::application::FAILURE);
+				        std::cout << "[ERROR] UNKNOWN REQUEST\n" << std::endl;
+					        request->replyBinary(sim_result.to_cameo());
+				                continue;
+			}
 			//--------------- Request for a communication test
 			if (sim_request_obj.is_test()) {
 				panosc::sim_result_server sim_result;
@@ -192,6 +198,34 @@ int main(int argc, char *argv[])
 				std::cout << "REQUEST FOR TEST!\n" << sim_result.to_cameo() << std::endl;
 
 				CHECK_REQUESTER_EXISTS
+				request->replyBinary(sim_result.to_cameo());
+				continue;
+			}
+
+			//--------------- Request for a clearing the local cache
+			if (sim_request_obj.type() == panosc::sim_request::CLEAR) {
+				panosc::sim_result_server sim_result(cameo::application::SUCCESS);;
+
+				panosc::local_cache lc(sim_request_obj.instrument_name(),
+				                       sim_request_obj.hash(), baseDir + "QUICK/");
+
+				
+				std::cout << "CLEARING " << lc.output_dir() << " and removing "
+				          << fs::remove_all(lc.output_dir()) << " files and directories"
+				          << std::endl;
+
+				lc.clear_cache();
+
+				panosc::local_cache lc_full(sim_request_obj.instrument_name(),
+				                       sim_request_obj.hash(), baseDir + "FULL/");
+
+				std::cout << "CLEARING " << lc_full.output_dir() << " and removing "
+				          << fs::remove_all(lc_full.output_dir()) << " files and directories"
+				          << std::endl;
+
+				lc_full.clear_cache();
+				std::cout << "CLEARING THE LOCAL CACHE!\n" << sim_result.to_cameo() << std::endl;
+
 				request->replyBinary(sim_result.to_cameo());
 				continue;
 			}
@@ -342,8 +376,9 @@ int main(int argc, char *argv[])
 					std::cout << "[DEBUG] arg: #" << singlearg << "#" << std::endl;
 #endif
 
-				if(nJobs > seeds.size()){
-						  std::cerr << "[ERROR] Jobs with ID > " << seeds.size() << " will have the same seed!" << std::endl;
+				if (nJobs > seeds.size()) {
+					std::cerr << "[ERROR] Jobs with ID > " << seeds.size()
+					          << " will have the same seed!" << std::endl;
 				}
 
 				std::string filenames;
@@ -352,7 +387,7 @@ int main(int argc, char *argv[])
 					// order to set the output directories
 					args.push_back("--dir=" + lc.output_dir(i).string());
 
-					if(i < seeds.size())
+					if (i < seeds.size())
 						args.push_back("--seed=" + std::to_string(seeds[i]));
 					else
 						args.push_back("--seed=58868584939");
