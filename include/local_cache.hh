@@ -139,16 +139,15 @@ class local_cache
 
 	//	void set_job_dir(size_t jobIndex) { fs::create_directories(_p / std::to_string(jobIndex)); }
 
-	void clear_cache(void){
-		#ifdef DEBUG
+	void clear_cache(void)
+	{
+#ifdef DEBUG
 		std::cout << "[DEBUG] Clearing path: " << _p << std::endl;
-		#endif
+#endif
 		_p.clear();
 		fs::remove_all(_p);
-
 	}
 
-				
 	private:
 	fs::path _p;
 

@@ -186,10 +186,10 @@ int main(int argc, char *argv[])
 			          << std::endl;
 
 			if (sim_request_obj.type() >= panosc::sim_request::REQUNKNOWN) {
-					panosc::sim_result_server sim_result(cameo::application::FAILURE);
-				        std::cout << "[ERROR] UNKNOWN REQUEST\n" << std::endl;
-					        request->replyBinary(sim_result.to_cameo());
-				                continue;
+				panosc::sim_result_server sim_result(cameo::application::FAILURE);
+				std::cout << "[ERROR] UNKNOWN REQUEST\n" << std::endl;
+				request->replyBinary(sim_result.to_cameo());
+				continue;
 			}
 			//--------------- Request for a communication test
 			if (sim_request_obj.is_test()) {
@@ -204,12 +204,12 @@ int main(int argc, char *argv[])
 
 			//--------------- Request for a clearing the local cache
 			if (sim_request_obj.type() == panosc::sim_request::CLEAR) {
-				panosc::sim_result_server sim_result(cameo::application::SUCCESS);;
+				panosc::sim_result_server sim_result(cameo::application::SUCCESS);
+				;
 
 				panosc::local_cache lc(sim_request_obj.instrument_name(),
 				                       sim_request_obj.hash(), baseDir + "QUICK/");
 
-				
 				std::cout << "CLEARING " << lc.output_dir() << " and removing "
 				          << fs::remove_all(lc.output_dir()) << " files and directories"
 				          << std::endl;
@@ -217,14 +217,15 @@ int main(int argc, char *argv[])
 				lc.clear_cache();
 
 				panosc::local_cache lc_full(sim_request_obj.instrument_name(),
-				                       sim_request_obj.hash(), baseDir + "FULL/");
+				                            sim_request_obj.hash(), baseDir + "FULL/");
 
 				std::cout << "CLEARING " << lc_full.output_dir() << " and removing "
 				          << fs::remove_all(lc_full.output_dir()) << " files and directories"
 				          << std::endl;
 
 				lc_full.clear_cache();
-				std::cout << "CLEARING THE LOCAL CACHE!\n" << sim_result.to_cameo() << std::endl;
+				std::cout << "CLEARING THE LOCAL CACHE!\n"
+				          << sim_result.to_cameo() << std::endl;
 
 				request->replyBinary(sim_result.to_cameo());
 				continue;
