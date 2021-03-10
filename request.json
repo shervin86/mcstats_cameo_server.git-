@@ -1,5 +1,5 @@
 {
-    "--ncount": "5000000",
+    "--ncount": "21000000",
     "instrument": {
         "name": "D22"
     },

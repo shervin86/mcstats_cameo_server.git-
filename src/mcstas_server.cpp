@@ -31,7 +31,7 @@ namespace fs = std::filesystem;
 #define VERBOSE
 #define DEBUG
 
-unsigned long long int NEUTRONS_PER_JOB  = 1000000; // 1e7 neutrons -> 280MB MCPL file
+unsigned long long int NEUTRONS_PER_JOB  = 5000000; // 1e7 neutrons -> 280MB MCPL file
 size_t                 MAX_PARALLEL_JOBS = 3;
 
 /**
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 				mc.save_request();
 			}
 #endif
-			if (lc.is_done()) { // in this case re-use the previous results
+			if (lc.is_done() && false) { // in this case re-use the previous results
 
 				std::cout << "simulation exists, re-using the same results" << std::endl;
 				auto sim_result = send_result(lc.output_dir(), cameo::application::SUCCESS,
@@ -470,6 +470,7 @@ int main(int argc, char *argv[])
 					std::vector<std::string> args;
 					args.push_back("filenames=" + filenames_);
 					args.push_back("--dir=" + (lc.output_dir() / "merge").string());
+					fs::remove_all(lc.output_dir_merge());
 					auto mergingJob = server.start("SIMD22-QUICKMERGE", args);
 					cameo::application::State merging_state = mergingJob->waitFor();
 					returnState                             = merging_state;
@@ -490,6 +491,7 @@ int main(int argc, char *argv[])
 					running_simulations.erase(
 					    sim_request_obj.hash()); // remove it from the list of
 					                             // running simulations
+
 					std::cout << "[THREAD] END" << std::endl;
 				}));
 

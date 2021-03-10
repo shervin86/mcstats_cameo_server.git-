@@ -58,12 +58,13 @@ int main(int argc, char *argv[])
 			return exitNOSERVER;
 		}
 
-		auto mcstas_server_instance = server.start(SERVERNAME);
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
 		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(SERVERNAME);
-
-		std::cout << "responder: " << *responderServer << "                    ["
+		if(responderServer->exists()==false){ // start it for me
+			responderServer = server.start(SERVERNAME);
+		}
+		std::cout << "responder: " << *responderServer << "   --"<< responderServer->exists()<<"--                 ["
 		          << cameo::application::toString(responderServer->now()) << "]" << std::endl;
 
 		// check that the server is running, otherwise wait till a given timeOut
@@ -153,7 +154,7 @@ int main(int argc, char *argv[])
 			std::cout << "[INFO] Result already present in " << std::endl;
 		}
 
-		mcstas_server_instance->stop();
+		responderServer->stop();
 		return 0;
 		std::cout << "Sending two requests: testing the threads" << std::endl;
 		// Create a requester.

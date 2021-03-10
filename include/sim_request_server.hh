@@ -81,6 +81,8 @@ class sim_request_server : public sim_request
 	{
 		nlohmann::json j(_j);
 		j.erase("type");
+		j.erase("--ncount");
+		j.erase("return");
 		return std::to_string(_hash(j));
 	}
 
@@ -88,6 +90,9 @@ class sim_request_server : public sim_request
 	{
 		nlohmann::json j(_j);
 		j.erase("type");
+		j.erase("--ncount");
+		j.erase("return");
+		
 		switch (s) {
 		case sFULL:
 			break;
