@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<config port="7123" max_applications="20" log_directory="logs" debug="ON" polling_time="100">
+<config port="7123" max_applications="40" log_directory="logs" debug="ON" polling_time="100">
 
 	<applications>
 	
@@ -33,15 +33,15 @@
 		</application>
 
 		<application name="mcstas_server-dev" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
-		  <start executable="/usr/local/bin/mcstas_server" args="-d /dev/shm/panosc/devel/ --devel"/>
+		  <start executable="/tmp/devel/bin/mcstas_server" args="-d /dev/shm/panosc/devel/ --devel"/>
 		</application>
 
 		<application name="fakeNomad" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
-		  <start executable="/usr/local/bin/fakeNomad" args=""/>
+		  <start executable="/tmp/devel/bin/fakeNomad" args=""/>
 		</application>
 
 		<application name="fakeNomadJson" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
-		  <start executable="/usr/local/bin/fakeNomad" args="-J"/>
+		  <start executable="/tmp/devel/bin/fakeNomad" args="-J"/>
 		</application>
 
 		<application name="MCPLD22" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
