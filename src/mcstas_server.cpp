@@ -467,33 +467,44 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
 					std::cout << std::endl;
 #endif
-					std::vector<std::string> args;
-					args.push_back("filenames=" + filenames_);
-					args.push_back("--dir=" + (lc.output_dir() / "merge").string());
-					fs::remove_all(lc.output_dir_merge());
-					auto mergingJob = server.start("SIMD22-QUICKMERGE", args);
-					cameo::application::State merging_state = mergingJob->waitFor();
-					returnState                             = merging_state;
-					//					if (returnState and (not
-					// cameo::application::SUCCESS))
-					// any job not successful;
-					auto sim_result = send_result(lc.output_dir_merge(), returnState,
-					                              sim_request_obj.get_return_data() ==
-					                                  panosc::sim_request::rCOUNTS);
-					std::cout << "[THREAD] after send result" << std::endl;
-					std::cout << "[THREAD] Requester exists? " << std::boolalpha
-					          << *(request_thread->connectToRequester()) << "\t"
-					          << request_thread->connectToRequester()->exists()
-					          << std::endl;
+					if (returnState != cameo::application::SUCCESS) {
+						panosc::sim_result_server sim_result(
+						    cameo::application::FAILURE);
 
 					request_thread->replyBinary(sim_result.to_cameo());
+						
+					}else{
+						std::vector<std::string> args;
+						args.push_back("filenames=" + filenames_);
+						args.push_back("--dir=" +
+						               (lc.output_dir() / "merge").string());
+						fs::remove_all(lc.output_dir_merge());
+						auto mergingJob = server.start("SIMD22-QUICKMERGE", args);
+						cameo::application::State merging_state =
+						    mergingJob->waitFor();
+						returnState = merging_state;
+						//					if (returnState and
+						//(not
+						// cameo::application::SUCCESS))
+						// any job not successful;
+						auto sim_result =
+						    send_result(lc.output_dir_merge(), returnState,
+						                sim_request_obj.get_return_data() ==
+						                    panosc::sim_request::rCOUNTS);
+						std::cout << "[THREAD] after send result" << std::endl;
+						std::cout << "[THREAD] Requester exists? " << std::boolalpha
+						          << *(request_thread->connectToRequester()) << "\t"
+						          << request_thread->connectToRequester()->exists()
+						          << std::endl;
 
+						request_thread->replyBinary(sim_result.to_cameo());
+					}
 					running_simulations.erase(
 					    sim_request_obj.hash()); // remove it from the list of
 					                             // running simulations
 
 					std::cout << "[THREAD] END" << std::endl;
-				}));
+					}));
 
 				//				panosc::sim_result_server  sim_result;
 				//				sim_result.set_status(cameo::application::RUNNING);

@@ -62,8 +62,8 @@ or you can find it at https://nourbakhsh.sites.code.ill.fr/mcstats_cameo_server/
 ## Launch CAMEO server
 ```
 bash
-export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/jni/:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib:/usr/share/java
-cameo-server cameo_config.xml
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/jni/:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib:/usr/share/java:/usr/local/lib
+cameo-server --log-console cameo_config.xml
 ```
 
 ## Cameo applications
