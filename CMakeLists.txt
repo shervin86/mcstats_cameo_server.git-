@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.14.0)
 
 # Project name and version
-project(cameo-mcstas
-  VERSION 0.10.0
+project(mcstas_server
+  VERSION 0.11.0
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
   )
@@ -10,18 +10,14 @@ project(cameo-mcstas
 #--------------- Helpers
 include(GNUInstallDirs)
 
-# specify the C++ standard
-#set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD_REQUIRED False)
-
 # Want to compile dynamic or static libraries
-#option(BUILD_SHARED_LIBS "Compiling shared or static library version of the api" ON)
-set(BUILD_SHARED_LIBS True)
+option(BUILD_SHARED_LIBS "Compiling shared or static library version of the api" ON)
+#set(BUILD_SHARED_LIBS True)
 
 option(ENABLE_TESTING "Enable testing" OFF)
 option(USE_MONGO "Use MongoDB to store requests and results" OFF)
 option(DO_INSTRUMENTS "Compile the instruments with mcstas" OFF)
-option(SERVER "Build the server" OFF)
+option(SERVER "Build the server and the instruments" OFF)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
   set(DO_INSTRUMENTS ON)
@@ -41,9 +37,9 @@ if(NOT APPLE)
 endif()
 
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
 
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+#list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 # where to find the header files
 include_directories(include include/nlohmann)
 
@@ -56,13 +52,13 @@ add_subdirectory(client_api)
 #------------------------------------------------------------
 # Libraries
 #------------------------------------------------------------
-add_library(libserver  src/sim_request_server.cc src/sim_result_server.cc)  # server
-target_link_libraries(libserver libclient)
-
+if(SERVER)
+add_library(cameo_mcstas_server  src/sim_request_server.cc src/sim_result_server.cc src/sim_request_answer_server.cc)  # server
+target_link_libraries(cameo_mcstas_server Panosc::cameo_mcstas_client)
 #------------------------------------------------------------
 # Executables
 #------------------------------------------------------------
-if(SERVER)
+
   find_package(cameo-api-cpp 1.1.0 REQUIRED)
   if(USE_MONGO)
     find_package(mongocxx 3.2.0 REQUIRED)
@@ -76,7 +72,7 @@ if(SERVER)
   add_executable(fakeNomad src/fakeNomad.cpp)
   target_link_libraries(fakeNomad PRIVATE Cameo::cameo-api-cpp)
   target_link_libraries(fakeNomad PRIVATE m zmq)
-  target_link_libraries(fakeNomad PRIVATE libclient)
+  target_link_libraries(fakeNomad PRIVATE Panosc::cameo_mcstas_client)
   target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
   target_compile_features(fakeNomad PUBLIC cxx_std_17)
   
@@ -86,7 +82,7 @@ if(SERVER)
   target_link_libraries(mcstas_server PRIVATE m zmq)
   target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
   target_compile_features(mcstas_server PUBLIC cxx_std_17)
-  target_link_libraries(mcstas_server PRIVATE libserver)
+  target_link_libraries(mcstas_server PRIVATE cameo_mcstas_server)
   if(USE_MONGO)
     target_include_directories(mcstas_server SYSTEM INTERFACE ${LIBMONGOCXX_INCLUDE_DIRS})
     target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
@@ -104,18 +100,22 @@ if(SERVER)
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
   
   if (BUILD_SHARED_LIBS)
-    install(TARGETS  libserver  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
+    install(TARGETS  cameo_mcstas_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
   endif(BUILD_SHARED_LIBS)
 
   install(PROGRAMS bin/launch_server.sh
-	TYPE bin
+	TYPE BIN
 	)
-  
+
+  configure_file(share/cameo_config.xml share/mcstas_server.xml)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcstas_server.xml
+	DESTINATION	${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+	)
   if(ENABLE_TESTING)
     add_executable(testserver ./test/testserver.cpp)
     target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
       $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
-    target_link_libraries(testserver PRIVATE libserver)
+    target_link_libraries(testserver PRIVATE cameo_mcstas_server)
     target_link_libraries(testserver PRIVATE stdc++fs)
     target_compile_features(testserver PUBLIC cxx_std_17)
     

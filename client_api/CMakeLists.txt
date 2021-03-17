@@ -1,40 +1,156 @@
-project(sim_client_api VERSION 0.10.0 LANGUAGES CXX)
+project(cameo_mcstas_client
+  VERSION 0.11.0
+  LANGUAGES CXX
+  )
 
-#set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_library(libclient src/sim_request.cc src/sim_result.cc)
+#--------------- Helpers
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
+option(INSTALL_CLIENT "Install the client library" ON)
 
-# Define headers for this library. PUBLIC headers are used for
-# compiling the library, and will be added to consumers' build
-# paths.
-target_include_directories(libclient PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:${PROJECT_NAME}/include>
+set(LIBNAME ${PROJECT_NAME})
+set(NAMESPACE Panosc)
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+set(ConfigPackageLocation ${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME})
+set(component_runtime CAMEO_MCSTAS_CLIENT_RUNTIME)
+set(component_development CAMEO_MCSTAS_CLIENT_DEVELOPMENT)
+
+add_library(${LIBNAME} src/sim_request.cc src/sim_result.cc src/sim_request_answer.cc)
+target_include_directories(cameo_mcstas_client
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   PRIVATE src)
+target_compile_features(${LIBNAME} PUBLIC cxx_std_11)
+set_target_properties(${LIBNAME} PROPERTIES
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  VERSION ${PROJECT_VERSION}
+  POSITION_INDEPENDENT_CODE 1 # this is needed for static compilation 
+  )
+add_library(${NAMESPACE}::${LIBNAME} ALIAS ${LIBNAME})
+
+#------------------------------------------------------------
+include(GenerateExportHeader)
+generate_export_header(${LIBNAME}
+    EXPORT_MACRO_NAME ${LIBNAME}_EXPORT
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/${INSTALL_INCLUDEDIR}/export.hh
+)
 
 
-# 'make install' to the correct locations (provided by GNUInstallDirs).
-install(TARGETS libclient EXPORT ${PROJECT_NAME}
-  ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
-  LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+
+#---------------
+# Library version
+write_basic_package_version_file(${PROJECT_NAME}-config-version.cmake
+  COMPATIBILITY SameMajorVersion
+  VERSION ${PROJECT_VERSION}
+  )
+
+
+configure_package_config_file(cmake/${PROJECT_NAME}-config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+  INSTALL_DESTINATION  ${ConfigPackageLocation}
+  )
+
+
+#------------------------------------------------------------
+# Install
+#------------------------------------------------------------
+if(INSTALL_CLIENT AND BUILD_SHARED_LIBS)
+
+  install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/../${PROJECT_NAME}
+  RENAME copyright
+  COMPONENT ${component_runtime}
+  )
+
+
 
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT ${PROJECT_NAME} DESTINATION share/${PROJECT_NAME}/cmake)
 
-# This makes the project importable from the build directory
-export(TARGETS libclient FILE ${PROJECT_NAME}.cmake)
+if(UNIX AND FALSE)
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz
+    COMMAND gzip -cn9 ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/changelog"
+    COMMENT "Compressing changelog"
+	)
+  
+  add_custom_target(changelog
+	ALL
+	#	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz
+	COMMAND gzip -cn9 ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog > ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz
+	)
+  
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+	DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+	COMPONENT ${component_runtime}
+	)
+endif()
+
+
+install(EXPORT cameo_mcstas_client_targets
+  FILE ${PROJECT_NAME}-targets.cmake
+#  FILE ${PROJECT_NAME}Config.cmake #${PROJECT_NAME}Targets.cmake
+  NAMESPACE ${NAMESPACE}::
+  DESTINATION ${ConfigPackageLocation}
+  COMPONENT ${component_development}
+  )
+export(EXPORT cameo_mcstas_client_targets
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-targets.cmake
+  NAMESPACE ${NAMESPACE}::
+  )
+
+install(
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+  DESTINATION ${ConfigPackageLocation}
+  COMPONENT ${component_development}
+  )
+
+install(TARGETS ${LIBNAME} 
+  EXPORT cameo_mcstas_client_targets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # windows
+    COMPONENT ${component_runtime}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/ # dynamic
+    COMPONENT ${component_runtime}
+    NAMELINK_COMPONENT ${component_development} #from CMake 3.12
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/ # static
+    COMPONENT ${component_development}
+  PUBLIC_HEADER  DESTINATION ${INSTALL_INCLUDEDIR}
+    COMPONENT ${component_development}
+#  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+
+# this is to install the headers
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ # don't forget the trailing /
+  DESTINATION ${INSTALL_INCLUDEDIR}
+  COMPONENT ${component_development}
+  FILES_MATCHING  PATTERN "*\.h*"
+  )
+# this is to install the version header that is generated by cmake
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/ # don't forget the trailing /
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT ${component_development}
+  FILES_MATCHING  PATTERN *.hh
+  )
+
+endif()
+
+
+
+
+
 
 # Every library has unit tests, of course
 if(ENABLE_TESTING)
   add_executable(testclient ./test/client.cpp)
   target_include_directories(testclient PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../doctest/doctest/>)
-  target_link_libraries(testclient libclient)
+  target_link_libraries(testclient cameo_mcstas_client)
   
   enable_testing()
   add_test(testclient testclient )

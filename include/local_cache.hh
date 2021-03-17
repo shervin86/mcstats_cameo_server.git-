@@ -128,7 +128,7 @@ class local_cache
 		}
 		if (mcpl_filename.empty()) {
 #ifdef DEBUG
-			std::cout << "    -> file NOT found" << std::endl;
+			std::cout << "    -> NO file found" << std::endl;
 #endif
 		}
 		if (mcpl_filename.empty())

@@ -1,5 +1,4 @@
-#include "sim_request.hh"
-#include "sim_result.hh"
+#include "cameo_mcstas_client.hh"
 #include <cameo/api/cameo.h>
 #include <fstream>
 #include <iomanip>
@@ -10,33 +9,20 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-/**
- * Writes a string to a file as binary
- * @param fileName : the name of the output file
- * @param fileContent : the string to write to  */
-void writeFile(const std::string &fileName, const std::string &fileContent)
-{
-	std::ofstream file(fileName, std::ios::binary | std::ios::ate);
-	if (file.is_open()) {
-		file << fileContent;
-		file.flush();
-		file.close();
-	} else {
-		std::cerr << "File " << fileName << " cannot be written." << std::endl;
-	}
-}
-
 enum exitCodes { exitOK = 0, exitNOCLIENT, exitNOSERVER, exitREQUESTER, exitFAILURE };
 
 int main(int argc, char *argv[])
 {
-	exitCodes ret     = exitOK;
-	bool      useJSON = false;
+	exitCodes   ret        = exitOK;
+	bool        useJSON    = false;
+	std::string serverName = SERVERNAME;
 	std::cout << "\n============================== Start of fakeNomad " << std::endl;
 	for (int i = 0; i < argc; ++i) {
 		if (strcmp(argv[i], "useJSON") == 0 or strcmp(argv[i], "-J") == 0)
 			useJSON = true;
 		//		std::cout << "#" << argv[i] << "#\t" << useJSON << std::endl;
+		if (strcmp(argv[i], "serverName") == 0 or strcmp(argv[i], "-s") == 0)
+			serverName = argv[++i];
 	}
 	cameo::application::This::init(argc, argv);
 	cameo::application::State returnState = cameo::application::UNKNOWN;
@@ -60,9 +46,9 @@ int main(int argc, char *argv[])
 
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
-		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(SERVERNAME);
+		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(serverName);
 		if (responderServer->exists() == false) { // start it for me
-			responderServer = server.start(SERVERNAME);
+			responderServer = server.start(serverName);
 		}
 		std::cout << "responder: " << *responderServer << "   --" << responderServer->exists()
 		          << "--                 [" << cameo::application::toString(responderServer->now())
@@ -81,6 +67,18 @@ int main(int argc, char *argv[])
 		          << "]" << std::endl;
 		if (requester.get() == 0) {
 			std::cerr << "[ERROR] requester error" << std::endl;
+			return exitREQUESTER;
+		}
+
+		// Create a subscriber
+		std::unique_ptr<cameo::application::Subscriber> subscriber =
+		    cameo::application::Subscriber::create(*responderServer,
+		                                           panosc::CAMEO_PUBLISHER); //
+		std::cout << "Subscriber: " << *subscriber << " ["
+		          << "CREATED"
+		          << "]" << std::endl;
+		if (subscriber.get() == 0) {
+			std::cerr << "[ERROR] subscriber creation error" << std::endl;
 			return exitREQUESTER;
 		}
 
@@ -127,26 +125,36 @@ int main(int argc, char *argv[])
 			std::optional<std::string> response = requester->receiveBinary();
 			if (response.has_value() == false)
 				throw std::runtime_error("no message received");
-
-			panosc::sim_result result(response.value());
+			panosc::sim_request_answer answer(response.value());
+			std::cout << "Response to request: " << response.value() << std::endl;
 			/// [receive result]
 			/// [return state]
-			returnState = result.get_status();
-			if (cameo::application::SUCCESS == returnState) {
+			if (answer.waitPub()) {
 				///[return state]
-				// if (response.size() > 1000)
-				//	writeFile(p, response);
-				///[get data]
-				std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
-				const std::vector<float> &data = result.data();
-				///[get data]
-				for (auto d = data.begin(); d != data.end() && (d - data.begin()) < 10; d++) {
-					std::cout << "Data: " << *d << std::endl;
-				}
+				cameo::application::State state = cameo::application::UNKNOWN;
+				do{
+					///[get data]
+					std::optional<std::string> published_data = subscriber->receiveBinary();
+					if (published_data.has_value() == false)
+						throw std::runtime_error("no output from publisher");
+					//std::cout << published_data.value() << std::endl;
+					
+					panosc::sim_result result(published_data.value());
+					state = result.get_status();
+					std::cout << "[DEBUG] state = " << state << "\t" << cameo::application::toString(state) << std::endl;
+					std::cout << result.dim_x() << "\t" << result.dim_y() << std::endl;
+					const std::vector<float> &data = result.data();
+					///[get data]
+					for (auto d = data.begin(); d != data.end() && (d - data.begin()) < 10; d++) {
+						std::cout << "Data: " << *d << std::endl;
+					}
+					
+				
+				}while(state==cameo::application::RUNNING);
 			} else {
-				std::cerr
-				    << "[ERROR] exit status is: " << cameo::application::toString(returnState)
-				    << std::endl;
+				std::cerr << "[ERROR] The answer to the request is: " << answer.answer()
+
+				          << std::endl;
 				ret = exitFAILURE;
 				return ret;
 			}

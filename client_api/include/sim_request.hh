@@ -28,7 +28,6 @@ class param_not_implemented : public std::runtime_error
 	param_not_implemented(const char *what) : std::runtime_error(what){};
 };
 
-
 /**
  * \class sim_request
  * \brief code simulation requests from client to server
@@ -45,8 +44,8 @@ class sim_request
 		SIMULATE = 0, ///< SIMULATE
 		STOP,         ///< stop the ongoing simulation
 		QUICK,        ///< run a QUICK simulation using the SimpleSource component before the sample
-		CLEAR,         ///< clear the cache (to be used only by experts)
-		REQUNKNOWN     ///< for checking not implemented requests
+		CLEAR,        ///< clear the cache (to be used only by experts)
+		REQUNKNOWN    ///< for checking not implemented requests
 	};
 
 	/** \brief Specify what you want the server to return in the result
@@ -92,10 +91,7 @@ class sim_request
 	 *   - add_parameter()
 	 *   - set_return_data()
 	 */
-	sim_request(req_t request_type = QUICK) : _type(request_type)
-	{
-		_j["type"] = request_type;
-	};
+	sim_request(req_t request_type = QUICK) : _type(request_type) { _j["type"] = request_type; };
 
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long long int n);

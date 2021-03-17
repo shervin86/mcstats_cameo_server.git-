@@ -27,14 +27,18 @@ class sim_result
 	size_t dim_y(void) const { return _dim_y; };
 	/// return the linearized vector of values
 	const std::vector<float> &data() const { return _counts; };
-	int                       get_status(void) const { return _status; };
+
+	inline unsigned long long int processed_neutrons(void) const { return _processed_neutrons; }
+	inline unsigned long long int requested_neutrons(void) const { return _requested_neutrons; }
+	inline int                    get_status(void) const { return _status; }
 
 	protected:
-	sim_result(void): _dim_x(0), _dim_y(0), _status(0) {};
-	size_t              _dim_x;
-	size_t              _dim_y;
-	std::vector<float>  _counts, _errors, _n;
-	int                 _status;
+	sim_result(void){};
+	size_t                 _dim_x = 0;
+	size_t                 _dim_y = 0;
+	std::vector<float>     _counts, _errors, _n;    // empty vectors
+	int                    _status             = 0; // 0 = UNKNOWN in CAMEO
+	unsigned long long int _processed_neutrons = 0, _requested_neutrons = 0;
 };
 } // namespace panosc
 #endif

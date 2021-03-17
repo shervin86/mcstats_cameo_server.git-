@@ -1,10 +1,11 @@
 BasedOnStyle: LLVM
-IndentWidth: 8
+IndentWidth: 4
 UseTab: ForIndentation
 BreakBeforeBraces: Linux
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
-ColumnLimit: 110
+#ColumnLimit: 110
+ColumnLimit: 250
 
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true

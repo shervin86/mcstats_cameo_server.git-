@@ -24,7 +24,7 @@
 		</application>
 
 		
-		<application name="mcstas_server-test" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
+		<application name="mcstas_server-test" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1"  environment="environment.properties">
 		  <start executable="/usr/local/bin/mcstas_server" args="-d /dev/shm/panosc/test/"/>
 		</application>
 

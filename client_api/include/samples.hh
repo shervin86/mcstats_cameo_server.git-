@@ -20,4 +20,4 @@ NLOHMANN_JSON_SERIALIZE_ENUM(sample_material_t, {
 #endif
 } // namespace panosc
 
-#endif 
+#endif

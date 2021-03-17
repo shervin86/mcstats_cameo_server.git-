@@ -86,40 +86,9 @@ class sim_request_server : public sim_request
 		return std::to_string(_hash(j));
 	}
 
-	inline simHash_t hash(stage_t s) const
-	{
-		nlohmann::json j(_j);
-		j.erase("type");
-		j.erase("--ncount");
-		j.erase("return");
+	simHash_t hash(stage_t s) const;
 
-		switch (s) {
-		case sFULL:
-			break;
-		case sDETECTOR:
-			j.erase(stages.at(sDETECTOR));
-			break;
-		case sSAMPLE:
-			j.erase(stages.at(sDETECTOR));
-			j.erase(stages.at(sSAMPLE));
-			break;
-		}
-#ifdef DEBUG
-		std::cout << "hash: " << std::to_string(_hash(j)) << "\n" << j << std::endl;
-#endif
-		return std::to_string(_hash(j));
-	}
-
-	inline std::vector<simHash_t> stage_hashes(void) const
-	{
-		std::vector<simHash_t> hashes;
-		for (auto stage : stages) {
-			if (stage.first == sNONE)
-				continue;
-			hashes.push_back(hash(stage.first));
-		}
-		return hashes;
-	}
+	std::vector<simHash_t> stage_hashes(void) const;
 
 	std::string to_string(void) const { return _j.dump(); }
 

@@ -15,7 +15,8 @@ class sim_result_server : public sim_result
 	public:
 	/** \brief constructor reading the mcstas detector file (server-side)
 	 */
-	sim_result_server(int stat = 0) { set_status(stat); }; // 0 = UNKNOWN in CAMEO
+	sim_result_server(int stat) { set_status(stat); };
+	sim_result_server(){};
 
 	void read_file(std::ifstream &f);
 
@@ -40,8 +41,6 @@ class sim_result_server : public sim_result
 	 * \todo replace plain json with MessagePack or CBOR or something else
 	 */
 	std::string to_cameo(void) const;
-
-	inline int get_status(void) { return _status; };
 
 	inline void set_status(int s) { _status = s; };
 };

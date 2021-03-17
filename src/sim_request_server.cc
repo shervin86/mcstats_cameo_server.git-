@@ -66,4 +66,42 @@ std::vector<std::string> sim_request_server::args(void) const
 
 	return argss;
 }
+
+
+	std::vector<simHash_t> sim_request_server::stage_hashes(void) const
+	{
+		std::vector<simHash_t> hashes;
+		for (auto stage : stages) {
+			if (stage.first == sNONE)
+				continue;
+			hashes.push_back(hash(stage.first));
+		}
+		return hashes;
+	}
+
+
+	simHash_t sim_request_server::hash(stage_t s) const
+	{
+		nlohmann::json j(_j);
+		j.erase("type");
+		j.erase("--ncount");
+		j.erase("return");
+
+		switch (s) {
+		case sFULL:
+			break;
+		case sDETECTOR:
+			j.erase(stages.at(sDETECTOR));
+			break;
+		case sSAMPLE:
+			j.erase(stages.at(sDETECTOR));
+			j.erase(stages.at(sSAMPLE));
+			break;
+		}
+#ifdef DEBUG
+		std::cout << " + stage: " << s << "\thash: " << std::to_string(_hash(j)) << "\n\t" << j << std::endl;
+#endif
+		return std::to_string(_hash(j));
+	}
+
 } // namespace panosc
