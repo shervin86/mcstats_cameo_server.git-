@@ -4,7 +4,7 @@ include(GNUInstallDirs)
 
 # mcstas code generates plenty of warnings!!! 
 set(CMAKE_C_FLAGS "-O3 -Wno-error -Wno-all -Wno-extra -Wno-unused-result -Wno-format-truncation -Wno-format-overflow -Wno-format")
-
+set(MCSTAS $ENV{MCSTAS} CACHE PATH "Path of the mcstas installation [MANDATORY]")
 ############################# MCSTAS
 message(STATUS "MCSTAS: ${MCSTAS}")
 #include_directories(/usr/share/mcstas/2.6/libs/mcpl)

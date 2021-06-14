@@ -17,6 +17,7 @@ sim_request::return_t sim_request_server::get_return_data(void) const
 		return rFULL;
 	else
 		assert(false);
+	return rNONE;
 }
 
 std::vector<std::string> sim_request_server::args(void) const

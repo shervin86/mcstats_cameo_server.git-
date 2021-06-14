@@ -5,7 +5,7 @@
 #include "sim_request_server.hh"
 #include "sim_result_server.hh"
 
-#include <cameo/cameo.h>
+#include <cameo/api/cameo.h>
 #include <cassert>
 #include <fstream>
 #include <iomanip>

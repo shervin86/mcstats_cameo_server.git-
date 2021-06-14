@@ -142,3 +142,9 @@ while(true){
   MC neutrons:
     return the binary array of the true neutrons image if it exists.
 
+# TODO
+ - [ ] launch_server.sh 
+   - [ ] config file path not very generic -> to be fixed?
+   - [ ] cameo config file named mcstas_server.xml to be put in /usr/share/ directory
+ - [ ] decide a better name for the project
+ 

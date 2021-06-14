@@ -1,9 +1,13 @@
-cmake_minimum_required(VERSION 3.7.2)
+cmake_minimum_required(VERSION 3.12.0)
 
 # Project name and version
-project(cameo-mcstas VERSION 0.10.0 LANGUAGES CXX)
-enable_testing()
+project(cameo-mcstas
+  VERSION 0.10.0
+  LANGUAGES CXX
+  HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
+  )
 
+#--------------- Helpers
 include(GNUInstallDirs)
 
 # specify the C++ standard
@@ -11,6 +15,7 @@ include(GNUInstallDirs)
 #set(CMAKE_CXX_STANDARD_REQUIRED False)
 
 # Want to compile dynamic or static libraries
+#option(BUILD_SHARED_LIBS "Compiling shared or static library version of the api" ON)
 set(BUILD_SHARED_LIBS True)
 
 option(ENABLE_TESTING "Enable testing" OFF)
@@ -21,6 +26,19 @@ if(SERVER)
   set(BUILD_SHARED_LIBS False)
   set(DO_INSTRUMENTS ON)
 endif(SERVER)
+
+if(NOT DEFINED ${CMAKE_BUILD_TYPE})
+  set(CMAKE_BUILD_TYPE "Release") # set Release by default
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+if(ENABLE_TESTING)
+  enable_testing()
+endif()
+# fix the RPATH for the linker
+if(NOT APPLE)
+  set(CMAKE_INSTALL_RPATH $ORIGIN)
+endif()
 
 #add_compile_options(-Wall -Wextra -pedantic -Werror)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
@@ -45,18 +63,18 @@ target_link_libraries(libserver libclient)
 # Executables
 #------------------------------------------------------------
 if(SERVER)
-  find_package(cameo 1.1.0 REQUIRED)
+  find_package(cameo-api-cpp 1.1.0 REQUIRED)
   if(USE_MONGO)
     find_package(mongocxx 3.2.0 REQUIRED)
   endif()
   #message(${LIBMONGOCXX_INCLUDE_DIRS})
   #include_directories(${LIBMONGOCXX_INCLUDE_DIRS})  # this should be avoided
   
-  find_package (Threads)
+  find_package (Threads REQUIRED)
   
   # Client
   add_executable(fakeNomad src/fakeNomad.cpp)
-  target_link_libraries(fakeNomad PRIVATE cameo)
+  target_link_libraries(fakeNomad PRIVATE Cameo::cameo-api-cpp)
   target_link_libraries(fakeNomad PRIVATE m zmq)
   target_link_libraries(fakeNomad PRIVATE libclient)
   target_link_libraries(fakeNomad PRIVATE stdc++fs Threads::Threads)
@@ -64,7 +82,7 @@ if(SERVER)
   
   # Server
   add_executable(mcstas_server src/mcstas_server.cpp)
-  target_link_libraries(mcstas_server PRIVATE cameo)
+  target_link_libraries(mcstas_server PRIVATE Cameo::cameo-api-cpp)
   target_link_libraries(mcstas_server PRIVATE m zmq)
   target_link_libraries(mcstas_server PRIVATE stdc++fs Threads::Threads)
   target_compile_features(mcstas_server PUBLIC cxx_std_17)
@@ -74,6 +92,7 @@ if(SERVER)
     target_link_libraries(mcstas_server PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
   endif()
 
+  
   if(DO_INSTRUMENTS)
     add_subdirectory(mcstas)
   endif(DO_INSTRUMENTS)
@@ -81,12 +100,17 @@ endif(SERVER)
 
 ################ Install
 if(SERVER)
-  install(TARGETS fakeNomad mcstas_server RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
+  install(TARGETS fakeNomad mcstas_server
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
   
   if (BUILD_SHARED_LIBS)
     install(TARGETS  libserver  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
   endif(BUILD_SHARED_LIBS)
 
+  install(PROGRAMS bin/launch_server.sh
+	TYPE bin
+	)
+  
   if(ENABLE_TESTING)
     add_executable(testserver ./test/testserver.cpp)
     target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

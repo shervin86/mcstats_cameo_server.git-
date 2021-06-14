@@ -1,6 +1,6 @@
 #include "sim_request.hh"
 #include "sim_result.hh"
-#include <cameo/cameo.h>
+#include <cameo/api/cameo.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
