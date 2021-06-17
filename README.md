@@ -147,4 +147,4 @@ while(true){
    - [ ] config file path not very generic -> to be fixed?
    - [ ] cameo config file named mcstas_server.xml to be put in /usr/share/ directory
  - [ ] decide a better name for the project
- 
+ - [ ] number of jobs growing? Based on the index of the job, one can have the number of events. This reduces the number of mergings, that would take longer and longer. 

@@ -4,8 +4,8 @@ UseTab: ForIndentation
 BreakBeforeBraces: Linux
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
-#ColumnLimit: 110
-ColumnLimit: 250
+ColumnLimit: 110
+#ColumnLimit: 250
 
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true

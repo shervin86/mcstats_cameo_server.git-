@@ -37,7 +37,7 @@
 *
 * %End
 *******************************************************************************/
-DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq", sample_size_r=0.005, sample_size_y=0.05, string filenames="none", stage=-1 )
+DEFINE INSTRUMENT ILL_H512_D22( lambda=4.5, dlambda=.45, D22_collimation=2, string D22_sample="H2O_liq.qSq", sample_size_r=0.005, sample_size_y=0.05, string filenames="none", string filelist="none", stage=-1 )
 
 DECLARE %{
 
@@ -62,6 +62,7 @@ DECLARE %{
 
 INITIALIZE %{
 	fprintf(stderr,"INPUT: filenames=%s\n",filenames);
+	fprintf(stderr,"INPUT: filelist =%s\n",filelist);
 %}
 
 TRACE
@@ -72,7 +73,7 @@ COMPONENT D22_Sample_Pos = Progress_bar()
 AT(0,0,0) ABSOLUTE
 
 /*1 cm before the detector */
-COMPONENT Vin = MCPL_input( filename = filenames)
+COMPONENT Vin = MCPL_input( filelist= filelist)
 AT (0, 0, D22_collimation-0.01) RELATIVE D22_Sample_Pos
 
 COMPONENT D22_Detector = Monitor_nD(xwidth=0.98, yheight=1.024, options="x bins=128 y bins=256")

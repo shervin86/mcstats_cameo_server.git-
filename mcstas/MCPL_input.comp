@@ -41,7 +41,7 @@
 
 DEFINE COMPONENT MCPL_input
 DEFINITION PARAMETERS ()
-SETTING PARAMETERS (string filename=0, polarisationuse=1,verbose=1, Emin=0, Emax=FLT_MAX, int repeat_count=1, E_smear=0, pos_smear=0, dir_smear=0)
+SETTING PARAMETERS (string filename=0, string filelist=0, polarisationuse=1,verbose=1, Emin=0, Emax=FLT_MAX, int repeat_count=1, E_smear=0, pos_smear=0, dir_smear=0)
 OUTPUT PARAMETERS (inputfile,nparticles,read_neutrons,used_neutrons,inactive)
 DEPENDENCY "-I@MCCODE_LIB@/libs/mcpl -L@MCCODE_LIB@/libs/mcpl -lmcpl"
 
@@ -53,8 +53,9 @@ SHARE
 
 DECLARE
 %{
+	
 	int containing_particles[100];
-	char* filenames[100];
+	char filenames[256][256];
 	mcpl_file_t inputfiles[100];
 mcpl_file_t* inputfile;
 long long nparticles;
@@ -70,30 +71,39 @@ int inactive;
 
 INITIALIZE
 %{
+
 char line[256];
 long long ncount;
 
-if (filename && strlen(filename) && strcmp(filename, "NULL") && strcmp(filename,"0") && repeat_count>0) {
-  /* We got a proper filename, do the rest of the work */
-  inactive=0;
-  if(Emax<Emin){
-        fprintf(stderr,"Warning(%s): Nonsensical energy interval: E=[%g,%g]. Aborting.\n",NAME_CURRENT_COMP,Emin,Emax);
-        exit(-1);
-    }
+if(Emax<Emin){
+	fprintf(stderr,"Warning(%s): Nonsensical energy interval: E=[%g,%g]. Aborting.\n",NAME_CURRENT_COMP,Emin,Emax);
+	exit(-1);
+}
 
+if (filelist && strlen(filelist) && strcmp(filelist, "NULL") && strcmp(filelist,"0") && repeat_count>0) {
+	/* read the list of input files from a file */
+/*	fprintf(stderr, "filelist = %s\n",filelist);*/
+	FILE *filelist_f = fopen(filelist, "r");
+	if(filelist_f!=NULL){
+		nfiles=0;
+		while(fgets(filenames[nfiles], 256, filelist_f)!=NULL){
+			filenames[nfiles][strlen(filenames[nfiles])-1]='\0';
+			nfiles++;
+		}
+	}else exit(2);
+	inactive=0;
+} else if (filename && strlen(filename) && strcmp(filename, "NULL") && strcmp(filename,"0") && repeat_count>0) {
+	/* We got a proper filename, do the rest of the work */
+	inactive=0;
+	nfiles=1;
+	sprintf(filenames[0],"%s", filename);
+}
 
-  /* count number of input files */
-  char *fname_tofree, *fname_token, *fname_copy;
-  fname_tofree = fname_copy = strdup(filename);
-  nfiles=0;
-  while(fname_token = strsep(&fname_copy, ";")){
-	  filenames[nfiles++]=fname_token;
-  }
-  --nfiles;
-  //  free(fname_tofree);
+ 
+if(nfiles>0){
   unsigned long long int nparts;
   for(unsigned int ifile =0; ifile<nfiles; ++ifile){
-	  fprintf(stderr, "INFO: reading file %d %s\n", ifile, filenames[ifile]);
+	  fprintf(stderr, "INFO: reading file %d #%s#\n", ifile, filenames[ifile]);
 	  inputfiles[ifile]=mcpl_open_file(filenames[ifile]);
 	  if ( !(nparts=mcpl_hdr_nparticles(inputfiles[ifile])) ) { 
 		  fprintf(stderr, "WARNING: file %d %s does not contain neutrons -> skipping\n", ifile, filenames[ifile]);

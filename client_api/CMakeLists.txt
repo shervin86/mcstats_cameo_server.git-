@@ -16,7 +16,7 @@ set(ConfigPackageLocation ${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME})
 set(component_runtime CAMEO_MCSTAS_CLIENT_RUNTIME)
 set(component_development CAMEO_MCSTAS_CLIENT_DEVELOPMENT)
 
-add_library(${LIBNAME} src/sim_request.cc src/sim_result.cc src/sim_request_answer.cc)
+add_library(${LIBNAME} src/sim_request.cc src/sim_result.cc src/sim_request_answer.cc )
 target_include_directories(cameo_mcstas_client
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
