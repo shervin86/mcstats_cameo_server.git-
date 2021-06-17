@@ -147,4 +147,14 @@ while(true){
    - [ ] config file path not very generic -> to be fixed?
    - [ ] cameo config file named mcstas_server.xml to be put in /usr/share/ directory
  - [ ] decide a better name for the project
- - [ ] number of jobs growing? Based on the index of the job, one can have the number of events. This reduces the number of mergings, that would take longer and longer. 
+ - [ ] number of jobs growing? Based on the index of the job, one can have the number of events. This reduces the number of mergings, that would take longer and longer.
+ - [ ] put the merge waitFor in a separate thread to avoid stopping the submission of other simulation jobs
+ - [ ] Make the QUICK option as a stage
+ - [ ] sim_result must publish:
+   - [X] Status: RUNNING, DONE, ERROR
+   - [ ] Number of requested events
+   - [ ] Number of processed events
+ - [ ] Reply to the request with a two part message: status and human readable message
+ - [ ] How to treat failed simulation jobs
+ - [ ] create a set of CTests with fakeNomad
+ - [ ] Document clearly the possible answers from the request and the publisher

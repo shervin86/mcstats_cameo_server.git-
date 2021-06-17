@@ -26,14 +26,6 @@
 		  <start executable="@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/mcstas_server" args="-d /dev/shm/panosc/prod/"/>
 		</application>
 
-		<application name="fakeNomad" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
-		  <start executable="@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/fakeNomad" args=""/>
-		</application>
-
-		<application name="fakeNomadJson" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1">
-		  <start executable="@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/fakeNomad" args="-J"/>
-		</application>
-
 
 		<application name="SIMD22-sSAMPLE" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
 		  <start executable="@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/ILL_H512_D22-sSAMPLE.out" args="--ncount=1e5 -s 65453 lambda=4.5" />

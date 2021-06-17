@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14.0)
 
 # Project name and version
-project(mcstas_server
+project(cameo_mcstas
   VERSION 0.11.0
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
@@ -9,6 +9,11 @@ project(mcstas_server
 
 #--------------- Helpers
 include(GNUInstallDirs)
+
+set(NAMESPACE Panosc)
+set(ConfigPackageLocation ${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME})
+string(TOUPPER server component_server)
+
 
 # Want to compile dynamic or static libraries
 option(BUILD_SHARED_LIBS "Compiling shared or static library version of the api" ON)
@@ -92,25 +97,34 @@ target_link_libraries(cameo_mcstas_server Panosc::cameo_mcstas_client)
   if(DO_INSTRUMENTS)
     add_subdirectory(mcstas)
   endif(DO_INSTRUMENTS)
+
 endif(SERVER)
+
+
 
 ################ Install
 if(SERVER)
-  install(TARGETS fakeNomad mcstas_server
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) 
+  install(TARGETS  mcstas_server #fakeNomad
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	COMPONENT ${component_server}) 
   
-  if (BUILD_SHARED_LIBS)
-    install(TARGETS  cameo_mcstas_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
-  endif(BUILD_SHARED_LIBS)
+  #if (BUILD_SHARED_LIBS)
+  #  install(TARGETS  cameo_mcstas_server  LIBRARY DESTINATION lib ARCHIVE DESTINATION obj)
+  #endif(BUILD_SHARED_LIBS)
 
-  install(PROGRAMS bin/launch_server.sh
+  set(XML_DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})
+  configure_file(bin/launch_server.sh bin/launch_server.sh @ONLY)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/launch_server.sh
 	TYPE BIN
+	COMPONENT ${component_server}
 	)
 
   configure_file(share/cameo_config.xml share/mcstas_server.xml)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcstas_server.xml
-	DESTINATION	${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+	DESTINATION	${XML_DESTINATION}
+	COMPONENT ${component_server}
 	)
+	
   if(ENABLE_TESTING)
     add_executable(testserver ./test/testserver.cpp)
     target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -125,6 +139,17 @@ if(SERVER)
   
 endif(SERVER)
 
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
+  DESTINATION ${CMAKE_INSTALL_DOCDIR}/#${PROJECT_NAME}
+  RENAME copyright
+  COMPONENT ${component_server}
+  )
+
+#------------------------------------------------------------
+# CPack
+#------------------------------------------------------------
+include(${CMAKE_CURRENT_SOURCE_DIR}/packaging/CPackConfig.cmake)
+include(CPack)
 
 ################ Doc
 find_package(Doxygen)

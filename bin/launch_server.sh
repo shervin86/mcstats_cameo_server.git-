@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # this is the cameo config file
-CONFIG_FILE=${1:-/usr/share/mcstas_server/mcstas_server.xml}
+CONFIG_FILE=${1:-`basename $0`/..//@XML_DESTINATION@/mcstas_server.xml}
 test -e ${CONFIG_FILE} || {
 	echo "ERROR: config file \"${CONFIG_FILE}\" not found. Wrong filename or wong path"
 	exit 1
