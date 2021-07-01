@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14.0)
 
 project(cameo_mcstas_client
-  VERSION 0.11.0
+  VERSION 0.11.1
   LANGUAGES CXX
   )
 
@@ -13,8 +13,8 @@ option(INSTALL_CLIENT "Install the client library" ON)
 
 set(LIBNAME ${PROJECT_NAME})
 set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-string(TOUPPER ${PROJECT_NAME}_RUNTIME component_client_runtime)
-string(TOUPPER ${PROJECT_NAME}_DEVELOPMENT component_client_development)
+string(TOUPPER lib component_client_runtime)
+string(TOUPPER dev component_client_development)
 set(ConfigPackageLocation ${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME})
 
 add_library(${LIBNAME} src/sim_request.cc src/sim_result.cc src/sim_request_answer.cc )
@@ -103,7 +103,7 @@ install(TARGETS ${LIBNAME}
   EXPORT cameo_mcstas_client_targets
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # windows
     COMPONENT ${component_client_runtime}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/ # dynamic
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/ # dynamic
     COMPONENT ${component_client_runtime}
     NAMELINK_COMPONENT ${component_client_development} #from CMake 3.12
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/ # static
