@@ -110,12 +110,6 @@ int main(int argc, char *argv[])
 		jsonfile.close();
 		std::cout << request << std::endl;
 
-		// std::string dirName = baseDir + request.instrument_name() + "/";
-		// fs::path    p       = dirName;
-		// fs::create_directories(p);
-		// std::string hash_string = request.hash();
-		// p /= hash_string;
-		// p += ".tgz";
 		if (true) {
 			/// [send request]
 			requester->sendBinary(request.to_cameo()); // request number 1
