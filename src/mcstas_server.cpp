@@ -41,7 +41,7 @@ size_t                 MAX_PARALLEL_JOBS = 10;
  *
  * WARNING: if the application was stopped, the number of effective neutrons are not saved in the file!
  */
-panosc::sim_result_server read_result(const std::string output_dir, const state_t state)
+panosc::sim_result_server read_result(const std::string output_dir, const panosc::sim_result::answer_t state)
 {
     panosc::sim_result_server sim_result(state);
 
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 	    //--------------- Request for a communication test
 	    if (sim_request_obj.is_test()) {
 		panosc::sim_result_server sim_result;
-		sim_result.set_test(cameo::application::SUCCESS);
+		sim_result.set_test(panosc::sim_result::ansDONE);
 		std::cout << "REQUEST FOR TEST!\n" << sim_result.to_cameo() << std::endl;
 
 		request->replyBinary(
@@ -294,10 +294,7 @@ int main(int argc, char *argv[])
 	    if (lc.is_done() && false) { // in this case re-use the previous results
 
 		std::cout << "simulation exists, re-using the same results" << std::endl;
-		auto sim_result =
-		    read_result(lc.output_dir(), cameo::application::SUCCESS
-		                //, sim_request_obj.get_return_data() == panosc::sim_request::rCOUNTS
-		    );
+		auto sim_result = read_result(lc.output_dir(), panosc::sim_result::ansDONE);
 
 		request->replyBinary(
 		    panosc::sim_request_answer_server::to_cameo(panosc::sim_request_answer::ansDONE));
@@ -410,12 +407,12 @@ int main(int argc, char *argv[])
 			    // put here an error message
 			    std::cerr << "[ERROR MERGING] " << cameo::application::toString(merging_state)
 			              << std::endl;
-			    panosc::sim_result_server sim_result(cameo::application::FAILURE);
+			    panosc::sim_result_server sim_result(panosc::sim_result::ansERROR);
 			    publisher->sendBinary(sim_result.to_cameo());
 			} else {
 			    auto sim_result =
-			        read_result(lc.output_dir_merge(), finished ? cameo::application::SUCCESS
-			                                                    : cameo::application::RUNNING);
+			        read_result(lc.output_dir_merge(), finished ? panosc::sim_result::ansDONE
+			                                                    : panosc::sim_result::ansRUNNING);
 			    publisher->sendBinary(sim_result.to_cameo());
 			}
 		    };

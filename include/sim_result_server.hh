@@ -15,12 +15,12 @@ class sim_result_server : public sim_result
 	public:
 	/** \brief constructor reading the mcstas detector file (server-side)
 	 */
-	sim_result_server(int stat) { set_status(stat); };
+	sim_result_server(answer_t stat) { set_status(stat); };
 	sim_result_server(){};
 
 	void read_file(std::ifstream &f);
 
-	void set_test(int status)
+	void set_test(answer_t status)
 	{
 		_status = status;
 		_dim_x  = 16;
@@ -42,7 +42,7 @@ class sim_result_server : public sim_result
 	 */
 	std::string to_cameo(void) const;
 
-	inline void set_status(int s) { _status = s; };
+	inline void set_status(answer_t s) { _status = s; };
 };
 } // namespace panosc
 #endif
