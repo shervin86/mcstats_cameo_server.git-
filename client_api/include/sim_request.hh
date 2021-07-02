@@ -177,19 +177,19 @@ class sim_request
 
 	void read_json(std::ifstream &jsonfile);
 
-/** \brief map containing the list of parameters defined in the simulation and some information 
- * \todo improve the documentation
- */
+	/** \brief map containing the list of parameters defined in the simulation and some information
+	 * \todo improve the documentation
+	 */
 	// define here the stage for each parameter, it should match the McStas instrument implementation
 	// define here the name for each parameter, it should match the McStas instrument implementation
 	static const std::map<param_t, param_data> param_names;
 
-	bool is_param_implemented(param_t par) const{
-		    const auto &par_data = param_names.at(par);
-		    return par_data.stage != sNONE;
+	bool is_param_implemented(param_t par) const
+	{
+		const auto &par_data = param_names.at(par);
+		return par_data.stage != sNONE;
 	}
 
-	
 	protected:
 	nlohmann::json _j;
 	instrument_t   _instrument;

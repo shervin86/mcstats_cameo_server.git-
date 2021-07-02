@@ -38,8 +38,11 @@ class sim_request_answer
 	bool ok(void) const { return _answer == ansOK; }
 	bool error(void) const { return _answer == ansERROR or _answer == ansNOANS or _answer == ansWAIT; }
 
+	std::string answer_message(void) const;
+
 	private:
-	answer_t _answer;
+	answer_t    _answer;
+	std::string _answer_message;
 };
 } // namespace panosc
 #endif

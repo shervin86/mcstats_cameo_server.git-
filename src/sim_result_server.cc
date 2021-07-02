@@ -54,6 +54,7 @@ std::string sim_result_server::to_cameo(void) const
 	j["dim_x"]  = _dim_x;
 	j["dim_y"]  = _dim_y;
 	j["status"] = _status;
+	j["answer_message"] = "";
 	// std::cout << j << std::endl;
 	return j.dump();
 }
