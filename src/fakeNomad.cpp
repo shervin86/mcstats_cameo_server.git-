@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	    std::cout << "Response to request: " << response.value() << std::endl;
 	    /// [receive result]
 	    /// [return state]
-	    if (answer.waitPub()) {
+	    if (answer.wait_pub()) {
 		///[return state]
 		panosc::sim_result::answer_t state   = panosc::sim_result::ansNOANS;
 		bool                         waitPub = true;

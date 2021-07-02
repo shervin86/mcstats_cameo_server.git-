@@ -31,7 +31,7 @@ class sim_request_answer
 
 	answer_t answer(void) const { return _answer; }
 	bool     done(void) const { return _answer == ansDONE; }
-	bool     waitPub(void) const
+	bool     wait_pub(void) const
 	{
 		return _answer == ansDONE or _answer == ansRUNNING or _answer == ansSTARTING;
 	}
