@@ -1,5 +1,5 @@
 #!/usr/bin/fish
-set dir $argv
+set dir $argv[1]
 
 for file in $dir/*.x_y
     set -l f $dir/(basename $file .x_y | sed -r 's|_[0-9]+||').dat

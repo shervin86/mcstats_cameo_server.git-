@@ -109,6 +109,11 @@ int main(int argc, char *argv[])
 	jsonfile.close();
 	std::cout << request << std::endl;
 
+	// print the list of available parameters and values
+	for(const auto& p : request.param_names){
+		std::cout << p.first << "\t" << std::boolalpha << request.is_param_implemented(p.first) << "\t" << p.second.name << "\t[" << p.second.min << ":" << p.second.max << "]\t" << p.second.units
+			 << std::endl;
+	}
 	if (true) {
 	    /// [send request]
 	    requester->sendBinary(request.to_cameo()); // request number 1

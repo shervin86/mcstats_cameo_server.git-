@@ -77,6 +77,18 @@ class sim_request
 		pNOTIMPLEMENTED,    ///< FOR UNIT TESTS
 	};
 
+	/** \brief structure defining some information about each parameter
+	 * it is used internally by the library, but it is publicly exposed
+	 * to let the client list and print the list of available parameters and their predefined values
+	 */
+	struct param_data {
+		stage_t     stage;
+		std::string name;
+		float       min;
+		float       max;
+		std::string units;
+	};
+
 	/** \brief list of sample shapes */
 	// enum sample_shape_t {
 	// 	ssSPHERE, ///< sphere, radious defined bt the p_SAMPLE_SIZE_X parameter
@@ -125,7 +137,7 @@ class sim_request
 	void set_return_data(return_t iret = rNONE);
 
 	/** \brief sets the request as defined by req_t */
-	void set_type(req_t request_type = SIMULATE)
+	void set_type(req_t request_type)
 	{
 		_type      = request_type;
 		_j["type"] = request_type;
@@ -165,6 +177,19 @@ class sim_request
 
 	void read_json(std::ifstream &jsonfile);
 
+/** \brief map containing the list of parameters defined in the simulation and some information 
+ * \todo improve the documentation
+ */
+	// define here the stage for each parameter, it should match the McStas instrument implementation
+	// define here the name for each parameter, it should match the McStas instrument implementation
+	static const std::map<param_t, param_data> param_names;
+
+	bool is_param_implemented(param_t par) const{
+		    const auto &par_data = param_names.at(par);
+		    return par_data.stage != sNONE;
+	}
+
+	
 	protected:
 	nlohmann::json _j;
 	instrument_t   _instrument;

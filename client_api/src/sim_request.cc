@@ -6,19 +6,11 @@
 namespace panosc
 {
 
-// this struct is needed only in this library
-struct param_data {
-    stage_t     stage;
-    std::string name;
-    float       min;
-    float       max;
-    std::string units;
-};
 
 // this map is only of internal use
 // define here the stage for each parameter, it should match the McStas instrument implementation
 // define here the name for each parameter, it should match the McStas instrument implementation
-static const std::map<sim_request::param_t, param_data> param_names = {
+	const std::map<sim_request::param_t, sim_request::param_data> sim_request::param_names = {
     // clang-format off
 	{sim_request::pWAVELENGTH     	, {sFULL  , "lambda"          , 3,  6                                                                             , "angs" }},
 	{sim_request::pSOURCE_SIZE_X  	, {sNONE  , "source_size_x"   , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
