@@ -103,8 +103,13 @@ class sim_request
 	 *   - add_parameter()
 	 *   - set_return_data()
 	 */
-	sim_request(req_t request_type = QUICK) : _type(request_type) { _j["type"] = request_type; };
+	sim_request(req_t request_type, instrument_t instr)
+	{
+		set_instrument(instr);
+		set_type(request_type);
+	};
 
+	sim_request(std::ifstream &json_file) { read_json(json_file); }
 	/** \brief set the number of neutrons to simulate */
 	void set_num_neutrons(unsigned long long int n);
 
@@ -191,6 +196,7 @@ class sim_request
 	}
 
 	protected:
+	sim_request(void){}; // empty contructor only for sim_request_server
 	nlohmann::json _j;
 	instrument_t   _instrument;
 	req_t          _type;

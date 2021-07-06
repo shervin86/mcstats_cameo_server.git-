@@ -4,10 +4,9 @@
 #include "sim_request.hh"
 #include "sim_result.hh"
 
-
 TEST_CASE("Testing test request (zero neutrons)")
 {
-	panosc::sim_request request;
+	panosc::sim_request request(panosc::sim_request::QUICK, panosc::D22);
 	request.set_instrument(panosc::D22);
 	request.set_measurement_time(0);
 	request.set_return_data(panosc::sim_request::rNONE);
@@ -21,14 +20,14 @@ TEST_CASE("Testing test request (zero neutrons)")
 
 	// panosc::sim_result result;
 	// result.set_test(0);
-	// CHECK(result.to_cameo() == "{\"data\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0."
+	// CHECK(result.to_cameo() ==
+	// "{\"data\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0."
 	//                            "0],\"dim_x\":16,\"dim_y\":16,\"status\":64}");
 }
 
 TEST_CASE("Testing json equivalence")
 {
-	panosc::sim_request request;
-	request.set_instrument(panosc::D22);
+	panosc::sim_request request(panosc::sim_request::QUICK, panosc::D22);
 	// request.set_num_neutrons(10000000);
 	request.set_measurement_time(1);
 
@@ -56,7 +55,7 @@ TEST_CASE("Testing json equivalence")
 	fout << request << std::endl;
 
 	std::ifstream       fin("./request.json");
-	panosc::sim_request req_json;
+	panosc::sim_request req_json(panosc::sim_request::QUICK, panosc::D22);
 	req_json.read_json(fin);
 
 	// test the the json is unchanged
@@ -64,13 +63,13 @@ TEST_CASE("Testing json equivalence")
 	WARN(req_json.to_cameo() == request.to_cameo());
 }
 
+TEST_CASE("testing sim_result")
+{
 
-TEST_CASE("testing sim_result"){
+	// empty message
 
-    // empty message
-	
-//	CHECK_THROWS_AS(panosc::sim_result(""), "[SIM_RESULT] Received empty result message", std::runtime_error);
-	CHECK_THROWS_AS(panosc::sim_result(""),  std::runtime_error);
+	//	CHECK_THROWS_AS(panosc::sim_result(""), "[SIM_RESULT] Received empty result message",
+	// std::runtime_error);
+	CHECK_THROWS_AS(panosc::sim_result(""), std::runtime_error);
 	CHECK_THROWS(panosc::sim_result("{}"));
 }
-

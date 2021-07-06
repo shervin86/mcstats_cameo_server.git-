@@ -158,3 +158,13 @@ while(true){
  - [ ] How to treat failed simulation jobs
  - [ ] create a set of CTests with fakeNomad
  - [ ] Document clearly the possible answers from the request and the publisher
+
+
+
+# TESTING
+```
+launch_server.sh test/cameo_config.xml
+
+cmake --build /dev/shm/mcstats_cameo_server/server/
+ctest -R server -V --test-dir /dev/shm/mcstats_cameo_server/server/
+```

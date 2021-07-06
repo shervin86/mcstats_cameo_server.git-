@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14.0)
 
 # Project name and version
 project(cameo_mcstas
-  VERSION 0.13.1
+  VERSION 0.14.0
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
   )
@@ -160,6 +160,7 @@ if(SERVER)
     target_link_libraries(testserver PRIVATE stdc++fs)
     target_compile_features(testserver PUBLIC cxx_std_17)
 	target_link_libraries(testserver PRIVATE doctest::doctest)
+	target_link_libraries(testserver PRIVATE Cameo::cameo-api-cpp)
     
     add_test(testserver testserver -nc)
     set_tests_properties(testserver PROPERTIES LABELS server)
