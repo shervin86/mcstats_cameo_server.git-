@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 			//--------------- Request for a clearing the local cache
 			if (sim_request_obj.type() == panosc::sim_request::CLEAR) {
 				panosc::local_cache lc(sim_request_obj.instrument_name(),
-				                       sim_request_obj.hash(), baseDir + "QUICK/");
+				                       "", baseDir + "QUICK/");
 
 				std::cout << "CLEARING " << lc.output_dir() << " and removing "
 				          << fs::remove_all(lc.output_dir()) << " files and directories"
