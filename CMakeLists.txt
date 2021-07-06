@@ -152,7 +152,7 @@ if(SERVER)
 	COMPONENT ${component_server}
 	)
 	
-
+if(ENABLE_TESTING)
     add_executable(testserver ./test/testserver.cpp)
     target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
     #  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
@@ -165,7 +165,8 @@ if(SERVER)
     add_test(testserver testserver -nc)
     set_tests_properties(testserver PROPERTIES LABELS server)
   
-  
+    configure_file(test/cameo_config.xml.in test/mcstas_server.xml)
+endif(ENABLE_TESTING)
 endif(SERVER)
 
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE

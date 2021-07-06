@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config port="7323" max_applications="40" log_directory="logs" debug="ON" polling_time="100">
+
+	<applications>
+	
+	
+
+		<!-- The Java application with name subpubjava -->
+		<application name="SIMD22-sFULL" stream="yes" multiple="yes"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="@CMAKE_BINARY_DIR@/mcstas/ILL_H512_D22.out" args="" /> 
+		  <stop executable="kill" args="-2 $PID"/>
+		</application>
+
+		<application name="SIMD22-QUICK" stream="yes" multiple="yes"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="@CMAKE_BINARY_DIR@/mcstas/ILL_D22_quick.out" args="" /> 
+		  <stop executable="kill" args="-2 $PID"/>
+		</application>
+
+		<application name="SIMD22-QUICKMERGE" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="@CMAKE_BINARY_DIR@/mcstas/ILL_D22_quick_merge.out" args="" /> 
+		  <stop executable="kill" args="-2 $PID"/>
+		</application>
+
+		<application name="mcstas_server" stream="yes" multiple="no"  restart="no" starting_time="0" retries="0" stopping_time="1" log_directory="default" >
+		  <start executable="@CMAKE_BINARY_DIR@/mcstas_server" args="-d /dev/shm/panosc/test/"/>
+		</application>
+
+
+		<application name="SIMD22-sSAMPLE" stream="yes" multiple="no"  restart="no" starting_time="1" retries="0" stopping_time="1" pass_info="no"  >
+		  <start executable="@CMAKE_BINARY_DIR@/ILL_H512_D22-sSAMPLE.out" args="--ncount=1e5 -s 65453 lambda=4.5" />
+		  <stop executable="kill" args="-2 $PID"/>
+		</application>
+
+	</applications>
+
+</config>
