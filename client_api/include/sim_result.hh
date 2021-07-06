@@ -41,14 +41,14 @@ class sim_result
 	inline unsigned long long int requested_neutrons(void) const { return _requested_neutrons; }
 	inline answer_t               get_status(void) const { return _status; }
 	inline bool                   wait_pub(void) const { return _status == ansRUNNING; };
-
+	inline std::string answer_message(void) const {return _answer_message;};
 	protected:
 	sim_result(void){};
 	size_t                 _dim_x = 0;
 	size_t                 _dim_y = 0;
 	std::vector<float>     _counts, _errors, _n; // empty vectors
 	answer_t               _status = ansNOANS;
-	std::string            _answer_message;
+	std::string            _answer_message= "DEF";
 	unsigned long long int _processed_neutrons = 0, _requested_neutrons = 0;
 };
 } // namespace panosc

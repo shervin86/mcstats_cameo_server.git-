@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 3.14.0)
 
 # Project name and version
 project(cameo_mcstas
-  VERSION 0.12.0
+  VERSION 0.13.1
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
   )
 
 #--------------- Helpers
 include(GNUInstallDirs)
+include(FetchContent)
 
 set(NAMESPACE Panosc)
 set(ConfigPackageLocation ${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME})
@@ -46,6 +47,32 @@ endif()
 
 #list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 # where to find the header files
+
+
+
+if(ENABLE_TESTING)
+  add_definitions(-DDOCTEST=ON)
+	find_package(doctest 1.2.9 QUIET)
+	if(NOT doctest_FOUND)
+	  message(WARNING "Using Doctest from GIT repository")
+	  FetchContent_Declare(doctest
+		GIT_REPOSITORY https://github.com/onqtam/doctest.git
+		GIT_TAG 1.2.9
+		GIT_SHALLOW True
+		CMAKE_ARGS -DDOCTEST_WITH_TESTS=OFF -DDOCTEST_NO_INSTALL=ON
+		)
+	  
+	  #	  FetchContent_MakeAvailable(doctest)
+	  	  FetchContent_Populate(doctest)
+	  
+	  
+		  add_library(doctest INTERFACE ${doctest_SOURCE_DIR}/doctest/doctest.h)
+		  target_include_directories(doctest INTERFACE ${doctest_SOURCE_DIR}/doctest/)
+		  add_library(doctest::doctest ALIAS doctest)
+	endif()
+	message(STATUS "doctest found here: ${doctest_SOURCE_DIR}")
+	
+  endif(ENABLE_TESTING)
 include_directories(include include/nlohmann)
 
 
@@ -125,17 +152,18 @@ if(SERVER)
 	COMPONENT ${component_server}
 	)
 	
-  if(ENABLE_TESTING)
+
     add_executable(testserver ./test/testserver.cpp)
-    target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
+    target_include_directories(testserver PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
+    #  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/doctest/doctest/>)
     target_link_libraries(testserver PRIVATE cameo_mcstas_server)
     target_link_libraries(testserver PRIVATE stdc++fs)
     target_compile_features(testserver PUBLIC cxx_std_17)
+	target_link_libraries(testserver PRIVATE doctest::doctest)
     
-    add_test(testserver testserver)
+    add_test(testserver testserver -nc)
     set_tests_properties(testserver PROPERTIES LABELS server)
-  endif(ENABLE_TESTING)
+  
   
 endif(SERVER)
 

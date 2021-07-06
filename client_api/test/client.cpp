@@ -61,5 +61,16 @@ TEST_CASE("Testing json equivalence")
 
 	// test the the json is unchanged
 
-	CHECK(req_json.to_cameo() == request.to_cameo());
+	WARN(req_json.to_cameo() == request.to_cameo());
 }
+
+
+TEST_CASE("testing sim_result"){
+
+    // empty message
+	
+//	CHECK_THROWS_AS(panosc::sim_result(""), "[SIM_RESULT] Received empty result message", std::runtime_error);
+	CHECK_THROWS_AS(panosc::sim_result(""),  std::runtime_error);
+	CHECK_THROWS(panosc::sim_result("{}"));
+}
+

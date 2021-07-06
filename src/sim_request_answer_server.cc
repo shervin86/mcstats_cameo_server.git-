@@ -7,7 +7,7 @@ namespace panosc
 {
 	nlohmann::json j;
 	j["answer"]   = answer;
-	j["answer_message"] = "";
+	j["answer_message"] = std::string();
 	return j.dump();
 }
 } // namespace panosc
