@@ -1,7 +1,7 @@
 #!/usr/bin/fish
 set -l build_dir /dev/shm/mcstats_cameo_server/server/
 cmake -S . -B $build_dir -DSERVER=ON -DENABLE_TESTING=ON
-cmake --build $build_dir
+cmake --build $build_dir || exit 1
 launch_server.sh $build_dir/test/mcstas_server.xml &
 
 ctest  -V --test-dir $build_dir -R testserver

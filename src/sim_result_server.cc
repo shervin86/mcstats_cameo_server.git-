@@ -19,8 +19,9 @@ void sim_result_server::read_file(std::ifstream &f)
 			if (line.find("type") != std::string::npos) {
 				type = line.substr(2);
 				/// \todo throw exception
-				assert(sscanf(type.c_str(), "type: array_2d(%lu,%lu)", &_dim_x, &_dim_y) ==
-				       2);
+				//assert(sscanf("type: array_2d(128, 256)", "type: array_2d(%lu, %lu)", &_dim_x, &_dim_y) ==
+				//       2);
+				sscanf(type.c_str(), "type: array_2d(%lu, %lu)", &_dim_x, &_dim_y);
 			} else {
 				if (line.find("I:") != std::string::npos) {
 					z = &_counts;
@@ -43,8 +44,9 @@ void sim_result_server::read_file(std::ifstream &f)
 			}
 		}
 	}
-	if(z == nullptr) assert(false);
-	assert(z->size() == _dim_x * _dim_y);
+
+//	if(z == nullptr) assert(false);
+//	assert(z->size() == _dim_x * _dim_y);
 }
 
 std::string sim_result_server::to_cameo(void) const

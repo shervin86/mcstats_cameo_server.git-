@@ -166,7 +166,8 @@ if(ENABLE_TESTING)
     set_tests_properties(testserver PROPERTIES LABELS server)
   
     configure_file(test/cameo_config.xml.in test/mcstas_server.xml)
-endif(ENABLE_TESTING)
+	configure_file(test/D22_Detector_0000000000.x_y test/D22_Detector_0000000000.x_y)
+  endif(ENABLE_TESTING)
 endif(SERVER)
 
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
