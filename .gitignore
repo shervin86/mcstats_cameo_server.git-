@@ -4,6 +4,7 @@
 [Oo]bj/
 [Bb]uild/
 
+logs/
 # emacs temp files
 *~
 #*
@@ -43,3 +44,4 @@
 
 
 *.tgz
+
