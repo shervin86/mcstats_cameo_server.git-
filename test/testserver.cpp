@@ -209,3 +209,45 @@ TEST_CASE("Full server test from fakeNomad")
 		}
 	}
 }
+
+
+
+TEST_CASE("Test image transformation from McStas to Nomad")
+{
+	std::ifstream fin("test/D22_Detector_0000000000.x_y");
+	panosc::sim_result_server sim_result;
+	sim_result.read_file(fin);
+ 	CHECK(sim_result.dim_x() == 128);
+ 	CHECK(sim_result.dim_y() == 256);
+	CHECK(sim_result.data().size() == 32768);
+	
+	for(auto i : sim_result.data())
+		CHECK(i != -999);
+	CHECK(sim_result.data()[0] ==	doctest::Approx(256.001).epsilon(0.0001) );
+	CHECK(sim_result.data()[32767] ==	doctest::Approx(1.128).epsilon(0.0001) );
+
+
+}
+// TEST_CASE("Server Result") {
+
+// 	// find the file with the counts on the detector
+// 	fs::path p;
+// 	for (auto &p_itr : fs::directory_iterator("mcstas")) {
+// 		std::string s   = p_itr.path().stem();
+// 		auto        pos = s.rfind('_');
+// 		if (pos != std::string::npos)
+// 			s.erase(pos);
+// 		if (s == "D22_Detector")
+// 			p = p_itr.path();
+// 	}
+// 	std::cout << p << std::endl;
+// 	std::ifstream fi(p);
+
+// 	panosc::sim_result_server sim_result;
+// 	sim_result.read_file(fi);
+
+// 	//sim_result.set_status(0);
+// 	CHECK(sim_result.dim_x() == 128);
+// 	CHECK(sim_result.dim_y() == 256);
+// 	CHECK(sim_result.data().size() == 32768);
+// }
