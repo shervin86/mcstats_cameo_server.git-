@@ -6,8 +6,6 @@
 #include "sim_result_server.hh"
 
 #include <cameo/api/cameo.h>
-//#include "c++/7/experimental/filesystem"
-// namespace fs = std::experimental::filesystem;
 #include <filesystem>
 namespace fs = std::filesystem;
 

@@ -143,9 +143,9 @@ while(true){
     return the binary array of the true neutrons image if it exists.
 
 # TODO
- - [ ] launch_server.sh 
-   - [ ] config file path not very generic -> to be fixed?
-   - [ ] cameo config file named mcstas_server.xml to be put in /usr/share/ directory
+ - [X] launch_server.sh 
+   - [X] config file path not very generic -> to be fixed?
+   - [X] cameo config file named mcstas_server.xml to be put in /usr/share/ directory
  - [ ] decide a better name for the project
  - [ ] number of jobs growing? Based on the index of the job, one can have the number of events. This reduces the number of mergings, that would take longer and longer.
  - [ ] put the merge waitFor in a separate thread to avoid stopping the submission of other simulation jobs
@@ -154,11 +154,13 @@ while(true){
    - [X] Status: RUNNING, DONE, ERROR
    - [ ] Number of requested events
    - [ ] Number of processed events
- - [ ] Reply to the request with a two part message: status and human readable message
+ - [X] Reply to the request with a human readable message
  - [ ] How to treat failed simulation jobs
- - [ ] create a set of CTests with fakeNomad
+ - [X] create a set of CTests with fakeNomad
  - [ ] Document clearly the possible answers from the request and the publisher
-
+ - [ ] doctest should save junit file for gitlab: 
+		- https://docs.gitlab.com/ee/ci/unit_test_reports.html
+		- https://github.com/onqtam/doctest/blob/master/doc/markdown/reporters.md
 
 
 # TESTING
