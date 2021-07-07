@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14.0)
 
 # Project name and version
 project(cameo_mcstas
-  VERSION 0.14.1
+  VERSION 0.14.2
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
   )
