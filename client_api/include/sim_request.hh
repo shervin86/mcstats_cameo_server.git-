@@ -74,6 +74,9 @@ class sim_request
 		pATTENUATOR,        ///< NOT IMPLEMENTED YET
 		pTHICKNESS,         ///< NOT IMPLEMENTED YET
 		pCOLLIMATION,       ///< collimation
+		pAXIS1,             ///< first axis
+		pAXIS2,             ///< second axis
+		pAXIS3,             ///< third axis
 		pNOTIMPLEMENTED,    ///< FOR UNIT TESTS
 	};
 

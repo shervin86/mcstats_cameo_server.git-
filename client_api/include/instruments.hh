@@ -6,6 +6,7 @@ namespace panosc
 /** \brief implemented instruments */
 enum instrument_t {
 	D22 = 0,       /** D22 Detector */
+	THALES, /* THALES detector */,
 	notIMPLEMENTED /** not implemented/not defined */
 };
 
@@ -13,6 +14,7 @@ enum instrument_t {
 // map instrument_t values to JSON as strings
 NLOHMANN_JSON_SERIALIZE_ENUM(instrument_t, {
                                                {D22, "D22"},
+					       {THALES, "THALES"},
                                            })
 #endif
 

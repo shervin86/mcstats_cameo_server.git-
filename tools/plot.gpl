@@ -8,8 +8,8 @@ set size square
 set auto fix
 set offsets graph 0.05, graph 0.05, graph 0.05, graph 0.05
 
-set xlabel 'x [m]'
-set ylabel 'y [m]'
+set xlabel 'x [cm]'
+set ylabel 'y [cm]'
 
 set term pdf size 5in,5in
 set output outfile
