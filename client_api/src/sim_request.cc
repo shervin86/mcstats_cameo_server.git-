@@ -24,6 +24,10 @@ const std::map<sim_request::param_t, sim_request::param_data> sim_request::param
 	{sim_request::pATTENUATOR       , {sNONE  , "attenuator"      , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pTHICKNESS        , {sNONE  , "thickness"       , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
 	{sim_request::pCOLLIMATION      , {sSAMPLE, "D22_collimation" , 2                                      ,  18                                      , "m"    }},
+	{sim_request::pA2               , {sFULL  , "a2"              , 0                                      , 360                                      , "degree"}},
+	{sim_request::pA4               , {sFULL  , "a4"              , 0                                      , 360                                      , "degree"}},
+	{sim_request::pA6               , {sFULL  , "a6"              , 0                                      , 360                                      , "degree"}},
+	{sim_request::pA3               , {sNONE  , "a3"              , 0                                      , 360                                      , "degree"}},
 	{sim_request::pNOTIMPLEMENTED   , {sNONE  , "not_implemented" , std::numeric_limits<float>::quiet_NaN(),  std::numeric_limits<float>::quiet_NaN() , ""     }},
     // clang-format on
 };
@@ -48,6 +52,15 @@ void sim_request::set_instrument(instrument_t instr)
 		for (auto istage : stages) {
 			if (istage.first == sNONE)
 				continue;
+			_j[stages.at(istage.first)] = nlohmann::json::object();
+		}
+		_j["mcpl"] = nlohmann::json::object();
+		break;
+	case THALES:
+		_instrument = instr;
+		_j["instrument"]["name"] = instr;
+		for( auto istage : stages){
+			if(istage.first==sNONE)continue;
 			_j[stages.at(istage.first)] = nlohmann::json::object();
 		}
 		_j["mcpl"] = nlohmann::json::object();
