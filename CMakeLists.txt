@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.14.0)
+cmake_minimum_required(VERSION 3.20.0)
 
 # Project name and version
-project(cameo_mcstas
+project(cameo-mcstas
   VERSION 0.14.2
   LANGUAGES CXX
   HOMEPAGE_URL "https://code.ill.fr/nourbakhsh/mcstats_cameo_server"
@@ -26,7 +26,7 @@ option(DO_INSTRUMENTS "Compile the instruments with mcstas" OFF)
 option(SERVER "Build the server and the instruments" OFF)
 if(SERVER)
   set(BUILD_SHARED_LIBS False)
-  set(DO_INSTRUMENTS ON)
+  set(DO_INSTRUMENTS OFF)
 endif(SERVER)
 
 if(NOT DEFINED ${CMAKE_BUILD_TYPE})
