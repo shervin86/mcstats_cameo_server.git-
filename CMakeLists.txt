@@ -90,8 +90,8 @@ target_link_libraries(cameo_mcstas_server Panosc::cameo_mcstas_client)
 #------------------------------------------------------------
 # Executables
 #------------------------------------------------------------
-
-  find_package(cameo-api-cpp 1.1.0 REQUIRED)
+if(SERVER)
+  find_package(cameo-api-cpp 2.0.0 REQUIRED)
   if(USE_MONGO)
     find_package(mongocxx 3.2.0 REQUIRED)
   endif()
