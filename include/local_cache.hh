@@ -6,6 +6,7 @@ namespace fs = std::filesystem;
 #include "stages.hh"
 #include <fstream>
 #include <iostream>
+#include <vector>
 #define DEBUG
 namespace panosc
 {
