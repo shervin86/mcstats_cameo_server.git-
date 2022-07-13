@@ -65,6 +65,9 @@ void sim_request::set_instrument(instrument_t instr)
 		}
 		_j["mcpl"] = nlohmann::json::object();
 		break;
+	case notIMPLEMENTED:
+	  assert(false);
+	  break;
 	}
 }
 
