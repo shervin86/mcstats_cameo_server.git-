@@ -84,9 +84,9 @@ add_subdirectory(client_api)
 #------------------------------------------------------------
 # Libraries
 #------------------------------------------------------------
-if(SERVER)
+
 add_library(cameo_mcstas_server  src/sim_request_server.cc src/sim_result_server.cc src/sim_request_answer_server.cc)  # server
-target_link_libraries(cameo_mcstas_server Panosc::cameo_mcstas_client)
+target_link_libraries(cameo_mcstas_server PUBLIC Panosc::cameo_mcstas_client)
 #------------------------------------------------------------
 # Executables
 #------------------------------------------------------------
