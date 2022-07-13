@@ -102,13 +102,13 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "--devel") == 0)
 			isDevel = true;
 #ifdef DEBUG
-		std::cout << "#" << argv[i] << "#\t" << std::endl;
+		std::cout << "#COMMAND LINE ARGUMENT:#" << argv[i] << "#\t" << std::endl;
 #endif
 	}
 #ifndef MONGO
 	std::cout << isDevel << std::endl;
 #endif
-	cameo::application::This::init(argc, argv);
+	cameo::This::init(argc, argv);
 #ifdef MONGO
 	panosc::mongo_cache mc(isDevel);
 #endif
@@ -116,45 +116,49 @@ int main(int argc, char *argv[])
 	// application. needed because of zmq
 	{
 
-		cameo::application::This::setRunning();
+		cameo::This::setRunning();
 		// Get the local Cameo server.
-		cameo::Server &server = cameo::application::This::getServer();
+		cameo::Server &server = cameo::This::getServer();
 
-		if (cameo::application::This::isAvailable() && server.isAvailable()) {
-			std::cout << "Connected server " << server << std::endl;
+		if (cameo::This::isAvailable() && server.isAvailable()) {
+			std::cout << "Connected server: " << server << std::endl;
 		}
 
 		// Define a responder for the requests
-		std::unique_ptr<cameo::application::Responder> responder;
+		std::unique_ptr<cameo::coms::basic::Responder> responder;
+		// try {
+		responder = cameo::coms::basic::Responder::create(panosc::CAMEO_RESPONDER);
+		std::cout << "Created responder: " << *responder << std::endl;
+		std::cout << "Initializing responder..." << std::endl;
 		try {
-			responder = cameo::application::Responder::create(panosc::CAMEO_RESPONDER);
-			std::cout << "Created responder " << *responder << std::endl;
-		} catch (const cameo::ResponderCreationException &e) {
-			std::cout << "Responder error" << std::endl;
+			responder->init();
+		} catch (const cameo::InitException &e) {
+			std::cout << "Responder initialization error" << std::endl;
 			return -1;
 		}
 
 		// Define a publisher for the results
-		std::unique_ptr<cameo::application::Publisher> publisher;
-
+		std::unique_ptr<cameo::coms::Publisher> publisher =
+		    cameo::coms::Publisher::create(panosc::CAMEO_PUBLISHER);
+		std::cout << "Created publisher: " << *publisher << std::endl;
+		std::cout << "Initializing publisher..." << std::endl;
 		try {
-			publisher = cameo::application::Publisher::create(panosc::CAMEO_PUBLISHER);
-			std::cout << "Created publisher " << *publisher << std::endl;
-		} catch (const cameo::PublisherCreationException &e) {
-			std::cout << "Error in creation of publisher" << std::endl;
+			publisher->init();
+		} catch (const cameo::InitException &e) {
+			std::cout << "Responder initialization error" << std::endl;
 			return -1;
 		}
 
 		std::unique_ptr<std::thread> thread;
 		typedef struct {
 			state_t                                       state;
-			std::unique_ptr<cameo::application::Instance> instance;
+			std::unique_ptr<cameo::App> instance;
 		} sim_job_t;
 
 		std::map<panosc::simHash_t, std::vector<sim_job_t>>
 		    running_simulations; // maps the hash to the list of running instances and their state
 
-		std::unique_ptr<cameo::application::Request>
+		std::unique_ptr<cameo::coms::basic::Request>
 		    request_th; // this is the request being treated in the thread
 
 		// Loop on the requests
@@ -166,10 +170,10 @@ int main(int argc, char *argv[])
 			          << std::endl;
 
 			// Receive the simple request.
-			std::unique_ptr<cameo::application::Request> request = responder->receive();
+			std::unique_ptr<cameo::coms::basic::Request> request = responder->receive();
 
 			/////--------------- Process the request
-			panosc::sim_request_server sim_request_obj(request->getBinary());
+			panosc::sim_request_server sim_request_obj(request->get());
 			std::cout << "========== [REQ] ==========" << *request
 #ifdef VERBOSE
 			          << "\n"
@@ -182,7 +186,7 @@ int main(int argc, char *argv[])
 			//--------------- Request not recognized
 			if (sim_request_obj.type() >= panosc::sim_request::REQUNKNOWN) {
 				std::cout << "[ERROR] UNKNOWN REQUEST\n" << std::endl;
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansERROR));
 
 				///\todo add here the second part of the reply with a human readable message
@@ -194,9 +198,9 @@ int main(int argc, char *argv[])
 				sim_result.set_test(panosc::sim_result::ansDONE);
 				std::cout << "REQUEST FOR TEST!\n" << sim_result.to_cameo() << std::endl;
 
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansDONE));
-				publisher->sendBinary(sim_result.to_cameo());
+				publisher->send(sim_result.to_cameo());
 				continue;
 			}
 
@@ -221,7 +225,7 @@ int main(int argc, char *argv[])
 				lc_full.clear_cache();
 				std::cout << "CLEARING THE LOCAL CACHE!\n" << std::endl;
 
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansOK));
 				continue;
 			}
@@ -240,7 +244,7 @@ int main(int argc, char *argv[])
 					simulationApplication->stop();
 				}
 
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansOK));
 				///\todo add here the merge thread and the publishing of the result
 				running_simulations.erase(sim_request_obj.hash());
@@ -255,7 +259,7 @@ int main(int argc, char *argv[])
 				std::cout << "[REQUEST] Received again same request as the one running: "
 				          << "thread is active? " << std::boolalpha
 				          << (thread.get() != nullptr) << std::endl;
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansRUNNING));
 				continue;
 			}
@@ -264,7 +268,7 @@ int main(int argc, char *argv[])
 				std::cout << "There is already one simulation running, cannot accept more"
 				          << std::endl;
 
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansWAIT));
 				continue;
 			}
@@ -286,7 +290,7 @@ int main(int argc, char *argv[])
 				          << "   removing the directory and restarting the simulation"
 				          << std::endl;
 				fs::remove_all(lc.output_dir());
-				// panosc::sim_result_server sim_result(cameo::application::FAILURE);
+				// panosc::sim_result_server sim_result(cameo::FAILURE);
 				// CHECK_REQUESTER_EXISTS
 				// request->replyBinary(sim_result.to_cameo());
 				// continue; // get ready to process new request
@@ -303,7 +307,7 @@ int main(int argc, char *argv[])
 			if (lc.is_done() && false) { // in this case re-use the previous results
 
 				std::cout << "simulation exists, re-using the same results" << std::endl;
-				request->replyBinary(panosc::sim_request_answer_server::to_cameo(
+				request->reply(panosc::sim_request_answer_server::to_cameo(
 				    panosc::sim_request_answer::ansDONE));
 				auto sim_result = read_result(lc.output_dir(), panosc::sim_result::ansDONE);
 				publisher->sendBinary(sim_result.to_cameo());
@@ -424,21 +428,21 @@ int main(int argc, char *argv[])
 
 						auto    mergingJob = server.start("SIMD22-QUICKMERGE", args);
 						state_t merging_state = mergingJob->waitFor();
-						if (merging_state != cameo::application::SUCCESS) {
+						if (merging_state != cameo::SUCCESS) {
 							// put here an error message
 							std::cerr
 							    << "[ERROR MERGING] "
-							    << cameo::application::toString(merging_state)
+							    << cameo::toString(merging_state)
 							    << std::endl;
 							panosc::sim_result_server sim_result(
 							    panosc::sim_result::ansERROR);
-							publisher->sendBinary(sim_result.to_cameo());
+							publisher->send(sim_result.to_cameo());
 						} else {
 							auto sim_result = read_result(
 							    lc.output_dir_merge(),
 							    finished ? panosc::sim_result::ansDONE
 							             : panosc::sim_result::ansRUNNING);
-							publisher->sendBinary(sim_result.to_cameo());
+							publisher->send(sim_result.to_cameo());
 						}
 					};
 
@@ -459,7 +463,7 @@ int main(int argc, char *argv[])
 							std::cout << "[DEBUG] Job with index i=" << i
 							          << " already done" << std::endl;
 #endif
-							sim_job.state = cameo::application::SUCCESS;
+							sim_job.state = cameo::SUCCESS;
 						} else {
 #ifdef DEBUG
 							std::cout << "[DEBUG] Launching " << app_name << "\t";
@@ -485,11 +489,11 @@ int main(int argc, char *argv[])
 						sim_job_t &sim_job = sim_jobs[fJob];
 						// publish the partial result of the finished job
 						if (fJob % MAX_PARALLEL_JOBS == 0 and
-						    sim_job.state != cameo::application::SUCCESS)
+						    sim_job.state != cameo::SUCCESS)
 							mergeJobs(false);
 
 						if (sim_job.state <
-						    cameo::application::PROCESSING_ERROR) { // it means that
+						    cameo::PROCESSING_ERROR) { // it means that
 							                                    // it is still
 							                                    // running
 							std::cout << "Waiting from application "
@@ -498,7 +502,7 @@ int main(int argc, char *argv[])
 							std::cout
 							    << "[THREAD] Finished the simulation application "
 							       "with state "
-							    << cameo::application::toString(sim_job.state)
+							    << cameo::toString(sim_job.state)
 							    << std::endl;
 						}
 						if (sim_jobs.size() <
@@ -516,8 +520,8 @@ int main(int argc, char *argv[])
 				}));
 
 				//				panosc::sim_result_server  sim_result;
-				//				sim_result.set_status(cameo::application::RUNNING);
-				//				request->replyBinary(sim_result.to_cameo());
+				//				sim_result.set_status(cameo::RUNNING);
+				//				request->reply(sim_result.to_cameo());
 			}
 		}
 		if (thread.get() != nullptr) { // wait that any previous simulation has ended

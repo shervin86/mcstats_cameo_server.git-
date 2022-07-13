@@ -24,21 +24,21 @@ int main(int argc, char *argv[])
 		if (strcmp(argv[i], "serverName") == 0 or strcmp(argv[i], "-s") == 0)
 			serverName = argv[++i];
 	}
-	cameo::application::This::init(argc, argv);
-	cameo::application::State returnState = cameo::application::UNKNOWN;
+	cameo::This::init(argc, argv);
+	cameo::State returnState = cameo::NIL;
 
 	// New block to ensure cameo objects are terminated before the
 	// application. needed because of zmq
 	{
 
-		cameo::application::This::setRunning();
-		if (!cameo::application::This::isAvailable()) {
+		cameo::This::setRunning();
+		if (!cameo::This::isAvailable()) {
 			std::cout << "[ERROR] Application not available" << std::endl;
 			return exitNOCLIENT;
 		}
 
 		// Get the local Cameo server.
-		cameo::Server &server = cameo::application::This::getServer();
+		cameo::Server &server = cameo::This::getServer();
 		if (!server.isAvailable()) {
 			std::cout << "[ERROR] CAMEO server not connected, abort" << server << std::endl;
 			return exitNOSERVER;
@@ -46,18 +46,17 @@ int main(int argc, char *argv[])
 
 		// Connect to the mcstas_server: put the name of the cameo process as
 		// indicated by the name in the config file
-		std::unique_ptr<cameo::application::Instance> responderServer = server.connect(serverName);
-		if (responderServer->exists() == false) { // start it for me
+		std::unique_ptr<cameo::App> responderServer = server.connect(serverName);
+		if (responderServer == nullptr) { // start it for me
 			responderServer = server.start(serverName);
 		}
-		std::cout << "responder: " << *responderServer << "   --" << responderServer->exists()
-		          << "--                 [" << cameo::application::toString(responderServer->now())
-		          << "]" << std::endl;
+		std::cout << "responder: " << *responderServer << "--                 ["
+		          << cameo::toString(responderServer->getActualState()) << "]" << std::endl;
 
 		// check that the server is running, otherwise wait till a given timeOut
 
 		// Create a requester.
-		std::unique_ptr<cameo::application::Requester> requester =
+		std::unique_ptr<cameo::coms::Requester> requester =
 		    cameo::application::Requester::create(
 		        *responderServer,
 		        panosc::CAMEO_RESPONDER); // the name here has to be the
@@ -65,10 +64,11 @@ int main(int argc, char *argv[])
 		std::cout << "Requester: " << *requester << " ["
 		          << "CREATED"
 		          << "]" << std::endl;
-		if (requester.get() == 0) {
+		if (requester == nullptr) {
 			std::cerr << "[ERROR] requester error" << std::endl;
 			return exitREQUESTER;
 		}
+		requester->init();
 
 		// Create a subscriber
 		std::unique_ptr<cameo::application::Subscriber> subscriber =
@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 		if (useJSON)
 			request.read_json(jsonfile);
 		else {
+#ifdef D22
 			/// [request2]
 			request.set_instrument(panosc::D22);
 			//			request.set_num_neutrons(1000000);
@@ -102,10 +103,17 @@ int main(int argc, char *argv[])
 			}
 			request.set_return_data(panosc::sim_request::rCOUNTS);
 
-			//			request.set_sample_material(panosc::H2O);
-			//			request.set_sample_size(0.005, 0.05);
-			// request.set_sample_size(0.005);
-			/// [request2]
+//			request.set_sample_material(panosc::H2O);
+//			request.set_sample_size(0.005, 0.05);
+// request.set_sample_size(0.005);
+/// [request2]
+#endif
+			request.set_instrument(panosc::THALES);
+			request.set_measurement_time(60);
+			request.add_parameter(panosc::sim_request::pA2, 79);
+			request.add_parameter(panosc::sim_request::pA4, 60);
+			request.add_parameter(panosc::sim_request::pA6, 79);
+			request.set_return_data(panosc::sim_request::rCOUNTS);
 		}
 		jsonfile.close();
 		std::cout << request << std::endl;
@@ -119,11 +127,11 @@ int main(int argc, char *argv[])
 		}
 		if (true) {
 			/// [send request]
-			requester->sendBinary(request.to_cameo()); // request number 1
+			requester->send(request.to_cameo()); // request number 1
 			/// [send request]
 			// Wait for the response from the server.
 			/// [receive result]
-			std::optional<std::string> response = requester->receiveBinary();
+			std::optional<std::string> response = requester->receive();
 			if (response.has_value() == false)
 				throw std::runtime_error("no message received");
 			panosc::sim_request_answer answer(response.value());
@@ -177,8 +185,8 @@ int main(int argc, char *argv[])
 		                                               panosc::sim_request::SIMULATE) {
 			std::cout << "[THREAD " << thread_name << "] "
 			          << "START" << std::endl;
-			std::unique_ptr<cameo::application::Requester> requester_thread =
-			    cameo::application::Requester::create(
+			std::unique_ptr<cameo::coms::Requester> requester_thread =
+			    cameo::coms::Requester::create(
 			        *responderServer,
 			        panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
 			panosc::sim_request req(type, panosc::D22); // = request;
@@ -189,10 +197,10 @@ int main(int argc, char *argv[])
 
 			req.set_measurement_time(measurement_time);
 
-			requester_thread->sendBinary(req.to_cameo());
+			requester_thread->send(req.to_cameo());
 			std::cout << "[THREAD " << thread_name << "] "
 			          << "sent" << std::endl;
-			std::optional<std::string> response = requester_thread->receiveBinary();
+			std::optional<std::string> response = requester_thread->receive();
 			std::cout << "[THREAD " << thread_name << "] " << response.value() << std::endl;
 		};
 
@@ -224,8 +232,8 @@ int main(int argc, char *argv[])
 		if (thread_B.get() != nullptr)
 			thread_B->join();
 
-		// std::unique_ptr<cameo::application::Requester> requester_bis =
-		//     cameo::application::Requester::create(
+		// std::unique_ptr<cameo::Requester> requester_bis =
+		//     cameo::Requester::create(
 		//         *responderServer,
 		//         panosc::CAMEO_RESPONDER); // the name here has to be the same as on the
 
